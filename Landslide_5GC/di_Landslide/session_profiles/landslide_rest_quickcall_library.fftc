@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="8.4.0.202012071239" entryPoint="add_favorites_to_KPIs">
+<testCase version="8.5.0.202012252016" entryPoint="add_favorites_to_KPIs">
     <general>
         <sessionClass includeTestCase="true" sessionType="project://di_Landslide/session_profiles/landslide_rest.ffsp"/>
         <language>Python</language>
@@ -12785,6 +12785,11 @@ Steps format: &quot;group index:tc index:action:pre group index:pre tc index:pre
                                                                             <statement>eth_count = 0</statement>
                                                                         </actionProperties>
                                                                     </item>
+                                                                    <item actionId="Eval">
+                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                            <statement>cpa_enabled = &quot;false&quot;</statement>
+                                                                        </actionProperties>
+                                                                    </item>
                                                                     <item actionId="SkipRemainingRules">
                                                                         <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                     </item>
@@ -12825,6 +12830,28 @@ Steps format: &quot;group index:tc index:action:pre group index:pre tc index:pre
                                                     <item>
                                                         <extractorInfo extractorType="query">
                                                             <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                <query>boolean(mapped/Json/requestControlAccelerator)</query>
+                                                            </extractorProperties>
+                                                        </extractorInfo>
+                                                        <processorInfo ruleType="assert">
+                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                <expression>value == &quot;true&quot;</expression>
+                                                                <actionsWhenFalse>
+                                                                    <item actionId="Eval">
+                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                            <statement>cpa_enabled = &quot;false&quot;</statement>
+                                                                        </actionProperties>
+                                                                    </item>
+                                                                    <item actionId="SkipRemainingRules">
+                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                    </item>
+                                                                </actionsWhenFalse>
+                                                            </ruleProperties>
+                                                        </processorInfo>
+                                                    </item>
+                                                    <item>
+                                                        <extractorInfo extractorType="query">
+                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
                                                                 <query>requestControlAccelerator()</query>
                                                             </extractorProperties>
                                                         </extractorInfo>
@@ -12841,6 +12868,74 @@ Steps format: &quot;group index:tc index:action:pre group index:pre tc index:pre
                                                 <storeResponseAt>ts_info_xml</storeResponseAt>
                                             </postProcessing>
                                             <applicationProperties type="com.fnfr.itest.platform2.shared.documents.ntaf.NtafTransferableDocumentObject" action="Custom" subharness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harnessName="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" rawResponse="true" rawResponse.inherit="false" url="testServers/[ts_id]" url.inherit="false"/>
+                                        </item>
+                                        <item guid="74078fa8-e707-464c-b688-826fae2cb252" action="comment" useFieldsInCommand="false">
+                                            <command>
+                                                <body>Verify ports</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="4372c6f0-4c69-4366-ad05-f69a21d22782" action="if" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>int(eth_count) &lt; int(len(port_list)):</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="6df76af8-5d40-41ec-b3b5-dae8af7c625a" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>message = &apos;Test Server: &quot;{0}&quot; does not have enough ports. Required: &quot;{1}&quot;, actual: &quot;{2}&quot;&apos;.format(ts_name, ts_port_count, eth_count)</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="90d37985-7816-48c8-95b7-4c9590b98a24" action="execute_fail_message" session="[session]" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>-should_exit true -message [message]</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="e64a5638-72a1-42d0-bf2d-c4802c5a7fe4" action="for" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>port_name in port_list:</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="e2011d1f-8b1f-4fad-b016-2629ae9df046" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>query_path = &apos;boolean(mapped/Json/ethInfos/item[name = &quot;{0}&quot;])&apos;.format(port_name)</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="dc7b23b4-8e32-447c-9153-738856bd1f15" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>port_exists = query(&apos;ts_info_xml&apos;,query_path);print(port_exists)</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="05ccf599-2863-4c6e-8f57-6c83fcc2ff83" action="if" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>port_exists == &quot;false&quot;:</body>
+                                                            </command>
+                                                            <nestedSteps>
+                                                                <item guid="f68cf1f9-9133-4131-ac06-bd0b8a350499" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>message = &apos;Port &quot;{0}&quot; does not exist on Test Server &quot;{1}&quot;&apos;.format(port_name, ts_name)</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                                <item guid="3fc0444d-bfdb-4ddc-a4a3-14447ef47f15" action="execute_fail_message" session="[session]" useFieldsInCommand="false" skippReporting="false">
+                                                                    <command>
+                                                                        <body>-message [message] -should_exit &quot;true&quot;</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                            </nestedSteps>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
                                         <item guid="dcb646fe-4c2a-495e-8db7-0fe79c680df4" action="comment" useFieldsInCommand="false">
                                             <command>
@@ -12964,74 +13059,6 @@ Steps format: &quot;group index:tc index:action:pre group index:pre tc index:pre
                                                                 <item guid="aa260919-0ec4-4bd3-8214-bd1627170187" action="execute_fail_message" session="[session]" useFieldsInCommand="false">
                                                                     <command>
                                                                         <body>-should_exit true -message [message]</body>
-                                                                    </command>
-                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                </item>
-                                                            </nestedSteps>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                    </nestedSteps>
-                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                </item>
-                                            </nestedSteps>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                        <item guid="74078fa8-e707-464c-b688-826fae2cb252" action="comment" useFieldsInCommand="false">
-                                            <command>
-                                                <body>Verify ports</body>
-                                            </command>
-                                            <nestedSteps>
-                                                <item guid="4372c6f0-4c69-4366-ad05-f69a21d22782" action="if" useFieldsInCommand="false">
-                                                    <command>
-                                                        <body>int(eth_count) &lt; int(len(port_list)):</body>
-                                                    </command>
-                                                    <nestedSteps>
-                                                        <item guid="6df76af8-5d40-41ec-b3b5-dae8af7c625a" action="eval" useFieldsInCommand="false">
-                                                            <command>
-                                                                <body>message = &apos;Test Server: &quot;{0}&quot; does not have enough ports. Required: &quot;{1}&quot;, actual: &quot;{2}&quot;&apos;.format(ts_name, ts_port_count, eth_count)</body>
-                                                            </command>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                        <item guid="90d37985-7816-48c8-95b7-4c9590b98a24" action="execute_fail_message" session="[session]" useFieldsInCommand="false">
-                                                            <command>
-                                                                <body>-should_exit true -message [message]</body>
-                                                            </command>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                    </nestedSteps>
-                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                </item>
-                                                <item guid="e64a5638-72a1-42d0-bf2d-c4802c5a7fe4" action="for" useFieldsInCommand="false">
-                                                    <command>
-                                                        <body>port_name in port_list:</body>
-                                                    </command>
-                                                    <nestedSteps>
-                                                        <item guid="e2011d1f-8b1f-4fad-b016-2629ae9df046" action="eval" useFieldsInCommand="false">
-                                                            <command>
-                                                                <body>query_path = &apos;boolean(mapped/Json/ethInfos/item[name = &quot;{0}&quot;])&apos;.format(port_name)</body>
-                                                            </command>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                        <item guid="dc7b23b4-8e32-447c-9153-738856bd1f15" action="eval" useFieldsInCommand="false">
-                                                            <command>
-                                                                <body>port_exists = query(&apos;ts_info_xml&apos;,query_path);print(port_exists)</body>
-                                                            </command>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                        <item guid="05ccf599-2863-4c6e-8f57-6c83fcc2ff83" action="if" useFieldsInCommand="false">
-                                                            <command>
-                                                                <body>port_exists == &quot;false&quot;:</body>
-                                                            </command>
-                                                            <nestedSteps>
-                                                                <item guid="f68cf1f9-9133-4131-ac06-bd0b8a350499" action="eval" useFieldsInCommand="false">
-                                                                    <command>
-                                                                        <body>message = &apos;Port &quot;{0}&quot; does not exist on Test Server &quot;{1}&quot;&apos;.format(port_name, ts_name)</body>
-                                                                    </command>
-                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                </item>
-                                                                <item guid="3fc0444d-bfdb-4ddc-a4a3-14447ef47f15" action="execute_fail_message" session="[session]" useFieldsInCommand="false" skippReporting="false">
-                                                                    <command>
-                                                                        <body>-message [message] -should_exit &quot;true&quot;</body>
                                                                     </command>
                                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                 </item>
