@@ -23,8 +23,9 @@ Procedure:
                     <TC_parameters>
                         <Targeted_End_Rate pt:datatype="INTEGER" pt:description="NAS PDU Session Establishment Attempts/sec. It must be an integer greater than 0.">1000</Targeted_End_Rate>
                         <Session_Capacity pt:datatype="INTEGER" pt:description="NAS PDU Sessions Establishment Attempts. It must be an even number greater than 0.">50000</Session_Capacity>
-                        <Enable_TAC_Report pt:datatype="BOOLEAN">false</Enable_TAC_Report>
                         <Session_Act_Rate pt:datatype="INTEGER" pt:description="Session activation rate/sec. It must be an integer greater than 0.">800</Session_Act_Rate>
+                        <Enable_TAC_Report pt:datatype="BOOLEAN">false</Enable_TAC_Report>
+                        <Enable_Port_Capture pt:datatype="BOOLEAN" pt:description="Enable port capture for Nodal test on the sanity testing.">true</Enable_Port_Capture>
                     </TC_parameters>
                     <SUT>
                         <N4ControlSut pt:description="Sut">
@@ -3181,15 +3182,15 @@ Procedure:
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
-                        <item guid="11093827-4a9d-4b09-88b0-76c164690781" action="eval" useFieldsInCommand="false">
+                        <item guid="f42fca33-bdfa-45d8-923a-c9274f682bb3" action="eval" useFieldsInCommand="false">
                             <command>
-                                <body>one_test = [run_data_list[0]]</body>
+                                <body>enable_port_capture = param(&apos;TC_parameters/Enable_Port_Capture&apos;, &apos;False&apos;)</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
                         <item guid="8ee18ac7-96de-46a8-bce5-c54115eb4a9c" action="call" useFieldsInCommand="false">
                             <command>
-                                <body>execute_nodal_tests -run_data_list [one_test] -set_interval [set_interval] -session_capacity [t_load] -targeted_end_rate [t_rate] -session_act_rate [session_act_rate] -testserver_number [testserver_number] -is_b2b [is_b2b] -timeout [timeout] -running_node_id_sba [running_node_id_sba]</body>
+                                <body>execute_nodal_tests -run_data_list [run_data_list] -set_interval [set_interval] -session_capacity [t_load] -targeted_end_rate [t_rate] -session_act_rate [session_act_rate] -testserver_number [testserver_number] -enable_port_capture [enable_port_capture] -is_b2b [is_b2b] -timeout [timeout] -running_node_id_sba [running_node_id_sba]</body>
                             </command>
                             <postProcessing>
                                 <analysisRules>
@@ -5213,6 +5214,203 @@ Procedure:
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
+                                                <item guid="4d69f695-e59b-4cf3-81a8-07750f1a006d" action="comment" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>Start port capture</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="6c68ce12-a2b2-410e-8bc8-a5713513a7ae" action="if" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>str(enable_port_capture) == &quot;True&quot;:</body>
+                                                            </command>
+                                                            <nestedSteps>
+                                                                <item guid="70142623-c71e-4593-8fcb-7196f8eb0d04" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>print(data)</body>
+                                                                    </command>
+                                                                    <postProcessing>
+                                                                        <analysisRules>
+                                                                            <item>
+                                                                                <extractorInfo extractorType="query">
+                                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                        <query>count(mapped/Json/reservations/item)</query>
+                                                                                    </extractorProperties>
+                                                                                </extractorInfo>
+                                                                                <processorInfo ruleType="store">
+                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                                        <storageLocation>reservation_count</storageLocation>
+                                                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                                                    </ruleProperties>
+                                                                                </processorInfo>
+                                                                            </item>
+                                                                        </analysisRules>
+                                                                        <storeResponseAt>data_xml</storeResponseAt>
+                                                                    </postProcessing>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                                <item guid="9fcee9c0-4efc-414d-9f56-737daae58592" action="for" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>reservation_i in range(1, int(reservation_count) + 1):</body>
+                                                                    </command>
+                                                                    <nestedSteps>
+                                                                        <item guid="81e90139-1817-460c-a9b7-e3f298b9e6a5" action="eval" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>query_path = &apos;mapped/Json/reservations/item[{0}]/tsId&apos;.format(reservation_i)</body>
+                                                                            </command>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                        <item guid="b89ae24e-a4cd-425b-af04-b1e33c8946b5" action="eval" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>ts_Id = query(&apos;data_xml&apos;,query_path);print(ts_Id)</body>
+                                                                            </command>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                        <item guid="21251424-d61b-449b-911e-5dbfc6b4cfed" action="eval" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>query_path = &apos;count(mapped/Json/reservations/item[{0}]/phySubnets/item)&apos;.format(reservation_i)</body>
+                                                                            </command>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                        <item guid="b018888d-7b44-4cbf-9344-a9502b491504" action="eval" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>eth_count = query(&apos;data_xml&apos;,query_path);print(eth_count)</body>
+                                                                            </command>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                        <item guid="34fcc767-910e-45fe-9865-af8849c2f96a" action="for" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>eth_i in range(1, int(eth_count) + 1):</body>
+                                                                            </command>
+                                                                            <nestedSteps>
+                                                                                <item guid="a17eb94d-4bc6-46fe-9b44-30bad8b91180" action="eval" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>query_path = &apos;boolean(mapped/Json/reservations/item[{0}]/phySubnets/item[{1}]/name)&apos;.format(reservation_i, eth_i)</body>
+                                                                                    </command>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                                <item guid="12757b7b-731c-437b-99d3-205b8456e5bf" action="eval" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>has_name = query(&apos;data_xml&apos;,query_path);print(has_name)</body>
+                                                                                    </command>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                                <item guid="e767988b-036e-489d-bc1c-6e8c2a9c427c" action="if" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>has_name == &quot;true&quot;:</body>
+                                                                                    </command>
+                                                                                    <nestedSteps>
+                                                                                        <item guid="6f2e17cb-6d91-438d-bf4b-c688532b942d" action="eval" useFieldsInCommand="false">
+                                                                                            <command>
+                                                                                                <body>query_path = &apos;mapped/Json/reservations/item[{0}]/phySubnets/item[{1}]/name&apos;.format(reservation_i, eth_i)</body>
+                                                                                            </command>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                        <item guid="2af16e46-41aa-4a6e-a98c-2423edd10c55" action="eval" useFieldsInCommand="false">
+                                                                                            <command>
+                                                                                                <body>eth_name = query(&apos;data_xml&apos;,query_path);print(eth_name)</body>
+                                                                                            </command>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                        <item guid="19293805-716e-432e-ab34-ce7767d6424f" action="eval" useFieldsInCommand="false">
+                                                                                            <command>
+                                                                                                <body>ts_index = reservation_i - 1</body>
+                                                                                            </command>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                        <item guid="4ce5342e-0b46-4306-818c-b20e0d30ca28" action="Custom" session="s1">
+                                                                                            <command>
+                                                                                                <body>-requestMethod POST -dataType json -rawResponse true -url runningtests/[running_nodal_id]?action=startCapture&amp;ts=[ts_index]&amp;port=[eth_name]</body>
+                                                                                            </command>
+                                                                                            <postProcessing>
+                                                                                                <analysisRules>
+                                                                                                    <item>
+                                                                                                        <extractorInfo extractorType="query">
+                                                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                                <query>success()</query>
+                                                                                                            </extractorProperties>
+                                                                                                        </extractorInfo>
+                                                                                                        <processorInfo ruleType="store">
+                                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                                                                <storageLocation>command_success</storageLocation>
+                                                                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                                                                            </ruleProperties>
+                                                                                                        </processorInfo>
+                                                                                                    </item>
+                                                                                                </analysisRules>
+                                                                                                <storeResponseAt>start_capture_response</storeResponseAt>
+                                                                                                <storeResponseText>true</storeResponseText>
+                                                                                            </postProcessing>
+                                                                                            <applicationProperties type="com.fnfr.itest.platform2.shared.documents.ntaf.NtafTransferableDocumentObject" action="Custom" subharness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harnessName="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" requestMethod="POST" requestMethod.inherit="false" rawResponse="true" rawResponse.inherit="false" url="runningtests/[running_nodal_id]?action=startCapture&amp;ts=[ts_index]&amp;port=[eth_name]" url.inherit="false"/>
+                                                                                        </item>
+                                                                                        <item guid="9d5b099f-7df6-4a7c-be08-83aea9b9538c" action="if" useFieldsInCommand="false">
+                                                                                            <command>
+                                                                                                <body>command_success == &quot;false&quot;:</body>
+                                                                                            </command>
+                                                                                            <nestedSteps>
+                                                                                                <item guid="01b1aed9-9585-4683-8a91-5c7f1c6b2ab4" action="eval" useFieldsInCommand="false">
+                                                                                                    <command>
+                                                                                                        <body>print(start_capture_response)</body>
+                                                                                                    </command>
+                                                                                                    <postProcessing>
+                                                                                                        <analysisRules>
+                                                                                                            <item>
+                                                                                                                <extractorInfo extractorType="query">
+                                                                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                                        <query>reason()</query>
+                                                                                                                    </extractorProperties>
+                                                                                                                </extractorInfo>
+                                                                                                                <processorInfo ruleType="store">
+                                                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                                                                        <storageLocation>reason</storageLocation>
+                                                                                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                                                                                    </ruleProperties>
+                                                                                                                </processorInfo>
+                                                                                                            </item>
+                                                                                                        </analysisRules>
+                                                                                                    </postProcessing>
+                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                </item>
+                                                                                                <item guid="e23c54b9-da77-46c1-bd35-c49cd3063ce1" action="if" useFieldsInCommand="false">
+                                                                                                    <command>
+                                                                                                        <body>&apos;Capturing already started&apos; not in reason:</body>
+                                                                                                    </command>
+                                                                                                    <nestedSteps>
+                                                                                                        <item guid="b5bb43b1-a11e-4fe2-841a-f82620e4fa2f" action="message" useFieldsInCommand="false">
+                                                                                                            <command>
+                                                                                                                <body>Error:[reason]</body>
+                                                                                                            </command>
+                                                                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                                                                                <severity inherit="false">Error</severity>
+                                                                                                                <message inherit="false">[reason]</message>
+                                                                                                            </applicationProperties>
+                                                                                                        </item>
+                                                                                                    </nestedSteps>
+                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                </item>
+                                                                                            </nestedSteps>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                    </nestedSteps>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                            </nestedSteps>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                    </nestedSteps>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                            </nestedSteps>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
                                             </nestedSteps>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
@@ -5881,6 +6079,149 @@ Procedure:
                     </nestedSteps>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
+                <item guid="775781cd-08c7-4675-af7d-69fb63b4be86" action="comment" useFieldsInCommand="false" skippReporting="false">
+                    <command>
+                        <body>Show pcap files</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="aee1b3fb-1b63-4dcd-b186-df84b5f27e9e" action="if" useFieldsInCommand="false">
+                            <command>
+                                <body>str(enable_port_capture) == &quot;True&quot;:</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="35162e1e-a368-418b-8bfe-f1bc05f307fc" action="for" useFieldsInCommand="false">
+                                    <command>
+                                        <body>running_id in running_id_list:</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="f7492eb5-c951-42e6-845e-d259eb70a6ba" action="comment" useFieldsInCommand="false">
+                                            <command>
+                                                <body>Show result files and get pcap files from result list</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="914fe84d-7615-4f3c-a463-dd02212d4853" action="Custom" session="s1">
+                                                    <command>
+                                                        <body>-requestMethod GET -dataType json -rawResponse true -url runningTests/[running_id]</body>
+                                                    </command>
+                                                    <postProcessing>
+                                                        <analysisRules>
+                                                            <item>
+                                                                <extractorInfo extractorType="query">
+                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                        <query>resultFilesList()</query>
+                                                                    </extractorProperties>
+                                                                </extractorInfo>
+                                                                <processorInfo ruleType="store">
+                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                        <storageLocation>result_files</storageLocation>
+                                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                                    </ruleProperties>
+                                                                </processorInfo>
+                                                            </item>
+                                                        </analysisRules>
+                                                        <storeResponseAt>running_test_info</storeResponseAt>
+                                                        <storeResponseText>true</storeResponseText>
+                                                    </postProcessing>
+                                                    <applicationProperties type="com.fnfr.itest.platform2.shared.documents.ntaf.NtafTransferableDocumentObject" action="Custom" subharness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harnessName="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" rawResponse="true" rawResponse.inherit="false" url="runningTests/[running_id]" url.inherit="false"/>
+                                                </item>
+                                                <item guid="3eba1f0a-f735-4c61-9f1f-534ffcd458be" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>print(result_files)</body>
+                                                    </command>
+                                                    <postProcessing>
+                                                        <analysisRules>
+                                                            <item>
+                                                                <extractorInfo extractorType="query">
+                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                        <query>count(mapped/Json/item)</query>
+                                                                    </extractorProperties>
+                                                                </extractorInfo>
+                                                                <processorInfo ruleType="store">
+                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                        <storageLocation>file_count</storageLocation>
+                                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                                    </ruleProperties>
+                                                                </processorInfo>
+                                                            </item>
+                                                        </analysisRules>
+                                                    </postProcessing>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="d74c9024-4397-4a50-bad3-e545209306c1" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>pcap_files = []</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="044f9517-a798-4b14-9a8e-72a9652ef11c" action="for" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>i in range(0, int(file_count)):</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="69accc6c-55e1-479f-86b6-12d6d585c77f" action="json" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>action=&apos;getJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;result_files&apos;, pathValue=&apos;{&quot;\\\\[[i]]&quot;}&apos;</body>
+                                                            </command>
+                                                            <postProcessing>
+                                                                <analysisRules>
+                                                                    <item>
+                                                                        <extractorInfo extractorType="query">
+                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                <query>group1()</query>
+                                                                            </extractorProperties>
+                                                                        </extractorInfo>
+                                                                        <processorInfo ruleType="store">
+                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                                <storageLocation>file_url</storageLocation>
+                                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                                            </ruleProperties>
+                                                                        </processorInfo>
+                                                                    </item>
+                                                                </analysisRules>
+                                                            </postProcessing>
+                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                                <action inherit="false">getJsonNode</action>
+                                                                <pathValue inherit="false" sub="true">{&quot;\\[[i]]&quot;}</pathValue>
+                                                                <documentName inherit="false">result_files</documentName>
+                                                            </applicationProperties>
+                                                        </item>
+                                                        <item guid="7b197642-a354-452c-bf2c-26aaec55c4f3" action="if" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>file_url.endswith(&quot;pcap&quot;):</body>
+                                                            </command>
+                                                            <nestedSteps>
+                                                                <item guid="87bfc0c9-cb42-43f9-91bc-30ac02d56683" action="message">
+                                                                    <command>
+                                                                        <body>Information:\\[file_url]</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                                        <message inherit="false">[file_url]</message>
+                                                                    </applicationProperties>
+                                                                </item>
+                                                            </nestedSteps>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
                 <item guid="5f8056c5-d586-41e2-8c47-9a771909061b" action="comment" useFieldsInCommand="false">
                     <command>
                         <body>Get last measurements of each instance</body>
@@ -6233,6 +6574,9 @@ Procedure:
                     <defaultValue>1</defaultValue>
                     <isMandatory>true</isMandatory>
                 </item>
+                <item name="enable_port_capture">
+                    <defaultValue>False</defaultValue>
+                </item>
                 <item name="is_b2b">
                     <defaultValue>true</defaultValue>
                     <isMandatory>true</isMandatory>
@@ -6558,10 +6902,29 @@ Procedure:
                                         <body>Calculate Rate Devivation</body>
                                     </command>
                                     <nestedSteps>
-                                        <item guid="a7729931-86fc-445c-95f0-643d192f1720" action="eval" useFieldsInCommand="false">
+                                        <item guid="8a8ba155-ceb6-4351-aeaf-430f309ca1c5" action="if" useFieldsInCommand="false">
                                             <command>
-                                                <body>rate_deviation_ts = float(rate_deviation)</body>
+                                                <body>rate_deviation !=&quot;&quot; and rate_deviation !=&quot;_&quot;:</body>
                                             </command>
+                                            <nestedSteps>
+                                                <item guid="cdfbf531-4083-42bb-9464-7d289dabf0d6" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>rate_deviation_ts = float(rate_deviation)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="c561d599-30f1-4d05-867d-d387903c7470" action="else" useFieldsInCommand="false">
+                                            <nestedSteps>
+                                                <item guid="cbdb73bf-20f4-4d11-86c8-f0959474bb18" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>rate_deviation=rate_deviation_ts=100</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
                                     </nestedSteps>
@@ -6720,7 +7083,34 @@ Procedure:
                                 <body>The Rate Deviation</body>
                             </command>
                             <nestedSteps>
-                                <item guid="644f9311-5492-4cdd-a870-3e8c9b698ca4" action="if" useFieldsInCommand="false">
+                                <item guid="23db6c03-34e6-4442-b8cc-d360eb7b82b0" action="if" useFieldsInCommand="false">
+                                    <command>
+                                        <body>rate_deviation_ts != &quot;&quot; and rate_deviation_ts != &quot;_&quot; and rate_deviation_ts &gt; 100:</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="acbfa6d2-c9f4-4c55-934c-b914aadc59c8" action="message" useFieldsInCommand="false">
+                                            <command>
+                                                <body>Warning:The Rate Deviation: Expected less than 3%, actual 100%</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                <severity inherit="false">Warning</severity>
+                                                <message inherit="false">The Rate Deviation: Expected less than 3%, actual 100%</message>
+                                            </applicationProperties>
+                                        </item>
+                                        <item guid="c1fe76c9-e144-4ad8-aed8-e095bcb19204" action="json" useFieldsInCommand="false">
+                                            <command>
+                                                <body>action=&apos;setJsonValue&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;response&apos;, pathValue=&apos;{&quot;result&quot;:&quot;FAIL&quot;}&apos;</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                <action inherit="false">setJsonValue</action>
+                                                <pathValue inherit="false">{&quot;result&quot;:&quot;FAIL&quot;}</pathValue>
+                                                <documentName inherit="false">response</documentName>
+                                            </applicationProperties>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="644f9311-5492-4cdd-a870-3e8c9b698ca4" action="elif" useFieldsInCommand="false">
                                     <command>
                                         <body>rate_deviation_ts != &quot;&quot; and rate_deviation_ts != &quot;_&quot; and rate_deviation_ts &gt; 3:</body>
                                     </command>
@@ -6749,7 +7139,7 @@ Procedure:
                                 </item>
                                 <item guid="3e367e9b-0b2a-4cdb-a48e-c818f7360b52" action="elif" useFieldsInCommand="false">
                                     <command>
-                                        <body>rate_deviation_ts != &quot;&quot; and rate_deviation_ts != &quot;_&quot; and rate_deviation_ts &lt; 3:</body>
+                                        <body>rate_deviation_ts != &quot;&quot; and rate_deviation_ts != &quot;_&quot; and rate_deviation_ts &lt;= 3:</body>
                                     </command>
                                     <nestedSteps>
                                         <item guid="a44d9387-d705-4818-bf7f-1948fd50ca78" action="message" useFieldsInCommand="false">
@@ -6768,10 +7158,10 @@ Procedure:
                                     <nestedSteps>
                                         <item guid="16afb6ef-ca48-4213-aca7-f41964f8f1dc" action="message" useFieldsInCommand="false">
                                             <command>
-                                                <body>Information: Can not calculation rate deviation, the response value is &quot;[rate_deviation_ts]&quot;</body>
+                                                <body>Warning: Can not calculation rate deviation, the response value is &quot;[rate_deviation_ts]&quot;</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
-                                                <severity inherit="false" defaultValue=""/>
+                                                <severity inherit="false">Warning</severity>
                                                 <message inherit="false"> Can not calculation rate deviation, the response value is &quot;[rate_deviation_ts]&quot;</message>
                                             </applicationProperties>
                                         </item>
@@ -8389,346 +8779,6 @@ Procedure:
                                                         </actionsWhenFalse>
                                                     </ruleProperties>
                                                 </processorInfo>
-                                                <skip>true</skip>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query>Average_Session_Connect_Time__micro_sec_(&apos;Current&apos;)</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="store">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
-                                                        <storageLocation>Average_Session_Connect_Time</storageLocation>
-                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
-                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
-                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                                <skip>true</skip>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query>boolean(Test_Summary/row[Actual_Handoff_Rate__Handoffs_Second____P_I_ != &quot;_&quot;])</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="assert">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                        <expression>value == &quot;true&quot;</expression>
-                                                        <actionsWhenFalse>
-                                                            <item actionId="Eval">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                    <statement>rate = &quot;&quot;</statement>
-                                                                </actionProperties>
-                                                            </item>
-                                                            <item actionId="SkipRemainingRules">
-                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                            </item>
-                                                        </actionsWhenFalse>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                                <skip>true</skip>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query>count(Test_Summary/row[Actual_Handoff_Rate__Handoffs_Second____P_I_ != &quot;_&quot; and Actual_Handoff_Rate__Handoffs_Second____P_I_ &gt; 0][1]/preceding-sibling::*) + 1</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="store">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
-                                                        <storageLocation>first_interval</storageLocation>
-                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
-                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
-                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                                <skip>true</skip>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query>count(Test_Summary/row[Actual_Handoff_Rate__Handoffs_Second____P_I_ != &quot;_&quot; and Actual_Handoff_Rate__Handoffs_Second____P_I_ &gt; 0][last()]/preceding-sibling::*) + 1</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="store">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
-                                                        <storageLocation>last_interval</storageLocation>
-                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
-                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
-                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                                <skip>true</skip>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query>count(Test_Summary/row[Actual_Handoff_Rate__Handoffs_Second____P_I_ != &quot;_&quot; and Actual_Handoff_Rate__Handoffs_Second____P_I_ &gt; 0][last()]/preceding-sibling::*) + 1</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="assert">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                        <expression>int(value) != first_interval</expression>
-                                                        <actionsWhenFalse>
-                                                            <item actionId="Eval">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                    <statement>rate = &quot;&quot;</statement>
-                                                                </actionProperties>
-                                                            </item>
-                                                            <item actionId="SkipRemainingRules">
-                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                            </item>
-                                                        </actionsWhenFalse>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                                <skip>true</skip>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query sub="true">Test_Summary/row\\[[first_interval]]/Actual_Handoff_Rate__Handoffs_Second____P_I_</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="store">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
-                                                        <storageLocation>first_interval_value</storageLocation>
-                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
-                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
-                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                                <skip>true</skip>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query sub="true">Test_Summary/row\\[[last_interval]]/Actual_Handoff_Rate__Handoffs_Second____P_I_</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="store">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
-                                                        <storageLocation>last_interval_value</storageLocation>
-                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
-                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
-                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                                <skip>true</skip>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query>count(Test_Summary/row[Actual_Handoff_Rate__Handoffs_Second____P_I_ != &quot;_&quot; and Actual_Handoff_Rate__Handoffs_Second____P_I_ &gt; 0][2]/preceding-sibling::*) + 1</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="store">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
-                                                        <storageLocation>nearest_interval</storageLocation>
-                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
-                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
-                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                                <skip>true</skip>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query>count(Test_Summary/row[Actual_Handoff_Rate__Handoffs_Second____P_I_ != &quot;_&quot; and Actual_Handoff_Rate__Handoffs_Second____P_I_ &gt; 0][2]/preceding-sibling::*) + 1</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="assert">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                        <expression>int(value) != first_interval</expression>
-                                                        <actionsWhenFalse>
-                                                            <item actionId="Eval">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                    <statement>rate = &quot;&quot;</statement>
-                                                                </actionProperties>
-                                                            </item>
-                                                            <item actionId="SkipRemainingRules">
-                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                            </item>
-                                                        </actionsWhenFalse>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                                <skip>true</skip>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query>count(Test_Summary/row[Actual_Handoff_Rate__Handoffs_Second____P_I_ != &quot;_&quot; and Actual_Handoff_Rate__Handoffs_Second____P_I_ &gt; 0][last()]/preceding-sibling::*) + 1</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="assert">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                        <expression>int(value) != nearest_interval</expression>
-                                                        <actionsWhenTrue>
-                                                            <item actionId="Eval">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                    <statement>nearest_interval_plus = int(nearest_interval) + 1</statement>
-                                                                </actionProperties>
-                                                            </item>
-                                                            <item actionId="Eval">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                    <statement>nearest_interval_de = int(nearest_interval) - 1</statement>
-                                                                </actionProperties>
-                                                            </item>
-                                                        </actionsWhenTrue>
-                                                        <actionsWhenFalse>
-                                                            <item actionId="Eval">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                    <statement>rate = &quot;&quot;</statement>
-                                                                </actionProperties>
-                                                            </item>
-                                                            <item actionId="SkipRemainingRules">
-                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                            </item>
-                                                        </actionsWhenFalse>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                                <skip>true</skip>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="none">
-                                                    <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="assert">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                        <expression>nearest_interval_plus == last_interval </expression>
-                                                        <actionsWhenTrue>
-                                                            <item actionId="Eval">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                    <statement>nearest_interval_de = nearest_interval</statement>
-                                                                </actionProperties>
-                                                            </item>
-                                                            <item actionId="Eval">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                    <statement>nearest_interval = int(nearest_interval) - 1</statement>
-                                                                </actionProperties>
-                                                            </item>
-                                                            <item actionId="Eval">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                    <statement>nearest_interval_plus = int(nearest_interval) - 1</statement>
-                                                                </actionProperties>
-                                                            </item>
-                                                        </actionsWhenTrue>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                                <skip>true</skip>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="none">
-                                                    <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="assert">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                        <expression>nearest_interval_de == first_interval</expression>
-                                                        <actionsWhenTrue>
-                                                            <item actionId="Eval">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                    <statement>nearest_interval_de = nearest_interval</statement>
-                                                                </actionProperties>
-                                                            </item>
-                                                            <item actionId="Eval">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                    <statement>nearest_interval = int(nearest_interval) + 1</statement>
-                                                                </actionProperties>
-                                                            </item>
-                                                            <item actionId="Eval">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                    <statement>nearest_interval_plus = int(nearest_interval) + 1</statement>
-                                                                </actionProperties>
-                                                            </item>
-                                                        </actionsWhenTrue>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                                <skip>true</skip>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query sub="true">Test_Summary/row\\[[nearest_interval]]/Actual_Handoff_Rate__Handoffs_Second____P_I_</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="store">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
-                                                        <storageLocation>rate</storageLocation>
-                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
-                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
-                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                                <skip>true</skip>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query sub="true">Test_Summary/row\\[[nearest_interval_plus]]/Actual_Handoff_Rate__Handoffs_Second____P_I_</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="assert">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                        <expression>float(value) &gt; 0.0</expression>
-                                                        <actionsWhenTrue>
-                                                            <item actionId="Eval">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                    <statement>rate = float(rate) + float(value)</statement>
-                                                                </actionProperties>
-                                                            </item>
-                                                        </actionsWhenTrue>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                                <skip>true</skip>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query sub="true">Test_Summary/row\\[[nearest_interval_de]]/Actual_Handoff_Rate__Handoffs_Second____P_I_</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="assert">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                        <expression>float(value) &gt; 0.0</expression>
-                                                        <actionsWhenTrue>
-                                                            <item actionId="Eval">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                    <statement>rate = float(rate) + float(value)</statement>
-                                                                </actionProperties>
-                                                            </item>
-                                                        </actionsWhenTrue>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                                <skip>true</skip>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query>count(Test_Summary/row)</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="assert">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                        <expression>int(value) &gt; 3</expression>
-                                                        <actionsWhenFalse>
-                                                            <item actionId="Eval">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                    <statement>Average_Session_Connect_Time = &quot;&quot;</statement>
-                                                                </actionProperties>
-                                                            </item>
-                                                            <item actionId="Eval">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                    <statement>connect_rate = 0</statement>
-                                                                </actionProperties>
-                                                            </item>
-                                                            <item actionId="SkipRemainingRules">
-                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                            </item>
-                                                        </actionsWhenFalse>
-                                                    </ruleProperties>
-                                                </processorInfo>
                                             </item>
                                             <item>
                                                 <extractorInfo extractorType="query">
@@ -8852,7 +8902,7 @@ Procedure:
                                             <item>
                                                 <extractorInfo extractorType="query">
                                                     <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query>count(Test_Summary/row[Actual_Handoff_Rate__Handoffs_Second____P_I_ != &quot;_&quot; and Actual_Handoff_Rate__Handoffs_Second____P_I_ &gt; 0][3]/preceding-sibling::*)+1</query>
+                                                        <query>count(Test_Summary/row[Actual_Handoff_Rate__Handoffs_Second____P_I_ != &quot;_&quot; and Actual_Handoff_Rate__Handoffs_Second____P_I_ &gt; 0][3]/preceding-sibling::*)</query>
                                                     </extractorProperties>
                                                 </extractorInfo>
                                                 <processorInfo ruleType="store">
@@ -8867,7 +8917,7 @@ Procedure:
                                             <item>
                                                 <extractorInfo extractorType="query">
                                                     <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query>count(Test_Summary/row[Actual_Handoff_Rate__Handoffs_Second____P_I_ != &quot;_&quot; and Actual_Handoff_Rate__Handoffs_Second____P_I_ &gt; 0][3]/preceding-sibling::*)+1</query>
+                                                        <query>count(Test_Summary/row[Actual_Handoff_Rate__Handoffs_Second____P_I_ != &quot;_&quot; and Actual_Handoff_Rate__Handoffs_Second____P_I_ &gt; 0][3]/preceding-sibling::*)</query>
                                                     </extractorProperties>
                                                 </extractorInfo>
                                                 <processorInfo ruleType="assert">
@@ -8931,11 +8981,11 @@ Procedure:
                                                 </extractorInfo>
                                                 <processorInfo ruleType="assert">
                                                     <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                        <expression>(int(value) +1) != last_interval</expression>
+                                                        <expression>int(value) != last_interval</expression>
                                                         <actionsWhenTrue>
                                                             <item actionId="Eval">
                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                    <statement>nearest_interval_plus = (int(value) +1)</statement>
+                                                                    <statement>nearest_interval_plus = int(value)</statement>
                                                                 </actionProperties>
                                                             </item>
                                                         </actionsWhenTrue>
@@ -8946,33 +8996,6 @@ Procedure:
                                                         </actionsWhenFalse>
                                                     </ruleProperties>
                                                 </processorInfo>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query>count(Test_Summary/row[Actual_Handoff_Rate__Handoffs_Second____P_I_ != &quot;_&quot; and Actual_Handoff_Rate__Handoffs_Second____P_I_ &gt; 0][3]/preceding-sibling::*)+1</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="assert">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                        <expression>(int(value) -1 ) != first_interval</expression>
-                                                        <actionsWhenTrue>
-                                                            <item actionId="Eval">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                    <statement>nearest_interval_de = (int(value) -1)</statement>
-                                                                </actionProperties>
-                                                            </item>
-                                                        </actionsWhenTrue>
-                                                        <actionsWhenFalse>
-                                                            <item actionId="Eval">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                    <statement>nearest_interval_de = 0</statement>
-                                                                </actionProperties>
-                                                            </item>
-                                                        </actionsWhenFalse>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                                <skip>true</skip>
                                             </item>
                                             <item>
                                                 <extractorInfo extractorType="query">
@@ -9009,26 +9032,6 @@ Procedure:
                                                         </actionsWhenTrue>
                                                     </ruleProperties>
                                                 </processorInfo>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query sub="true">Test_Summary/row\\[[nearest_interval_de]]/Actual_Handoff_Rate__Handoffs_Second____P_I_</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="assert">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                        <expression>float(value) &gt; 0.0</expression>
-                                                        <actionsWhenTrue>
-                                                            <item actionId="Eval">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                    <statement>rate = float(rate) + float(value)</statement>
-                                                                </actionProperties>
-                                                            </item>
-                                                        </actionsWhenTrue>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                                <skip>true</skip>
                                             </item>
                                         </analysisRules>
                                     </postProcessing>
@@ -9189,7 +9192,7 @@ Procedure:
                                 <body>set_interval &lt;5:</body>
                             </command>
                             <nestedSteps>
-                                <item guid="8f318dea-6ef1-43c4-a253-c96c7d9fb8d2" action="eval" useFieldsInCommand="false">
+                                <item guid="9d23ea96-b65b-43b0-ae22-e3cb6a09cf95" action="eval" useFieldsInCommand="false">
                                     <command>
                                         <body>connect_rate = float(connect_rate)/float(set_interval)</body>
                                     </command>
