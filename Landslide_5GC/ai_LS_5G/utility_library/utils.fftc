@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="8.4.0.202012071239" entryPoint="convert_to_milisecond">
+<testCase version="8.5.0.202012252016" entryPoint="convert_to_milisecond">
     <general>
         <isProcedureLibrary>true</isProcedureLibrary>
         <language>Python</language>
@@ -373,13 +373,25 @@
                         </item>
                         <item guid="fb085e34-f1f4-4938-b1f8-150180cf08fb" action="else" useFieldsInCommand="false">
                             <nestedSteps>
+                                <item guid="ca2d40c6-cbee-4027-8916-f3d79e81d07b" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>make = param(&apos;Topology_parameters/Testservers/EmulatedSUT/Make&apos;, &quot;Spirent&quot;)</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="8ae82032-b68b-4024-a715-74ef4d78fe20" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>model = param(&apos;Topology_parameters/Testservers/EmulatedSUT/Model&apos;, &quot;Landslide&quot;)</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
                                 <item guid="74223ee0-2250-4101-b65e-5caf0d03b15c" action="json" useFieldsInCommand="false">
                                     <command>
-                                        <body>action=&apos;createJson&apos;, documentName=&apos;response&apos;, fromFile=&apos;false&apos;, jsonString=&apos;[{&quot;memory_utilization&quot;:15,&quot;cpu_utilization&quot;:25,&quot;name&quot;:&quot;Emulated SUT (artificial)&quot;,&quot;model&quot;:&quot;Landslide&quot;,&quot;make&quot;:&quot;Spirent&quot;}]&apos;</body>
+                                        <body>action=&apos;createJson&apos;, documentName=&apos;response&apos;, fromFile=&apos;false&apos;, jsonString=&apos;\\\\[{&quot;memory_utilization&quot;:15,&quot;cpu_utilization&quot;:25,&quot;name&quot;:&quot;Emulated SUT (artificial)&quot;,&quot;model&quot;:&quot;[model]&quot;,&quot;make&quot;:&quot;[make]&quot;}]&apos;</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
                                         <action inherit="false">createJson</action>
-                                        <jsonString inherit="false">[{&quot;memory_utilization&quot;:15,&quot;cpu_utilization&quot;:25,&quot;name&quot;:&quot;Emulated SUT (artificial)&quot;,&quot;model&quot;:&quot;Landslide&quot;,&quot;make&quot;:&quot;Spirent&quot;}]</jsonString>
+                                        <jsonString inherit="false" sub="true">\\[{&quot;memory_utilization&quot;:15,&quot;cpu_utilization&quot;:25,&quot;name&quot;:&quot;Emulated SUT (artificial)&quot;,&quot;model&quot;:&quot;[model]&quot;,&quot;make&quot;:&quot;[make]&quot;}]</jsonString>
                                         <documentName inherit="false">response</documentName>
                                     </applicationProperties>
                                 </item>
@@ -399,6 +411,436 @@
             <arguments>
                 <item name="is_b2b">
                     <isMandatory>true</isMandatory>
+                </item>
+            </arguments>
+            <response>{}</response>
+        </item>
+        <item name="get_profile_A_SUCI_keys" isPublic="true">
+            <steps>
+                <item guid="6aad992e-5e29-415b-b2d1-cf4f8bce7f9e" action="comment" useFieldsInCommand="false">
+                    <command>
+                        <body>SSH to the TS and run the commands to get SUSI keys</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="fa4a7bb5-40c4-4255-ae0e-b0f615db5090" action="open" session="t1" useFieldsInCommand="false">
+                            <command>
+                                <body>application:com.fnfr.svt.applications.ssh</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.OpenStepPropertyGroup">
+                                <stepProperties type="com.fnfr.svt.editors.terminal.documents.StepDefaultProperties"/>
+                                <sessionProperties type="com.fnfr.svt.applications.ssh.documents.SSHProperties">
+                                    <TerminalProperties>
+                                        <prompts inherit="false">
+                                            <item name="prompt1">
+                                                <Content>##&gt;</Content>
+                                            </item>
+                                        </prompts>
+                                    </TerminalProperties>
+                                    <ipAddress inherit="false">[ts_ip_address]</ipAddress>
+                                    <port inherit="false">[ssh_port]</port>
+                                    <user inherit="false">cfguser</user>
+                                    <password inherit="false">bFFdd7YWC4Y=</password>
+                                </sessionProperties>
+                                <sessionClass type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                <sessionVersion type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                            </applicationProperties>
+                        </item>
+                        <item guid="f562f29f-fe61-4099-abd7-04b80a3e65b3" action="command" session="t1" normalOffset="19.051" estimatedStepExecutionTime="1.259">
+                            <command>
+                                <body>openssl genpkey -algorithm x25519 -out x25519.key.pem</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.editors.terminal.documents.StepDefaultProperties"/>
+                        </item>
+                        <item guid="89330aa4-6971-4b8a-a24e-d67255aa924b" action="command" session="t1" normalOffset="11.091" estimatedStepExecutionTime="0.478">
+                            <command>
+                                <body>openssl pkey -in x25519.key.pem -text</body>
+                            </command>
+                            <postProcessing>
+                                <storeResponseAt>prime_key_text</storeResponseAt>
+                                <storeResponseText>true</storeResponseText>
+                            </postProcessing>
+                            <applicationProperties type="com.fnfr.svt.editors.terminal.documents.StepDefaultProperties"/>
+                        </item>
+                        <item guid="a0515a04-c7da-41ce-9139-4108b659bde4" action="command" session="t1" normalOffset="4.153" estimatedStepExecutionTime="0.209">
+                            <command>
+                                <body>exit</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.editors.terminal.documents.StepDefaultProperties"/>
+                        </item>
+                        <item guid="f0329569-efe3-49d3-be30-ffecb4ffe674" action="close" session="t1" normalOffset="0.009">
+                            <applicationProperties type="com.fnfr.svt.editors.terminal.documents.StepDefaultProperties"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="7a5baae9-885f-43dd-a46c-ca83d4bb88c7" action="comment" useFieldsInCommand="false">
+                    <command>
+                        <body>String handling to extract private/public keys</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="f63ba618-0171-4f1e-b874-0dc6954a66db" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>split_str = prime_key_text.split(&apos;\\n&apos;)</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="39978af4-8903-4f1a-941b-e0254a2e214c" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>response = [&quot;&quot;, &quot;&quot;]</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="883af06c-d41d-4bf8-92f8-ea60d7836ed9" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>length = len(split_str)</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="ed8c676d-f6be-4cea-8fed-0a35db697faa" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>i = 0</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="3c229b52-40ed-4271-94af-1bb1046e4c47" action="while" useFieldsInCommand="false">
+                            <command>
+                                <body>i &lt; length:</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="2cefbb83-bc26-40a4-b343-9945e3cbce4c" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>item = split_str[i].strip()</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="21771384-f320-4865-bf10-79f266a1e2aa" action="if" useFieldsInCommand="false">
+                                    <command>
+                                        <body>item == &quot;priv:&quot; or item == &quot;pub:&quot;:</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="b8e25da6-09d3-4a3b-a076-bfa847b3088f" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>i += 1</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="6c730d75-d3cc-4b25-9896-9c24dc888d50" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>key = &quot;0x&quot;</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="f5a5f7b8-d171-49b1-8f34-90bc89dcc4c2" action="comment" useFieldsInCommand="false">
+                                            <command>
+                                                <body>One string key may be in multiple rows, each starts with a tab (4 spaces)</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="e71d5946-54f6-4d85-8751-8e01c6e6d30e" action="while" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>i &lt; length and split_str[i].startswith(&quot;    &quot;):</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="8f8c355c-1085-4507-98be-86362c3361e6" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>key += split_str[i].replace(&quot;:&quot;, &quot;&quot;).strip()</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="45ff9a48-a113-4f2d-9958-fe5d9e136d32" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>i = i + 1</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="7bc0b5e0-a967-4fb2-b317-819194dc2a8f" action="if" useFieldsInCommand="false">
+                                            <command>
+                                                <body>item == &quot;priv:&quot;:</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="6113da3f-b177-4418-97fc-83acb058a51b" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>response[0] = key</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="358cba66-210f-4aed-9f26-18daa5072b5b" action="else" useFieldsInCommand="false">
+                                            <nestedSteps>
+                                                <item guid="07896b23-a741-4c6e-b759-811cdae0ecc8" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>response[1] = key</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="c1197953-5b18-49e2-a20b-e27c739871b4" action="else" useFieldsInCommand="false">
+                                    <nestedSteps>
+                                        <item guid="c41edf8f-1c27-4a4a-89a0-8e331ced56cc" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>i = i + 1</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="408e9cfd-388e-4205-be00-83afe80fe560" action="comment" useFieldsInCommand="false">
+                    <command>
+                        <body>Returns a list of 2 items, item 0: private key, item 1: public key</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="0e8cc78c-21a0-41ea-a718-19d35337e55a" action="return">
+                            <command>
+                                <body>[response]</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+            </steps>
+            <arguments>
+                <item name="ts_ip_address">
+                    <description>IP Address or Hostname of the TS you want to SSH to</description>
+                    <isMandatory>true</isMandatory>
+                </item>
+                <item name="ssh_port">
+                    <description>SSH port</description>
+                    <defaultValue>22</defaultValue>
+                </item>
+            </arguments>
+            <response>{}</response>
+        </item>
+        <item name="get_profile_B_SUCI_keys" isPublic="true">
+            <steps>
+                <item guid="341bd5d3-acde-4670-8ab0-7fd1c4825c61" action="comment" useFieldsInCommand="false">
+                    <command>
+                        <body>SSH to the TS and run the commands to get SUSI keys</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="28e863b1-9c5e-4990-bd11-04fd4d719dca" action="open" session="t1" useFieldsInCommand="false">
+                            <command>
+                                <body>application:com.fnfr.svt.applications.ssh</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.OpenStepPropertyGroup">
+                                <stepProperties type="com.fnfr.svt.editors.terminal.documents.StepDefaultProperties"/>
+                                <sessionProperties type="com.fnfr.svt.applications.ssh.documents.SSHProperties">
+                                    <TerminalProperties>
+                                        <prompts inherit="false">
+                                            <item name="prompt1">
+                                                <Content>##&gt;</Content>
+                                            </item>
+                                        </prompts>
+                                    </TerminalProperties>
+                                    <ipAddress inherit="false">[ts_ip_address]</ipAddress>
+                                    <port inherit="false">[ssh_port]</port>
+                                    <user inherit="false">cfguser</user>
+                                    <password inherit="false">bFFdd7YWC4Y=</password>
+                                </sessionProperties>
+                                <sessionClass type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                <sessionVersion type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                            </applicationProperties>
+                        </item>
+                        <item guid="7c66e8cb-cc54-442d-9a19-e5a7ef5edeef" action="command" session="t1" normalOffset="19.051" estimatedStepExecutionTime="1.259">
+                            <command>
+                                <body>openssl ecparam -name prime256v1 -genkey -conv_form compressed &gt; prime256v1key.pem</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.editors.terminal.documents.StepDefaultProperties"/>
+                        </item>
+                        <item guid="7623f395-4f83-44c8-adca-5eb2de3921e5" action="command" session="t1" normalOffset="11.091" estimatedStepExecutionTime="0.478">
+                            <command>
+                                <body>openssl ec -in prime256v1key.pem -text -noout</body>
+                            </command>
+                            <postProcessing>
+                                <storeResponseAt>prime_key_text</storeResponseAt>
+                                <storeResponseText>true</storeResponseText>
+                            </postProcessing>
+                            <applicationProperties type="com.fnfr.svt.editors.terminal.documents.StepDefaultProperties"/>
+                        </item>
+                        <item guid="8f645ee9-ec72-4537-bee6-8534f044fa92" action="command" session="t1" normalOffset="4.153" estimatedStepExecutionTime="0.209">
+                            <command>
+                                <body>exit</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.editors.terminal.documents.StepDefaultProperties"/>
+                        </item>
+                        <item guid="90b930f5-6f4f-4310-9d5c-ec13471e11fd" action="close" session="t1" normalOffset="0.009">
+                            <applicationProperties type="com.fnfr.svt.editors.terminal.documents.StepDefaultProperties"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="45f7ba92-6c1b-4c0a-8bad-b964021eca7f" action="comment" useFieldsInCommand="false">
+                    <command>
+                        <body>String handling to extract private/public keys</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="612cfa04-4fc5-4ad8-9cd3-2b2d4a7c3f2c" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>split_str = prime_key_text.split(&apos;\\n&apos;)</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="fb3a7eb9-2619-444f-ba64-ccee0e4e587a" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>response = [&quot;&quot;, &quot;&quot;]</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="03780f77-9619-4696-be1e-5f713ead5ddd" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>length = len(split_str)</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="fbfda76e-7bb7-44a0-b81c-5c8be2c0f8a7" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>i = 0</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="b604875f-b2a7-4848-b55b-20c34349a7ee" action="while" useFieldsInCommand="false">
+                            <command>
+                                <body>i &lt; length:</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="50cd0053-cb62-4d54-bbef-ba33cb8df23f" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>item = split_str[i].strip()</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="45c1fd1b-90a1-4acb-8b6b-df983d4e943b" action="if" useFieldsInCommand="false">
+                                    <command>
+                                        <body>item == &quot;priv:&quot; or item == &quot;pub:&quot;:</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="45c10332-58a3-4f82-a900-440e04f22d70" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>i += 1</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="5426500e-3cec-4f23-9853-a534f1524ad3" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>key = &quot;0x&quot;</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="596ab539-c1ef-4c95-b56d-479a3447f39e" action="comment" useFieldsInCommand="false">
+                                            <command>
+                                                <body>One string key may be in multiple rows, each starts with a tab (4 spaces)</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="77c24afe-c4d1-4e14-a968-b7469c3c548d" action="while" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>i &lt; length and split_str[i].startswith(&quot;    &quot;):</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="96e46f35-4363-4296-870f-ec0e82e6e7bd" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>key += split_str[i].replace(&quot;:&quot;, &quot;&quot;).strip()</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="d739a8a1-7d6d-4170-9e3f-59af0469b14c" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>i = i + 1</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="73ee528a-ca91-4d0d-a080-03a1a2bd4db3" action="if" useFieldsInCommand="false">
+                                            <command>
+                                                <body>item == &quot;priv:&quot;:</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="fe18d568-2297-4150-878f-876fbbae0f83" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>response[0] = key</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="cff28cd9-02f0-48bb-84e3-2159aea161eb" action="else" useFieldsInCommand="false">
+                                            <nestedSteps>
+                                                <item guid="02ee5fb1-1497-4128-b1d2-2c117fbd7bbf" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>response[1] = key</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="b363457d-9461-49f7-9fe6-cf7045d56e7d" action="else" useFieldsInCommand="false">
+                                    <nestedSteps>
+                                        <item guid="d4405609-1af5-4b3f-a843-6572190ad3c7" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>i = i + 1</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="84881117-fcc1-4ba3-9cc1-b919b8151b28" action="comment" useFieldsInCommand="false">
+                    <command>
+                        <body>Returns a list of 2 items, item 0: private key, item 1: public key</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="1c60c8d5-86f7-46cc-99ad-fd4cba3562e4" action="return">
+                            <command>
+                                <body>[response]</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+            </steps>
+            <arguments>
+                <item name="ts_ip_address">
+                    <description>IP Address or Hostname of the TS you want to SSH to</description>
+                    <isMandatory>true</isMandatory>
+                </item>
+                <item name="ssh_port">
+                    <description>SSH port</description>
+                    <defaultValue>22</defaultValue>
                 </item>
             </arguments>
             <response>{}</response>
