@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="8.5.0.202104211757" entryPoint="convert_to_milisecond">
+<testCase version="8.5.0.202104181756" entryPoint="convert_to_milisecond">
     <general>
         <isProcedureLibrary>true</isProcedureLibrary>
         <language>Python</language>
@@ -1059,24 +1059,14 @@
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
-                                <item guid="a6caea00-d680-4eff-b9ee-f1e8139ac2e8" action="call" useFieldsInCommand="false">
-                                    <command>
-                                        <body>is_number(input_str=param_value)</body>
-                                    </command>
-                                    <postProcessing>
-                                        <storeResponseAt>is_number</storeResponseAt>
-                                        <storeResponseText>true</storeResponseText>
-                                    </postProcessing>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
                                 <item guid="154e9523-6b95-4a9c-95c5-74eae2a76908" action="if" useFieldsInCommand="false">
                                     <command>
-                                        <body>not is_number:</body>
+                                        <body>not isinstance(param_value, int):</body>
                                     </command>
                                     <nestedSteps>
                                         <item guid="f9deaf29-afc9-4474-91ad-822d9fd9cb53" action="eval" useFieldsInCommand="false">
                                             <command>
-                                                <body>message = &apos;Invalid TS_Percentage parameter: {0}. Expected: percent number, actual: {1}&apos;.format(param_name, param_value)</body>
+                                                <body>message = &apos;TS_Percentage is invalid, please re-check the TS_Percentage parameter: {0}. Expected: percentage number is INTEGER type, actual: {1}&apos;.format(param_name, param_value)</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
@@ -2473,12 +2463,12 @@ in which:
                 </item>
                 <item guid="4baffb46-a455-4d8a-a636-244078101491" action="if" useFieldsInCommand="false">
                     <command>
-                        <body>accept_commas:</body>
+                        <body>str(accept_commas).lower() == &quot;true&quot;:</body>
                     </command>
                     <nestedSteps>
                         <item guid="72c7f7f7-c243-437c-a79d-c3b6b87e6d80" action="eval" useFieldsInCommand="false">
                             <command>
-                                <body>pattern = re.compile(&quot;^-?[,0-9]+\\.?[0-9]*$&quot;)</body>
+                                <body>pattern = re.compile(&quot;^-?[,0-9]+\\.?[0-9]*([Ee][+-]?[0-9]+)?$&quot;)</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
@@ -2489,7 +2479,7 @@ in which:
                     <nestedSteps>
                         <item guid="e3b244ad-78cf-4d0f-bcd0-18cfad543a0a" action="eval" useFieldsInCommand="false">
                             <command>
-                                <body>pattern = re.compile(&quot;^-?\\d*(\\.\\d*)?$&quot;)</body>
+                                <body>pattern = re.compile(&quot;^-?\\d*(\\.\\d*)?([Ee][+-]?\\d+)?$&quot;)</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
@@ -2521,9 +2511,12 @@ in which:
 -1234
 -.321
 87078.
-884,323
-1,542,4123.3
--8,336.09
+8707893.12e+10
+870e-234
+8707893.e2
+.345E10
+8.23E-8
+83.E+8
 
 Some strings that don&apos;t:
 hello
@@ -2531,7 +2524,15 @@ hello
 hello9bye</description>
                 </item>
                 <item name="accept_commas">
-                    <description>Accept string is number has commas</description>
+                    <description>Accept string with commas. For example:
+884,323
+1,542,4123.3
+-8,336.09
+
+Limitation when setting accept_commas to &quot;true&quot;:
+The string starting with a dot (.) will not be matched, the procedure will return False. For example:
+.321,332,4343
+-.3,434,545</description>
                     <defaultValue>false</defaultValue>
                 </item>
             </arguments>

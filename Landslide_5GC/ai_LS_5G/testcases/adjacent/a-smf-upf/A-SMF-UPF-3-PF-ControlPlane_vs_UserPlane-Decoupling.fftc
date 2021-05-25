@@ -230,7 +230,7 @@
                                     <nestedSteps>
                                         <item guid="729a1e43-c9b5-46de-9e64-ecd3e8fa2a2c" action="eval" useFieldsInCommand="false">
                                             <command>
-                                                <body>params = &quot;TC_parameters/User_Plane_UEs:(50000):true;TC_parameters/Expected_CPU_Threshold:(0):true;TC_parameters/Expected_Memory_Threshold:(0):true&quot;</body>
+                                                <body>params = &quot;TC_parameters/User_Plane_UEs:(50000):true;TC_parameters/CP_Events_Sessions:[10000, 50000]:true;TC_parameters/Expected_CPU_Threshold:(0):true;TC_parameters/Expected_Memory_Threshold:(0):true&quot;</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
@@ -291,28 +291,91 @@
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
-                                        <item guid="223b9edd-16ac-4370-8a56-3b77e2ae9c4d" action="eval" useFieldsInCommand="false">
+                                        <item guid="b4c6a164-a1e6-4839-89ee-00f7296ba305" action="comment" useFieldsInCommand="false">
                                             <command>
-                                                <body>cp_events_sessions = 50000</body>
+                                                <body>Setting for CP Session</body>
                                             </command>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                        <item guid="45b45221-806d-4c20-9ef0-8aad70006131" action="eval" useFieldsInCommand="false">
-                                            <command>
-                                                <body>gset(&quot;cp_events_sessions&quot;, cp_events_sessions)</body>
-                                            </command>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                        <item guid="99cbc0a7-8970-4e56-855d-7275f4d98730" action="eval" useFieldsInCommand="false">
-                                            <command>
-                                                <body>session_act_rate = 500</body>
-                                            </command>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                        <item guid="4f70f238-db5d-4c62-af09-7ec42d9e328f" action="eval" useFieldsInCommand="false">
-                                            <command>
-                                                <body>gset(&quot;session_act_rate&quot;, session_act_rate)</body>
-                                            </command>
+                                            <nestedSteps>
+                                                <item guid="7e216ddf-fc47-432b-8578-19e8bb5cd96c" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>cp_events_sessions = int(param(&apos;TC_parameters/CP_Events_Sessions&apos;, 50000))</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="bf922cb8-5eca-4462-883f-7606fc69c987" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>percent_of_cp_fail = (cp_events_sessions / 2 ) * (3 / 100)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="a2cfe85d-2a4e-42bb-be25-325b28e5abef" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>sessions_established_drop = int((cp_events_sessions / 2) - percent_of_cp_fail)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="b06b6bcf-abc6-4c4a-846b-11aec42c12db" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>gset(&quot;sessions_established_drop&quot;, sessions_established_drop)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="3bbb42aa-685f-4a44-8b8a-0edea70a3d78" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>sessions_pending_drop = int((cp_events_sessions / 2) + percent_of_cp_fail)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="66e0b395-88c3-47ce-b8bf-b03a0fb782f1" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>gset(&quot;sessions_pending_drop&quot;, sessions_pending_drop)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="45b45221-806d-4c20-9ef0-8aad70006131" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>gset(&quot;cp_events_sessions&quot;, cp_events_sessions)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="6f03c226-138f-4c71-8e94-fa67bb55a479" action="if" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>cp_events_sessions == 50000:</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="99cbc0a7-8970-4e56-855d-7275f4d98730" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>session_act_rate = 500</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="c419f4f0-d158-4597-98dc-02b100bc24fd" action="else" useFieldsInCommand="false">
+                                                    <nestedSteps>
+                                                        <item guid="ce917b67-c309-431d-b25c-0ae8145aec3b" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>session_act_rate = 250</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="4f70f238-db5d-4c62-af09-7ec42d9e328f" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>gset(&quot;session_act_rate&quot;, session_act_rate)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="3047045c-d4e5-4811-aed1-ccc309b52d6c" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>idle_time = hold_time = int((cp_events_sessions / 2) / session_act_rate);print(hold_time)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
                                         <item guid="151ca479-d8ef-4d1d-8755-f99a22fbbcd0" action="eval" useFieldsInCommand="false">
@@ -321,7 +384,7 @@
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
-                                        <item guid="673de544-45b4-4473-87db-2d246509db2b" action="call" useFieldsInCommand="false">
+                                        <item guid="673de544-45b4-4473-87db-2d246509db2b" action="call" skip="true" useFieldsInCommand="false">
                                             <command>
                                                 <body>set_global_session_drop_var</body>
                                             </command>
@@ -1418,7 +1481,7 @@
                                 </item>
                                 <item guid="05d9191d-9ec1-4f82-bdeb-b7458d472fe4" action="eval" useFieldsInCommand="false">
                                     <command>
-                                        <body>additional_params = &quot;-1:-1:Sessions:1;-1:-1:StartRate:1;-1:-1:DisconnectRate:1;0:0:HoldTime:50;0:0:IdleTime:50&quot;</body>
+                                        <body>additional_params = &quot;-1:-1:Sessions:1;-1:-1:StartRate:1;-1:-1:DisconnectRate:1;0:0:HoldTime:{0};0:0:IdleTime:{0}&quot;.format(hold_time)</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
@@ -5485,20 +5548,32 @@
                         <body>Print expected CP baseline</body>
                     </command>
                     <nestedSteps>
+                        <item guid="2a8849a5-cae4-4a93-825d-ae18783c3e3c" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>sessions_established_drop = int(gget(&quot;sessions_established_drop&quot;))</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="e9c79fe5-f67d-4032-acef-d198a942ee86" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>sessions_pending_drop = int(gget(&quot;sessions_pending_drop&quot;))</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
                         <item guid="4f48024e-d88c-4689-9bfe-eaf59f1da032" action="message" useFieldsInCommand="false">
                             <command>
-                                <body>Information:   + Sessions Established &gt;= 24920</body>
+                                <body>Information:   + Sessions Established &gt;= [sessions_established_drop]</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
-                                <message inherit="false">   + Sessions Established &gt;= 24920</message>
+                                <message inherit="false">   + Sessions Established &gt;= [sessions_established_drop]</message>
                             </applicationProperties>
                         </item>
                         <item guid="55570bec-7069-48e0-b615-b05e8c39ff7b" action="message" useFieldsInCommand="false">
                             <command>
-                                <body>Information:   + Sessions Pending &lt;= 25080</body>
+                                <body>Information:   + Sessions Pending &lt;= [sessions_pending_drop]</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
-                                <message inherit="false">   + Sessions Pending &lt;= 25080</message>
+                                <message inherit="false">   + Sessions Pending &lt;= [sessions_pending_drop]</message>
                             </applicationProperties>
                         </item>
                     </nestedSteps>
@@ -5572,7 +5647,7 @@
                         </item>
                         <item guid="c994cd0d-2cd6-47f5-97d3-83c7a6e305a4" action="if" useFieldsInCommand="false">
                             <command>
-                                <body>int(sessions_established) &gt;= int(gget(&quot;sessions_established_drop&quot;)) and int(sessions_pending) &lt;= int(gget(&quot;sessions_pending_drop&quot;)):</body>
+                                <body>int(sessions_established) &gt;= sessions_established_drop and int(sessions_pending) &lt;= sessions_pending_drop:</body>
                             </command>
                             <nestedSteps>
                                 <item guid="c21e50c5-2482-4adc-bfed-7e176bec27ee" action="eval" useFieldsInCommand="false">
@@ -5707,22 +5782,6 @@
                 </item>
                 <item name="timeout"/>
             </arguments>
-        </item>
-        <item name="set_global_session_drop_var" isPublic="true">
-            <steps>
-                <item guid="3314fb57-af65-40bb-b75f-62fed8513b74" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>gset(&quot;sessions_established_drop&quot;, 24920)</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="b2aa1044-48c6-488f-af8a-c95ea4ce78ca" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>gset(&quot;sessions_pending_drop&quot;, 25080)</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-            </steps>
         </item>
     </procedures>
 </testCase>
