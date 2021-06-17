@@ -1079,7 +1079,7 @@
                     <nestedSteps>
                         <item guid="68890ea0-8990-4715-9380-ce818b2d92d2" action="call" useFieldsInCommand="false">
                             <command>
-                                <body>execute_landslide_procedure -run_data [run_data] -is_b2b [is_b2b] -running_node_id [running_node_id] -timeout [test_waiting_timeout]</body>
+                                <body>execute_landslide_procedure -run_data [run_data] -is_b2b [is_b2b] -running_node_id [running_node_id] -timeout [test_waiting_timeout] -clean_up [clean_up]</body>
                             </command>
                             <postProcessing>
                                 <storeResponseAt>running_nodal_id</storeResponseAt>
@@ -1581,13 +1581,7 @@
                             <nestedSteps>
                                 <item guid="980e327a-e16e-4f68-9dca-b11a0817682c" action="stop_or_abort_test" session="s1" useFieldsInCommand="false">
                                     <command>
-                                        <body>-abort false -timeout 180 -running_id [running_node_id]</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                                <item guid="1210015a-7f59-4d63-a472-7c485a7b3f97" action="delete_running_tests" session="s1" useFieldsInCommand="false">
-                                    <command>
-                                        <body>-running_id_list [running_node_id]</body>
+                                        <body>-abort false -timeout [test_waiting_timeout] -running_id [running_node_id] -clean_up [clean_up]</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
@@ -1701,7 +1695,7 @@
                             <nestedSteps>
                                 <item guid="961fa89b-8811-4b9b-85fc-105fe888e2d5" action="show_error_and_cleanup" session="s1" useFieldsInCommand="false">
                                     <command>
-                                        <body>-message [response] -running_node_id [running_node_id] -running_ids [running_nodal_id]</body>
+                                        <body>-message [response] -running_node_id [running_node_id] -running_ids [running_nodal_id] -clean_up [clean_up] -timeout [timeout]</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
@@ -1732,6 +1726,7 @@
                 <item name="timeout">
                     <defaultValue>180</defaultValue>
                 </item>
+                <item name="clean_up"/>
             </arguments>
             <response>{}</response>
         </item>
@@ -1745,24 +1740,6 @@
                         <item guid="d5e23fd4-ce71-4aa6-80ee-2b7a93232ff0" action="enable_port_capture" session="s1" useFieldsInCommand="false">
                             <command>
                                 <body>-run_data [run_data]</body>
-                            </command>
-                            <postProcessing>
-                                <storeResponseAt>run_data</storeResponseAt>
-                                <storeResponseText>true</storeResponseText>
-                            </postProcessing>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                    </nestedSteps>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="742b1669-536f-4768-ac9d-fb0baadd68c8" action="comment" useFieldsInCommand="false">
-                    <command>
-                        <body>Enable IEV</body>
-                    </command>
-                    <nestedSteps>
-                        <item guid="4843138a-d1fa-4647-8b7c-e65f2275ac79" action="enable_iev" session="s1" useFieldsInCommand="false">
-                            <command>
-                                <body>-run_data [run_data] -ports 0</body>
                             </command>
                             <postProcessing>
                                 <storeResponseAt>run_data</storeResponseAt>
@@ -2244,34 +2221,14 @@
                         </item>
                         <item guid="eb18cdb2-3840-423c-b7b5-56fc99ca6f72" action="else" useFieldsInCommand="false">
                             <nestedSteps>
-                                <item guid="e567e59d-769c-4849-aa7b-a3e378ccdbfb" action="comment" useFieldsInCommand="false">
-                                    <command>
-                                        <body>Stop Node Test</body>
-                                    </command>
-                                    <nestedSteps>
-                                        <item guid="dddf76df-58c9-4652-aa8e-10002546e27f" action="stop_or_abort_test" session="s1" useFieldsInCommand="false">
-                                            <command>
-                                                <body>-abort true -timeout 180 -running_id [running_node_id]</body>
-                                            </command>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                        <item guid="34e201a2-a261-475b-8bdc-ac3595068052" action="waiting_for_test_get_expected_state" session="s1" useFieldsInCommand="false">
-                                            <command>
-                                                <body>-running_test_id [running_node_id] -expected_state &quot;COMPLETE&quot; -unexpected_states &quot;ERROR;COMPLETE_ERROR&quot;</body>
-                                            </command>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                    </nestedSteps>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
                                 <item guid="8ceb9bb9-3990-4049-8db6-cbc45edc0e1d" action="if" useFieldsInCommand="false">
                                     <command>
                                         <body>testsession_state in unexpected_states:</body>
                                     </command>
                                     <nestedSteps>
-                                        <item guid="f5565cb8-a3d6-49aa-a668-185233a91e61" action="eval" useFieldsInCommand="false">
+                                        <item guid="ef0cd33f-523d-48b5-9933-a8253206773d" action="eval" useFieldsInCommand="false">
                                             <command>
-                                                <body>reason = &apos;Nodal test hanged.&apos;</body>
+                                                <body>reason = &quot;Nodal test hanged at state &apos;{0}&apos;&quot;.format(testsession_state)</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
@@ -2338,6 +2295,12 @@
                                         <pathValue inherit="false" sub="true">{&quot;/&quot;:{&quot;reason&quot;:&quot;[reason]&quot;}}</pathValue>
                                         <documentName inherit="false">response</documentName>
                                     </applicationProperties>
+                                </item>
+                                <item guid="168bec36-9851-4f07-a65d-5bd256e5f16a" action="return">
+                                    <command>
+                                        <body>[response]</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
                             </nestedSteps>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>

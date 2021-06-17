@@ -3246,6 +3246,12 @@
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
+                        <item guid="1cfd2b03-0501-47a3-879c-0446f2540ee3" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>number_id=1</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
                     </nestedSteps>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
@@ -3267,7 +3273,7 @@
                                 </item>
                                 <item guid="140eb249-71df-48bf-8e84-5841c989902b" action="command" session="w1">
                                     <command>
-                                        <body>query filter set &quot;ngap.procedureCode == [Initial_UE_Message_Proc_Code]&quot;</body>
+                                        <body>query filter set &quot;ngap.procedureCode == [Initial_UE_Message_Proc_Code] and nas_5gs.mm.message_type == [Service_Request_Msg_Type]&quot;</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
@@ -3286,6 +3292,13 @@
                                                 <processorInfo ruleType="assert">
                                                     <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
                                                         <expression>int(value) != 0</expression>
+                                                        <actionsWhenTrue>
+                                                            <item actionId="DeclareExecutionIssue">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Information">
+                                                                    <message>1. Initial UE Message, Service Request</message>
+                                                                </actionProperties>
+                                                            </item>
+                                                        </actionsWhenTrue>
                                                         <actionsWhenFalse>
                                                             <item actionId="FailTest">
                                                                 <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
@@ -3306,14 +3319,25 @@
                                                 </processorInfo>
                                             </item>
                                             <item>
+                                                <extractorInfo extractorType="none">
+                                                    <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                                </extractorInfo>
+                                                <processorInfo ruleType="message">
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.MessageProcessorPropertyGroup" severity="OK">
+                                                        <message>    Initial UE Message, Service Request Found</message>
+                                                        <tag sub="false" defaultValue=""/>
+                                                    </ruleProperties>
+                                                </processorInfo>
+                                            </item>
+                                            <item>
                                                 <extractorInfo extractorType="query">
                                                     <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query>rowCount</query>
+                                                        <query>messages/item/id</query>
                                                     </extractorProperties>
                                                 </extractorInfo>
                                                 <processorInfo ruleType="store">
                                                     <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
-                                                        <storageLocation>initial_ue_message_count</storageLocation>
+                                                        <storageLocation>number_id</storageLocation>
                                                         <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
                                                         <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
                                                         <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
@@ -3342,130 +3366,17 @@
                                     </eventHandlers>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
-                                <item guid="f898c6fb-fef8-4af4-a3ff-e0ad0e59284e" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>number_id = 1</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                                <item guid="06007229-3107-4c38-bf96-f4865324af75" action="for" useFieldsInCommand="false">
-                                    <command>
-                                        <body>i in range(1, int(initial_ue_message_count) + 1):</body>
-                                    </command>
-                                    <nestedSteps>
-                                        <item guid="f7211fd9-12f9-4403-999e-2bb03322f674" action="comment" useFieldsInCommand="false">
-                                            <command>
-                                                <body>Loop to find Initial UE Message, Service Request</body>
-                                            </command>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                        <item guid="0ff9ba4a-259a-461b-82b6-6e51e99cecef" action="command" session="w1">
-                                            <command>
-                                                <body>query packets</body>
-                                            </command>
-                                            <postProcessing>
-                                                <analysisRules>
-                                                    <item>
-                                                        <extractorInfo extractorType="query">
-                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                <query sub="true">messages/item\\[[i]]/id</query>
-                                                            </extractorProperties>
-                                                        </extractorInfo>
-                                                        <processorInfo ruleType="store">
-                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
-                                                                <storageLocation>initial_ue_message_id_no</storageLocation>
-                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
-                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
-                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
-                                                            </ruleProperties>
-                                                        </processorInfo>
-                                                    </item>
-                                                </analysisRules>
-                                            </postProcessing>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                        <item guid="11596fef-cc02-4df1-b70a-57d0253ecee7" action="command" session="w1">
-                                            <command>
-                                                <body>query details [initial_ue_message_id_no]</body>
-                                            </command>
-                                            <postProcessing>
-                                                <analysisRules>
-                                                    <item>
-                                                        <extractorInfo extractorType="query">
-                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                <query>details/item[field = &quot;nas_5gs.mm.message_type&quot;]/value</query>
-                                                            </extractorProperties>
-                                                        </extractorInfo>
-                                                        <processorInfo ruleType="assert">
-                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                <expression>int(value) == int(Service_Request_Msg_Type)</expression>
-                                                                <actionsWhenTrue>
-                                                                    <item actionId="Eval">
-                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                            <statement>number_id = int(initial_ue_message_id_no)</statement>
-                                                                        </actionProperties>
-                                                                    </item>
-                                                                </actionsWhenTrue>
-                                                                <actionsWhenFalse>
-                                                                    <item actionId="Continue">
-                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                    </item>
-                                                                    <item actionId="SkipRemainingRules">
-                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                    </item>
-                                                                </actionsWhenFalse>
-                                                            </ruleProperties>
-                                                        </processorInfo>
-                                                    </item>
-                                                    <item>
-                                                        <extractorInfo extractorType="none">
-                                                            <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
-                                                        </extractorInfo>
-                                                        <processorInfo ruleType="message">
-                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.MessageProcessorPropertyGroup" severity="Information">
-                                                                <message>1. Initial UE Message, Service Request</message>
-                                                                <tag sub="false" defaultValue=""/>
-                                                            </ruleProperties>
-                                                        </processorInfo>
-                                                    </item>
-                                                </analysisRules>
-                                            </postProcessing>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                        <item guid="e4479d57-62b1-4782-9fd3-9d57e4255d1b" action="break" useFieldsInCommand="false">
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                    </nestedSteps>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                                <item guid="6919796a-2c4d-40ac-863b-87dc7de9d735" action="else" useFieldsInCommand="false">
-                                    <nestedSteps>
-                                        <item guid="a3260e0a-3492-4b35-bd5d-1b6bbef56769" action="message" useFieldsInCommand="false">
-                                            <command>
-                                                <body>Error:Initial UE Message, Service Request is expected in message sequence, but not found</body>
-                                            </command>
-                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
-                                                <severity inherit="false">Error</severity>
-                                                <message inherit="false">Initial UE Message, Service Request is expected in message sequence, but not found</message>
-                                            </applicationProperties>
-                                        </item>
-                                        <item guid="ddc18bdc-e660-4547-a705-6d1e53e00a46" action="return">
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                    </nestedSteps>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
                             </nestedSteps>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
                         <item guid="ff04fed9-5ee5-4aff-b1d8-a9c2b62b42ae" action="comment" useFieldsInCommand="false">
                             <command>
-                                <body>Reset filter to ngap</body>
+                                <body>Set filter for the next message</body>
                             </command>
                             <nestedSteps>
                                 <item guid="75b01a78-3f7f-4ace-82f2-bd301525cc9f" action="command" session="w1">
                                     <command>
-                                        <body>query filter set ngap</body>
+                                        <body>query filter set (ngap.procedureCode == [Initial_Context_Setup_Proc_Code] and frame.number &gt; [number_id] and  ngap.InitialContextSetupRequest_element)</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
@@ -3477,10 +3388,86 @@
                                 <body>2. Initial Context Setup Request</body>
                             </command>
                             <nestedSteps>
-                                <item guid="0a438721-c3a9-4ad6-ab9c-b8f523f8f93f" action="eval" useFieldsInCommand="false">
+                                <item guid="b393ea06-543f-47f6-8ba6-5de81ae1a068" action="command" session="w1">
                                     <command>
-                                        <body>number_id += 1</body>
+                                        <body>query packets</body>
                                     </command>
+                                    <postProcessing>
+                                        <analysisRules>
+                                            <item>
+                                                <extractorInfo extractorType="query">
+                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                        <query>rowCount()</query>
+                                                    </extractorProperties>
+                                                </extractorInfo>
+                                                <processorInfo ruleType="assert">
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                        <expression>int(value) != 0</expression>
+                                                        <actionsWhenFalse>
+                                                            <item actionId="FailTest">
+                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                            </item>
+                                                            <item actionId="DeclareExecutionIssue">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
+                                                                    <message>Initial Context Setup Request is required in message sequence, but another mesage is found</message>
+                                                                </actionProperties>
+                                                            </item>
+                                                            <item actionId="ExitProcedure">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
+                                                            </item>
+                                                            <item actionId="SkipRemainingRules">
+                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                            </item>
+                                                        </actionsWhenFalse>
+                                                    </ruleProperties>
+                                                </processorInfo>
+                                            </item>
+                                            <item>
+                                                <extractorInfo extractorType="none">
+                                                    <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                                </extractorInfo>
+                                                <processorInfo ruleType="message">
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.MessageProcessorPropertyGroup" severity="Information">
+                                                        <message>2. Initial Context Setup Request</message>
+                                                        <tag sub="false" defaultValue=""/>
+                                                    </ruleProperties>
+                                                </processorInfo>
+                                            </item>
+                                            <item>
+                                                <extractorInfo extractorType="query">
+                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                        <query>messages/item/id</query>
+                                                    </extractorProperties>
+                                                </extractorInfo>
+                                                <processorInfo ruleType="store">
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                        <storageLocation>number_id</storageLocation>
+                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                    </ruleProperties>
+                                                </processorInfo>
+                                            </item>
+                                        </analysisRules>
+                                    </postProcessing>
+                                    <eventHandlers>
+                                        <item name="OnWiresharkCommandFailed">
+                                            <item actionId="DeclareExecutionIssue">
+                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
+                                                    <message>No Initial UE Message, Registration Request found</message>
+                                                </actionProperties>
+                                            </item>
+                                            <item actionId="FailTest">
+                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                            </item>
+                                            <item actionId="ExitProcedure">
+                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
+                                            </item>
+                                            <item actionId="SkipRemainingRules">
+                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                            </item>
+                                        </item>
+                                    </eventHandlers>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
                                 <item guid="9d603210-743f-424e-859b-f871d3d014fc" action="command" session="w1">
@@ -3504,7 +3491,7 @@
                                                             </item>
                                                             <item actionId="DeclareExecutionIssue">
                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                                    <message>Initial Context Setup Request is required in message sequence, but another mesage is found</message>
+                                                                    <message>Initial Context Setup Request details not found</message>
                                                                 </actionProperties>
                                                             </item>
                                                             <item actionId="ExitProcedure">
@@ -3514,34 +3501,6 @@
                                                                 <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                             </item>
                                                         </actionsWhenTrue>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query sub="true">count(details/item\\[field = &quot;ngap.procedureCode&quot; and value = [Initial_Context_Setup_Proc_Code]])</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="assert">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                        <expression>int(value) == 1</expression>
-                                                        <actionsWhenFalse>
-                                                            <item actionId="FailTest">
-                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                            </item>
-                                                            <item actionId="DeclareExecutionIssue">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                                    <message>Initial Context Setup Request is required in message sequence, but another mesage is found</message>
-                                                                </actionProperties>
-                                                            </item>
-                                                            <item actionId="ExitProcedure">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
-                                                            </item>
-                                                            <item actionId="SkipRemainingRules">
-                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                            </item>
-                                                        </actionsWhenFalse>
                                                     </ruleProperties>
                                                 </processorInfo>
                                             </item>
@@ -3578,8 +3537,8 @@
                                                     <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
                                                 </extractorInfo>
                                                 <processorInfo ruleType="message">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.MessageProcessorPropertyGroup" severity="Information">
-                                                        <message>2. Initial Context Setup Request</message>
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.MessageProcessorPropertyGroup" severity="OK">
+                                                        <message>    Initial Context Setup Request Found</message>
                                                         <tag sub="false" defaultValue=""/>
                                                     </ruleProperties>
                                                 </processorInfo>
@@ -4336,10 +4295,100 @@
                                 <body>3. Initial Context Setup Response</body>
                             </command>
                             <nestedSteps>
-                                <item guid="824e739b-a52c-4c0e-982b-6e0c3361fb8e" action="eval" useFieldsInCommand="false">
+                                <item guid="0e425c0c-b47e-4930-abb6-93274b1d383d" action="comment" useFieldsInCommand="false">
                                     <command>
-                                        <body>number_id += 1</body>
+                                        <body>Set filter for the next message</body>
                                     </command>
+                                    <nestedSteps>
+                                        <item guid="746d594e-3801-4194-ac3b-ceb2758edf4d" action="command" session="w1">
+                                            <command>
+                                                <body>query filter set (ngap.procedureCode == [Initial_Context_Setup_Proc_Code] and frame.number &gt; [number_id] and  ngap.InitialContextSetupResponse_element)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="82b02bd2-99c7-4e2c-aa5b-2679c55c0496" action="command" session="w1">
+                                            <command>
+                                                <body>query packets</body>
+                                            </command>
+                                            <postProcessing>
+                                                <analysisRules>
+                                                    <item>
+                                                        <extractorInfo extractorType="query">
+                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                <query>rowCount()</query>
+                                                            </extractorProperties>
+                                                        </extractorInfo>
+                                                        <processorInfo ruleType="assert">
+                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                <expression>int(value) != 0</expression>
+                                                                <actionsWhenFalse>
+                                                                    <item actionId="FailTest">
+                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                    </item>
+                                                                    <item actionId="DeclareExecutionIssue">
+                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
+                                                                            <message>Initial Context Setup Response is required in message sequence, but another mesage is found</message>
+                                                                        </actionProperties>
+                                                                    </item>
+                                                                    <item actionId="ExitProcedure">
+                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
+                                                                    </item>
+                                                                    <item actionId="SkipRemainingRules">
+                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                    </item>
+                                                                </actionsWhenFalse>
+                                                            </ruleProperties>
+                                                        </processorInfo>
+                                                    </item>
+                                                    <item>
+                                                        <extractorInfo extractorType="none">
+                                                            <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                                        </extractorInfo>
+                                                        <processorInfo ruleType="message">
+                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.MessageProcessorPropertyGroup" severity="Information">
+                                                                <message>2. Initial Context Setup Response</message>
+                                                                <tag sub="false" defaultValue=""/>
+                                                            </ruleProperties>
+                                                        </processorInfo>
+                                                    </item>
+                                                    <item>
+                                                        <extractorInfo extractorType="query">
+                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                <query>messages/item/id</query>
+                                                            </extractorProperties>
+                                                        </extractorInfo>
+                                                        <processorInfo ruleType="store">
+                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                <storageLocation>number_id</storageLocation>
+                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                            </ruleProperties>
+                                                        </processorInfo>
+                                                    </item>
+                                                </analysisRules>
+                                            </postProcessing>
+                                            <eventHandlers>
+                                                <item name="OnWiresharkCommandFailed">
+                                                    <item actionId="DeclareExecutionIssue">
+                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
+                                                            <message>No Initial UE Message, Registration Request found</message>
+                                                        </actionProperties>
+                                                    </item>
+                                                    <item actionId="FailTest">
+                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                    </item>
+                                                    <item actionId="ExitProcedure">
+                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
+                                                    </item>
+                                                    <item actionId="SkipRemainingRules">
+                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                    </item>
+                                                </item>
+                                            </eventHandlers>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
                                 <item guid="584197ad-edeb-4599-8068-c807ddbc2420" action="command" session="w1">
@@ -4363,7 +4412,7 @@
                                                             </item>
                                                             <item actionId="DeclareExecutionIssue">
                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                                    <message>Initial Context Setup Response is required in message sequence, but another mesage is found</message>
+                                                                    <message>Initial Context Setup Response details not found</message>
                                                                 </actionProperties>
                                                             </item>
                                                             <item actionId="ExitProcedure">
@@ -4373,34 +4422,6 @@
                                                                 <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                             </item>
                                                         </actionsWhenTrue>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query sub="true">count(details/item\\[field = &quot;ngap.procedureCode&quot; and value = [Initial_Context_Setup_Proc_Code]])</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="assert">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                        <expression>int(value) == 1</expression>
-                                                        <actionsWhenFalse>
-                                                            <item actionId="FailTest">
-                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                            </item>
-                                                            <item actionId="DeclareExecutionIssue">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                                    <message>Initial Context Setup Response is required in message sequence, but another mesage is found</message>
-                                                                </actionProperties>
-                                                            </item>
-                                                            <item actionId="ExitProcedure">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
-                                                            </item>
-                                                            <item actionId="SkipRemainingRules">
-                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                            </item>
-                                                        </actionsWhenFalse>
                                                     </ruleProperties>
                                                 </processorInfo>
                                             </item>
@@ -4437,8 +4458,8 @@
                                                     <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
                                                 </extractorInfo>
                                                 <processorInfo ruleType="message">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.MessageProcessorPropertyGroup" severity="Information">
-                                                        <message>3. Initial Context Setup Response</message>
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.MessageProcessorPropertyGroup" severity="OK">
+                                                        <message>    Initial Context Setup Response found</message>
                                                         <tag sub="false" defaultValue=""/>
                                                     </ruleProperties>
                                                 </processorInfo>
