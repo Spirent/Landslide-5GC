@@ -136,11 +136,11 @@
                             <nestedSteps>
                                 <item guid="cb98642a-085b-4284-b5b1-fe493fe2dd8e" action="json" useFieldsInCommand="false">
                                     <command>
-                                        <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;response&apos;, pathValue=&apos;{&quot;/&quot;:{&quot;favorites_measurements&quot;:[]}}&apos;</body>
+                                        <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;response&apos;, pathValue=&apos;{&quot;/&quot;:{&quot;[favorites_key_name]&quot;:\\\\[]}}&apos;</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
                                         <action inherit="false">addJsonNode</action>
-                                        <pathValue inherit="false">{&quot;/&quot;:{&quot;favorites_measurements&quot;:[]}}</pathValue>
+                                        <pathValue inherit="false" sub="true">{&quot;/&quot;:{&quot;[favorites_key_name]&quot;:\\[]}}</pathValue>
                                         <documentName inherit="false">response</documentName>
                                     </applicationProperties>
                                 </item>
@@ -255,11 +255,11 @@
                                 </item>
                                 <item guid="cf03bd9d-7720-4d98-be06-9953890638eb" action="json" useFieldsInCommand="false">
                                     <command>
-                                        <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;response&apos;, pathValue=&apos;{&quot;favorites_measurements/\\\\[[f_index]]&quot;:{&quot;name&quot;:&quot;[name]&quot;,&quot;value&quot;:&quot;[value]&quot;}}&apos;</body>
+                                        <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;response&apos;, pathValue=&apos;{&quot;[favorites_key_name]/\\\\[[f_index]]&quot;:{&quot;name&quot;:&quot;[name]&quot;,&quot;value&quot;:&quot;[value]&quot;}}&apos;</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
                                         <action inherit="false">addJsonNode</action>
-                                        <pathValue inherit="false" sub="true">{&quot;favorites_measurements/\\[[f_index]]&quot;:{&quot;name&quot;:&quot;[name]&quot;,&quot;value&quot;:&quot;[value]&quot;}}</pathValue>
+                                        <pathValue inherit="false" sub="true">{&quot;[favorites_key_name]/\\[[f_index]]&quot;:{&quot;name&quot;:&quot;[name]&quot;,&quot;value&quot;:&quot;[value]&quot;}}</pathValue>
                                         <documentName inherit="false">response</documentName>
                                     </applicationProperties>
                                 </item>
@@ -290,6 +290,9 @@
             <arguments>
                 <item name="running_id"/>
                 <item name="favorites"/>
+                <item name="favorites_key_name">
+                    <defaultValue>favorites_measurements</defaultValue>
+                </item>
                 <item name="response">
                     <isMandatory>true</isMandatory>
                 </item>
@@ -1519,6 +1522,18 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                                                     <command>
                                                                         <body>sut_value = param(value_sut_path, sut_value);print(sut_value)</body>
                                                                     </command>
+                                                                    <eventHandlers>
+                                                                        <item name="OnInterpreterError">
+                                                                            <item actionId="DeclareExecutionIssue">
+                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
+                                                                                    <message>{error}: &quot;[sut_value]&quot;</message>
+                                                                                </actionProperties>
+                                                                            </item>
+                                                                            <item actionId="FailTest">
+                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                            </item>
+                                                                        </item>
+                                                                    </eventHandlers>
                                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                 </item>
                                                             </nestedSteps>
@@ -2687,14 +2702,14 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                             <nestedSteps>
                                 <item guid="414140e1-1028-4761-b661-4bf633754e23" action="json" useFieldsInCommand="false">
                                     <command>
-                                        <body>action=&apos;setJsonValue&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;run_data&apos;, pathValue=&apos;{&quot;tsGroups/\\\\[[session_ts]]/testCases/\\\\[[session_tc]]/parameters/Sessions&quot;:[sessions_number]}&apos;</body>
+                                        <body>action=&apos;setJsonValue&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;run_data&apos;, pathValue=&apos;{&quot;tsGroups/\\\\[[session_ts]]/testCases/\\\\[[session_tc]]/parameters/[session_capacity_variable]&quot;:[sessions_number]}&apos;</body>
                                     </command>
                                     <eventHandlers>
                                         <item name="onExecJsonSetError"/>
                                     </eventHandlers>
                                     <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
                                         <action inherit="false">setJsonValue</action>
-                                        <pathValue inherit="false" sub="true">{&quot;tsGroups/\\[[session_ts]]/testCases/\\[[session_tc]]/parameters/Sessions&quot;:[sessions_number]}</pathValue>
+                                        <pathValue inherit="false" sub="true">{&quot;tsGroups/\\[[session_ts]]/testCases/\\[[session_tc]]/parameters/[session_capacity_variable]&quot;:[sessions_number]}</pathValue>
                                         <documentName inherit="false">run_data</documentName>
                                     </applicationProperties>
                                 </item>
@@ -2712,18 +2727,44 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                 <body>rate_tc != -1 and rate_ts != -1:</body>
                             </command>
                             <nestedSteps>
-                                <item guid="04a5eb32-2e64-4bc1-85df-e16e6b57b3b8" action="json" useFieldsInCommand="false">
+                                <item guid="5e758113-75af-43f0-8b96-bf8772be328c" action="if" useFieldsInCommand="false">
                                     <command>
-                                        <body>action=&apos;setJsonValue&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;run_data&apos;, pathValue=&apos;{&quot;tsGroups/\\\\[[rate_ts]]/testCases/\\\\[[rate_tc]]/parameters/StartRate&quot;:[start_rate],&quot;tsGroups/\\\\[[rate_ts]]/testCases/\\\\[[rate_tc]]/parameters/DisconnectRate&quot;:[disconnect_rate]}&apos;</body>
+                                        <body>targeted_end_rate_variable == &apos;StartRate&apos;:</body>
                                     </command>
-                                    <eventHandlers>
-                                        <item name="onExecJsonSetError"/>
-                                    </eventHandlers>
-                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
-                                        <action inherit="false">setJsonValue</action>
-                                        <pathValue inherit="false" sub="true">{&quot;tsGroups/\\[[rate_ts]]/testCases/\\[[rate_tc]]/parameters/StartRate&quot;:[start_rate],&quot;tsGroups/\\[[rate_ts]]/testCases/\\[[rate_tc]]/parameters/DisconnectRate&quot;:[disconnect_rate]}</pathValue>
-                                        <documentName inherit="false">run_data</documentName>
-                                    </applicationProperties>
+                                    <nestedSteps>
+                                        <item guid="04a5eb32-2e64-4bc1-85df-e16e6b57b3b8" action="json" useFieldsInCommand="false">
+                                            <command>
+                                                <body>action=&apos;setJsonValue&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;run_data&apos;, pathValue=&apos;{&quot;tsGroups/\\\\[[rate_ts]]/testCases/\\\\[[rate_tc]]/parameters/StartRate&quot;:[start_rate],&quot;tsGroups/\\\\[[rate_ts]]/testCases/\\\\[[rate_tc]]/parameters/DisconnectRate&quot;:[disconnect_rate]}&apos;</body>
+                                            </command>
+                                            <eventHandlers>
+                                                <item name="onExecJsonSetError"/>
+                                            </eventHandlers>
+                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                <action inherit="false">setJsonValue</action>
+                                                <pathValue inherit="false" sub="true">{&quot;tsGroups/\\[[rate_ts]]/testCases/\\[[rate_tc]]/parameters/StartRate&quot;:[start_rate],&quot;tsGroups/\\[[rate_ts]]/testCases/\\[[rate_tc]]/parameters/DisconnectRate&quot;:[disconnect_rate]}</pathValue>
+                                                <documentName inherit="false">run_data</documentName>
+                                            </applicationProperties>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="01cd924f-6fdc-4e66-af89-916408679b35" action="else" useFieldsInCommand="false">
+                                    <nestedSteps>
+                                        <item guid="289add07-ab67-4698-a0e1-970d9c90be2d" action="json" useFieldsInCommand="false">
+                                            <command>
+                                                <body>action=&apos;setJsonValue&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;run_data&apos;, pathValue=&apos;{&quot;tsGroups/\\\\[[rate_ts]]/testCases/\\\\[[rate_tc]]/parameters/[targeted_end_rate_variable]&quot;:[start_rate]}&apos;</body>
+                                            </command>
+                                            <eventHandlers>
+                                                <item name="onExecJsonSetError"/>
+                                            </eventHandlers>
+                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                <action inherit="false">setJsonValue</action>
+                                                <pathValue inherit="false" sub="true">{&quot;tsGroups/\\[[rate_ts]]/testCases/\\[[rate_tc]]/parameters/[targeted_end_rate_variable]&quot;:[start_rate]}</pathValue>
+                                                <documentName inherit="false">run_data</documentName>
+                                            </applicationProperties>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
                                 <item guid="d267ce3f-3f44-46aa-a521-0704a4256dae" action="eval" useFieldsInCommand="false">
                                     <command>
@@ -2789,7 +2830,7 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                                             <item>
                                                                 <extractorInfo extractorType="query">
                                                                     <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                        <query>count(mapped/Json/parameters/Sessions)</query>
+                                                                        <query sub="true">count(mapped/Json/parameters/[session_capacity_variable])</query>
                                                                     </extractorProperties>
                                                                 </extractorInfo>
                                                                 <processorInfo ruleType="assert">
@@ -2815,7 +2856,7 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                                             <item>
                                                                 <extractorInfo extractorType="query">
                                                                     <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                        <query>count(mapped/Json/parameters/StartRate)</query>
+                                                                        <query sub="true">count(mapped/Json/parameters/[targeted_end_rate_variable])</query>
                                                                     </extractorProperties>
                                                                 </extractorInfo>
                                                                 <processorInfo ruleType="assert">
@@ -2886,7 +2927,7 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                                             <nestedSteps>
                                                                 <item guid="49f82857-eec2-4da7-8c4b-8a52f51ffb17" action="json" useFieldsInCommand="false">
                                                                     <command>
-                                                                        <body>action=&apos;setJsonValue&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;run_data&apos;, pathValue=&apos;{&quot;tsGroups/\\\\[[group_index]]/testCases/\\\\[[testcase_index]]/parameters/Sessions&quot;:&quot;[sessions_number]&quot;}&apos;</body>
+                                                                        <body>action=&apos;setJsonValue&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;run_data&apos;, pathValue=&apos;{&quot;tsGroups/\\\\[[group_index]]/testCases/\\\\[[testcase_index]]/parameters/[session_capacity_variable]&quot;:&quot;[sessions_number]&quot;}&apos;</body>
                                                                     </command>
                                                                     <postProcessing>
                                                                         <storeResponseAt>run_data</storeResponseAt>
@@ -2894,7 +2935,7 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                                                     </postProcessing>
                                                                     <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
                                                                         <action inherit="false">setJsonValue</action>
-                                                                        <pathValue inherit="false" sub="true">{&quot;tsGroups/\\[[group_index]]/testCases/\\[[testcase_index]]/parameters/Sessions&quot;:&quot;[sessions_number]&quot;}</pathValue>
+                                                                        <pathValue inherit="false" sub="true">{&quot;tsGroups/\\[[group_index]]/testCases/\\[[testcase_index]]/parameters/[session_capacity_variable]&quot;:&quot;[sessions_number]&quot;}</pathValue>
                                                                         <documentName inherit="false">run_data</documentName>
                                                                     </applicationProperties>
                                                                 </item>
@@ -2927,7 +2968,7 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                                             <nestedSteps>
                                                                 <item guid="4b5ad7ca-19a6-4d15-a45e-72dc30eb09ef" action="json" useFieldsInCommand="false">
                                                                     <command>
-                                                                        <body>action=&apos;setJsonValue&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;run_data&apos;, pathValue=&apos;{&quot;tsGroups/\\\\[[group_index]]/testCases/\\\\[[testcase_index]]/parameters/StartRate&quot;:&quot;[start_rate]&quot;}&apos;</body>
+                                                                        <body>action=&apos;setJsonValue&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;run_data&apos;, pathValue=&apos;{&quot;tsGroups/\\\\[[group_index]]/testCases/\\\\[[testcase_index]]/parameters/[targeted_end_rate_variable]&quot;:&quot;[start_rate]&quot;}&apos;</body>
                                                                     </command>
                                                                     <postProcessing>
                                                                         <storeResponseAt>run_data</storeResponseAt>
@@ -2935,7 +2976,7 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                                                     </postProcessing>
                                                                     <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
                                                                         <action inherit="false">setJsonValue</action>
-                                                                        <pathValue inherit="false" sub="true">{&quot;tsGroups/\\[[group_index]]/testCases/\\[[testcase_index]]/parameters/StartRate&quot;:&quot;[start_rate]&quot;}</pathValue>
+                                                                        <pathValue inherit="false" sub="true">{&quot;tsGroups/\\[[group_index]]/testCases/\\[[testcase_index]]/parameters/[targeted_end_rate_variable]&quot;:&quot;[start_rate]&quot;}</pathValue>
                                                                         <documentName inherit="false">run_data</documentName>
                                                                     </applicationProperties>
                                                                 </item>
@@ -3118,6 +3159,14 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                 <item name="auto_config_interval_period">
                     <description>Auto set interval period base on Session Capacity and Target End Rate. true/false</description>
                     <defaultValue>true</defaultValue>
+                    <isMandatory>true</isMandatory>
+                </item>
+                <item name="session_capacity_variable">
+                    <defaultValue>Sessions</defaultValue>
+                    <isMandatory>true</isMandatory>
+                </item>
+                <item name="targeted_end_rate_variable">
+                    <defaultValue>StartRate</defaultValue>
                     <isMandatory>true</isMandatory>
                 </item>
             </arguments>
@@ -4319,7 +4368,7 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                                                 <body>int(new_phy_count) &gt; int(reservation_port_count):</body>
                                                             </command>
                                                             <nestedSteps>
-                                                                <item guid="18270897-572a-471c-8374-419e7a4d84d9" action="message" useFieldsInCommand="false">
+                                                                <item guid="18270897-572a-471c-8374-419e7a4d84d9" action="message" skip="true" useFieldsInCommand="false">
                                                                     <command>
                                                                         <body>Error:Test Session required [new_phy_count] ports, but reservation only reserves [reservation_port_count] ports. Please correct the Test Session on Landslide</body>
                                                                     </command>
@@ -4328,7 +4377,26 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                                                         <message inherit="false">Test Session required [new_phy_count] ports, but reservation only reserves [reservation_port_count] ports. Please correct the Test Session on Landslide</message>
                                                                     </applicationProperties>
                                                                 </item>
-                                                                <item guid="12f881a0-1b99-451b-9089-88d75fbada28" action="exit" useFieldsInCommand="false">
+                                                                <item guid="c7f502dc-1df6-4e9c-8944-e05322c23996" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>message = &apos;Test Session required {0} ports, but reservation only reserves {1} ports. Please correct the Test Session on Landslide or parameter file&apos;.format(new_phy_count, reservation_port_count)</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                                <item guid="00da5f2f-6dc0-4c32-8faa-5107d14a7467" action="json" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;run_data&apos;, pathValue=&apos;{&quot;/&quot;:{&quot;reason&quot;:&quot;[message]&quot;}}&apos;</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                                        <action inherit="false">addJsonNode</action>
+                                                                        <pathValue inherit="false" sub="true">{&quot;/&quot;:{&quot;reason&quot;:&quot;[message]&quot;}}</pathValue>
+                                                                        <documentName inherit="false">run_data</documentName>
+                                                                    </applicationProperties>
+                                                                </item>
+                                                                <item guid="12f881a0-1b99-451b-9089-88d75fbada28" action="return">
+                                                                    <command>
+                                                                        <body>[run_data]</body>
+                                                                    </command>
                                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                 </item>
                                                             </nestedSteps>
@@ -4396,6 +4464,28 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                                                                 <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
                                                                                 <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
                                                                                 <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                                            </ruleProperties>
+                                                                        </processorInfo>
+                                                                    </item>
+                                                                    <item>
+                                                                        <extractorInfo extractorType="query">
+                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                <query>boolean(mapped/Json/item/name)</query>
+                                                                            </extractorProperties>
+                                                                        </extractorInfo>
+                                                                        <processorInfo ruleType="assert">
+                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                <expression>value == &quot;true&quot;</expression>
+                                                                                <actionsWhenFalse>
+                                                                                    <item actionId="Eval">
+                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                            <statement>eth_list = []</statement>
+                                                                                        </actionProperties>
+                                                                                    </item>
+                                                                                    <item actionId="SkipRemainingRules">
+                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                    </item>
+                                                                                </actionsWhenFalse>
                                                                             </ruleProperties>
                                                                         </processorInfo>
                                                                     </item>
@@ -5634,7 +5724,7 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                             <nestedSteps>
                                                 <item guid="0fb9fb0f-c8d8-4e31-8b81-52337fb866e9" action="eval" useFieldsInCommand="false">
                                                     <command>
-                                                        <body>semi_sbi_port = 80</body>
+                                                        <body>semi_sbi_port = 0</body>
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
@@ -5658,24 +5748,16 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
-                                                <item guid="8bb39139-6f9f-4ead-a5cf-f9f0e7904e95" action="if" useFieldsInCommand="false">
+                                                <item guid="f67d0493-9816-44be-b9a4-192886290202" action="eval" useFieldsInCommand="false">
                                                     <command>
-                                                        <body>semi_sbi_port:</body>
+                                                        <body>sbi_ports[semi_port] = semi_sbi_port</body>
                                                     </command>
-                                                    <nestedSteps>
-                                                        <item guid="f67d0493-9816-44be-b9a4-192886290202" action="eval" useFieldsInCommand="false">
-                                                            <command>
-                                                                <body>sbi_ports[semi_port] = semi_sbi_port</body>
-                                                            </command>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                    </nestedSteps>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
                                             </nestedSteps>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
-                                        <item guid="635f1bca-2c15-44fd-aab2-fa33c496685a" action="else" useFieldsInCommand="false">
+                                        <item guid="635f1bca-2c15-44fd-aab2-fa33c496685a" action="else" skip="true" useFieldsInCommand="false">
                                             <nestedSteps>
                                                 <item guid="8c8ae5cd-04d6-4baf-a816-d3ebbb8d8526" action="eval" useFieldsInCommand="false">
                                                     <command>
@@ -5684,6 +5766,48 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
                                             </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="3d5d2ba1-78e2-478c-9838-f468b6a84c71" action="comment" useFieldsInCommand="false">
+                    <command>
+                        <body>Get sbi version index and sbi version</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="598346ea-a88f-4fba-b9e9-12a393f4254c" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>sbi_versions = {}</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="43a7cab1-5657-45c5-9c9f-bc7f5653883d" action="if" useFieldsInCommand="false">
+                            <command>
+                                <body>info(&apos;exists&apos;, &apos;local&apos;, &apos;sbi_version&apos;) and sbi_version:</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="2eec17ec-5f5b-47ea-92ff-9ce9eefdb1f3" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>parts = sbi_version.split(&apos;;&apos;)</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="928feabf-9c01-4670-b07d-3b5dade904c8" action="for" useFieldsInCommand="false">
+                                    <command>
+                                        <body>i in range (0, len(parts)):</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="5e4c142e-187b-4b57-a295-b6ca4e7fa964" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>sbi_versions[i] = parts[i]</body>
+                                            </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
                                     </nestedSteps>
@@ -5783,6 +5907,39 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                             <command>
                                                 <body>sbi_port = 80</body>
                                             </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="5eeb6d13-0e5d-460c-8f3f-a871113eb0d5" action="comment" useFieldsInCommand="false">
+                                    <command>
+                                        <body>Get version in list</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="3534860b-7234-49ab-b481-87eb3b648819" action="if" useFieldsInCommand="false">
+                                            <command>
+                                                <body>port_i in sbi_versions:</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="338281bf-7c64-4b32-9515-c30fb2a5fdbd" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>sbi_version = sbi_versions[port_i]</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="ec320c4d-5188-4627-93f1-9de91225e552" action="else" useFieldsInCommand="false">
+                                            <nestedSteps>
+                                                <item guid="f6aadb3a-ac55-4057-ac02-0a2d15f04e54" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>sbi_version = &quot;&quot;</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
                                     </nestedSteps>
@@ -6021,13 +6178,30 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                     </nestedSteps>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
-                                <item guid="43ece1ec-28d1-42e3-8b08-5bbcd1ddc574" action="else" useFieldsInCommand="false">
+                                <item guid="43ece1ec-28d1-42e3-8b08-5bbcd1ddc574" action="elif" useFieldsInCommand="false">
+                                    <command>
+                                        <body>info(&apos;exists&apos;, &apos;local&apos;, &apos;sbi_version&apos;) and sbi_version and sbi_port:</body>
+                                    </command>
                                     <nestedSteps>
-                                        <item guid="ae0f945b-4c2a-4217-9813-5a244d9a83ee" action="comment" useFieldsInCommand="false">
+                                        <item guid="96aa6e04-439e-4713-b008-9a31a23cd794" action="json" useFieldsInCommand="false">
                                             <command>
-                                                <body>// TODO</body>
+                                                <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;run_data&apos;, pathValue=&apos;{&quot;portCapture/\\\\[[port_i]]/ieValidation/&quot;:{&quot;sbiPorts&quot;:\\\\[[sbi_port]]}}&apos;</body>
                                             </command>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                <action inherit="false">addJsonNode</action>
+                                                <pathValue inherit="false" sub="true">{&quot;portCapture/\\[[port_i]]/ieValidation/&quot;:{&quot;sbiPorts&quot;:\\[[sbi_port]]}}</pathValue>
+                                                <documentName inherit="false">run_data</documentName>
+                                            </applicationProperties>
+                                        </item>
+                                        <item guid="da124faf-376c-404f-b8ee-6cabb4d13d80" action="json" useFieldsInCommand="false">
+                                            <command>
+                                                <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;run_data&apos;, pathValue=&apos;{&quot;portCapture/\\\\[[port_i]]/ieValidation/&quot;:{&quot;sbiVersion&quot;:&quot;[sbi_version]&quot;}}&apos;</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                <action inherit="false">addJsonNode</action>
+                                                <pathValue inherit="false" sub="true">{&quot;portCapture/\\[[port_i]]/ieValidation/&quot;:{&quot;sbiVersion&quot;:&quot;[sbi_version]&quot;}}</pathValue>
+                                                <documentName inherit="false">run_data</documentName>
+                                            </applicationProperties>
                                         </item>
                                     </nestedSteps>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
@@ -10325,6 +10499,11 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                                                     <statement>iev_exists = False</statement>
                                                                 </actionProperties>
                                                             </item>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>sbi_compliance = &quot;&quot;</statement>
+                                                                </actionProperties>
+                                                            </item>
                                                             <item actionId="SkipRemainingRules">
                                                                 <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                             </item>
@@ -11619,6 +11798,9 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
                     </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="4bc4e18e-a931-4c15-a222-95aee39a9c25" action="validate_required_nexthop" session="[session]" useFieldsInCommand="false">
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
                 <item guid="cd0560ba-b7bc-4d2b-826e-dcd8a8c506ea" action="return">
@@ -13411,8 +13593,62 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                             </ruleProperties>
                                         </processorInfo>
                                     </item>
+                                    <item>
+                                        <extractorInfo extractorType="query">
+                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                <query>boolean(mapped/Json/reason)</query>
+                                            </extractorProperties>
+                                        </extractorInfo>
+                                        <processorInfo ruleType="assert">
+                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                <expression>value == &quot;true&quot;</expression>
+                                                <actionsWhenTrue>
+                                                    <item actionId="Eval">
+                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                            <statement>error = True</statement>
+                                                        </actionProperties>
+                                                    </item>
+                                                </actionsWhenTrue>
+                                                <actionsWhenFalse>
+                                                    <item actionId="Eval">
+                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                            <statement>error = False</statement>
+                                                        </actionProperties>
+                                                    </item>
+                                                </actionsWhenFalse>
+                                            </ruleProperties>
+                                        </processorInfo>
+                                    </item>
                                 </analysisRules>
                             </postProcessing>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="92caf36e-dfbf-4127-97ff-08bffddd5b00" action="if" useFieldsInCommand="false">
+                            <command>
+                                <body>error:</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="f4f54094-1e56-4608-bff7-552068dcf334" action="json" useFieldsInCommand="false">
+                                    <command>
+                                        <body>action=&apos;getJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;run_data&apos;, pathValue=&apos;{&quot;reason&quot;}&apos;</body>
+                                    </command>
+                                    <postProcessing>
+                                        <storeResponseAt>response</storeResponseAt>
+                                        <storeResponseText>true</storeResponseText>
+                                    </postProcessing>
+                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                        <action inherit="false">getJsonNode</action>
+                                        <pathValue inherit="false">{&quot;reason&quot;}</pathValue>
+                                        <documentName inherit="false">run_data</documentName>
+                                    </applicationProperties>
+                                </item>
+                                <item guid="dcdb624f-8eba-4cc6-a1b7-c91e8f2823c0" action="return">
+                                    <command>
+                                        <body>[response]</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
                         <item guid="279199c4-3149-4bd8-924f-3fdf11ae1e51" action="eval" useFieldsInCommand="false">
@@ -13792,6 +14028,9 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                 <item name="start_capture">
                     <defaultValue>false</defaultValue>
                 </item>
+                <item name="required_nexthop_nodes">
+                    <description>Required next hop node names, separate by &apos;;&apos;</description>
+                </item>
                 <item name="time_out">
                     <defaultValue>180</defaultValue>
                 </item>
@@ -13832,8 +14071,62 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                             </ruleProperties>
                                         </processorInfo>
                                     </item>
+                                    <item>
+                                        <extractorInfo extractorType="query">
+                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                <query>boolean(mapped/Json/reason)</query>
+                                            </extractorProperties>
+                                        </extractorInfo>
+                                        <processorInfo ruleType="assert">
+                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                <expression>value == &quot;true&quot;</expression>
+                                                <actionsWhenTrue>
+                                                    <item actionId="Eval">
+                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                            <statement>error = True</statement>
+                                                        </actionProperties>
+                                                    </item>
+                                                </actionsWhenTrue>
+                                                <actionsWhenFalse>
+                                                    <item actionId="Eval">
+                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                            <statement>error = False</statement>
+                                                        </actionProperties>
+                                                    </item>
+                                                </actionsWhenFalse>
+                                            </ruleProperties>
+                                        </processorInfo>
+                                    </item>
                                 </analysisRules>
                             </postProcessing>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="9e8bb20d-fbc4-4c87-83f1-bc198468ebe9" action="if" useFieldsInCommand="false">
+                            <command>
+                                <body>error:</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="6a5fae6d-cd2b-479c-818d-d9298c0ac623" action="json" useFieldsInCommand="false">
+                                    <command>
+                                        <body>action=&apos;getJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;run_data&apos;, pathValue=&apos;{&quot;reason&quot;}&apos;</body>
+                                    </command>
+                                    <postProcessing>
+                                        <storeResponseAt>response</storeResponseAt>
+                                        <storeResponseText>true</storeResponseText>
+                                    </postProcessing>
+                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                        <action inherit="false">getJsonNode</action>
+                                        <pathValue inherit="false">{&quot;reason&quot;}</pathValue>
+                                        <documentName inherit="false">run_data</documentName>
+                                    </applicationProperties>
+                                </item>
+                                <item guid="4cd67eae-bdb4-4c95-af04-ff1303880f9c" action="return">
+                                    <command>
+                                        <body>[response]</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
                         <item guid="810da079-518f-4110-932d-2d367f79d24a" action="Custom" session="[session]">
@@ -15329,6 +15622,22 @@ Steps format: &quot;group index:tc index:action:pre group index:pre tc index:pre
         </item>
         <item name="validate_ie_log" isPublic="true" isVBlock="true">
             <steps>
+                <item guid="e23fbd75-865c-4598-81d3-228398e74c3e" action="if" useFieldsInCommand="false">
+                    <command>
+                        <body>info(&apos;exists&apos;, &apos;local&apos;, &apos;interface_name&apos;) and interface_name:</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="27ae8e82-f2f2-4e55-ab9c-8b073e208de6" action="message" useFieldsInCommand="false">
+                            <command>
+                                <body>Information:Validate &quot;[interface_name]&quot; interface:</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                <message inherit="false">Validate &quot;[interface_name]&quot; interface:</message>
+                            </applicationProperties>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
                 <item guid="3b4f3826-1841-4534-9e66-7a940d06e474" action="if" useFieldsInCommand="false">
                     <command>
                         <body>len(iev_files) &lt;= 0:</body>
@@ -15336,7 +15645,7 @@ Steps format: &quot;group index:tc index:action:pre group index:pre tc index:pre
                     <nestedSteps>
                         <item guid="c8ada0e6-6650-4aa5-83c8-893eb4fb287f" action="eval" useFieldsInCommand="false">
                             <command>
-                                <body>print(&quot;Do not have IEV log file&quot;)</body>
+                                <body>print(&quot;Do not have any IEV log file&quot;)</body>
                             </command>
                             <postProcessing>
                                 <analysisRules>
@@ -15452,12 +15761,368 @@ Steps format: &quot;group index:tc index:action:pre group index:pre tc index:pre
                 </item>
             </steps>
             <arguments>
+                <item name="interface_name"/>
                 <item name="iev_files"/>
                 <item name="tas_api_url"/>
                 <item name="username"/>
                 <item name="password"/>
             </arguments>
             <response>{&quot;result&quot;:&quot;PASSED&quot;}</response>
+        </item>
+        <item name="validate_required_nexthop" isPublic="true">
+            <steps>
+                <item guid="8b60dfa4-4ad1-4206-bc23-ec7f86cd2f81" action="if" useFieldsInCommand="false">
+                    <command>
+                        <body>info(&apos;exists&apos;, &apos;global&apos;, &apos;required_ts_mode&apos;):</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="45773658-77f4-423c-a940-5d7a36f80372" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>required_ts_mode = gget(&apos;required_ts_mode&apos;)</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="6bb1d9c5-c6be-4899-954c-be30e79d76cb" action="if" useFieldsInCommand="false">
+                            <command>
+                                <body>&apos;Fireball&apos; in required_ts_mode:</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="3eb35a1f-9c3c-49a8-9b43-4786687fb2fb" action="dumpState" responseMap="project://my_project/response_maps/new_map.ffrm" useFieldsInCommand="false">
+                                    <postProcessing>
+                                        <analysisRules>
+                                            <item>
+                                                <extractorInfo extractorType="query">
+                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                        <query>count(data/parameters/*[starts-with(name(), &quot;LS&quot;)])</query>
+                                                    </extractorProperties>
+                                                </extractorInfo>
+                                                <processorInfo ruleType="store">
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                        <storageLocation>ls_count</storageLocation>
+                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                    </ruleProperties>
+                                                </processorInfo>
+                                            </item>
+                                        </analysisRules>
+                                        <storeResponseAt>LandslideGroupParams</storeResponseAt>
+                                    </postProcessing>
+                                    <applicationProperties type="com.fnfr.svt.execution.builtin.exec.DumpStateProperties">
+                                        <appendThreads>false</appendThreads>
+                                        <appendSummary>false</appendSummary>
+                                    </applicationProperties>
+                                </item>
+                                <item guid="bf9b0de7-a2f5-4180-8abc-2b4631ad1109" action="for" useFieldsInCommand="false">
+                                    <command>
+                                        <body>i in range(1, int(ls_count) + 1):</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="48d09b52-6df9-4c42-8b57-c5985e56ca1b" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>query_path = &apos;name(data/parameters/*[starts-with(name(), &quot;LS&quot;)][{0}])&apos;.format(i)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="f3e59809-1a13-4ff9-8b05-5cf1de98c184" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>parameter_group_name = query(&apos;LandslideGroupParams&apos;,query_path);print(parameter_group_name)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="fcfaf583-1a6f-4899-b473-59a9dd2fcf6d" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>query_path = &apos;name(data/parameters/{0}/*[1])&apos;.format(parameter_group_name)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="8f810a90-91de-4aed-a94e-a3b30293bce0" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>ts_name = query(&apos;LandslideGroupParams&apos;,query_path);print(ts_name)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="0e0109ea-eaa9-49c6-9240-f62722d2023d" action="if" useFieldsInCommand="false">
+                                            <command>
+                                                <body>ts_name.startswith(&quot;TS&quot;):</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="77574d47-f973-4651-9b99-8283fad1772a" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>parameter_group_name = &quot;{0}/{1}&quot;.format(parameter_group_name, ts_name)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="00f7e87e-61ce-4758-bd8e-267da6a4e450" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>query_path = &apos;count(data/parameters/{0}/*)&apos;.format(parameter_group_name)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="881d9a61-3aba-49fc-a30d-e526ac321be5" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>numGroupParams = query(&apos;LandslideGroupParams&apos;,query_path);print(numGroupParams)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="af297a52-bfa5-47e0-9f60-3dbb4a32c78d" action="for" useFieldsInCommand="false">
+                                            <command>
+                                                <body>i in range(1, int(numGroupParams) + 1):</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="da9c17d1-5d16-4432-8333-825c97ca46e6" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>query_path = &apos;name(data/parameters/{0}/*[{1}])&apos;.format(parameter_group_name , i)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="aa9f837a-cf32-4a02-a653-755a7c3c4d18" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>ts_group_index = query(&apos;LandslideGroupParams&apos;,query_path);print(ts_group_index)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="87519915-3126-472f-b534-7ccc116b31a2" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>query_path = &apos;count(data/parameters/{0}/{1}/*)&apos;.format(parameter_group_name , ts_group_index)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="702fcaa2-b1fd-4449-bfa9-d6db78306514" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>tc_count = query(&apos;LandslideGroupParams&apos;,query_path);print(tc_count)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="26c3a8d0-7974-4ea4-8105-8b3f3d85f8f5" action="if" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>int(tc_count) &gt; 0:</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="26e384fb-1671-4a6a-a350-024ab2cf90b6" action="for" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>tc_i in range(1, int(tc_count) + 1):</body>
+                                                            </command>
+                                                            <nestedSteps>
+                                                                <item guid="577b7bde-ee73-457d-8799-9fc2cfb1591e" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>query_path = &apos;name(data/parameters/{0}/{1}/*[{2}])&apos;.format(parameter_group_name , ts_group_index, tc_i)</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                                <item guid="bd9a9e44-49d5-4927-b35b-63f79b7f7b1d" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>ts_tc_index = query(&apos;LandslideGroupParams&apos;,query_path);print(ts_tc_index)</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                                <item guid="43f1fcc4-61f8-4c63-8ccc-65d04a187b37" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>query_path = &apos;count(data/parameters/{0}/{1}/{2}/*)&apos;.format(parameter_group_name , ts_group_index, ts_tc_index)</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                                <item guid="1d507c8b-1b93-4b2b-a3b8-b4ae62aa94a9" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>param_count = query(&apos;LandslideGroupParams&apos;,query_path);print(param_count)</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                                <item guid="87aeb969-f783-4638-891a-a3d229993c3a" action="for" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>param_i in range(1, int(param_count) + 1):</body>
+                                                                    </command>
+                                                                    <nestedSteps>
+                                                                        <item guid="a6b78bfc-a47d-4f12-955c-fcaf9e462e82" action="eval" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>query_path = &apos;name(data/parameters/{0}/{1}/{2}/*[{3}])&apos;.format(parameter_group_name , ts_group_index, ts_tc_index, param_i)</body>
+                                                                            </command>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                        <item guid="114d4cfb-1118-43ad-935c-204d93426f62" action="eval" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>param_name = query(&apos;LandslideGroupParams&apos;,query_path);print(param_name)</body>
+                                                                            </command>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                        <item guid="966f064a-74bb-4801-b8a1-f908206b6d5c" action="eval" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>query_path = &apos;count(data/parameters/{0}/{1}/{2}/{3}/*)&apos;.format(parameter_group_name , ts_group_index, ts_tc_index, param_name)</body>
+                                                                            </command>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                        <item guid="9f7ce130-feb5-4d43-8709-ffc0b7ac9538" action="eval" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>param_child_count = query(&apos;LandslideGroupParams&apos;,query_path);print(param_child_count)</body>
+                                                                            </command>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                        <item guid="2fb3368a-f24d-4ab1-8e14-2ec0a847b0c4" action="if" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>int(param_child_count) &gt; 0:</body>
+                                                                            </command>
+                                                                            <nestedSteps>
+                                                                                <item guid="fb9ae7d1-0422-4b96-aba7-5dc0ad9c7ff2" action="for" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>child_i in range(1, int(param_child_count) + 1):</body>
+                                                                                    </command>
+                                                                                    <nestedSteps>
+                                                                                        <item guid="5742e9bf-17bd-47f0-9d04-4132f9e8b076" action="eval" useFieldsInCommand="false">
+                                                                                            <command>
+                                                                                                <body>query_path = &apos;name(data/parameters/{0}/{1}/{2}/{3}/*[{4}])&apos;.format(parameter_group_name , ts_group_index, ts_tc_index, param_name, child_i)</body>
+                                                                                            </command>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                        <item guid="58b02457-bcb3-4c9c-9e77-e85f08fb5bea" action="eval" useFieldsInCommand="false">
+                                                                                            <command>
+                                                                                                <body>child_name = query(&apos;LandslideGroupParams&apos;,query_path);print(child_name)</body>
+                                                                                            </command>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                        <item guid="cbfd8c73-52cf-47ba-8cfc-542f770b3169" action="if" useFieldsInCommand="false">
+                                                                                            <command>
+                                                                                                <body>child_name == &quot;nextHop&quot;:</body>
+                                                                                            </command>
+                                                                                            <nestedSteps>
+                                                                                                <item guid="dede11d2-6aa0-421c-9185-fac0c57f8ac6" action="eval" useFieldsInCommand="false">
+                                                                                                    <command>
+                                                                                                        <body>query_path = &apos;data/parameters/{0}/{1}/{2}/{3}/{4}/@value&apos;.format(parameter_group_name , ts_group_index, ts_tc_index, param_name, child_name)</body>
+                                                                                                    </command>
+                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                </item>
+                                                                                                <item guid="1d3751d0-66ab-49a7-ba9e-93117d463038" action="eval" useFieldsInCommand="false">
+                                                                                                    <command>
+                                                                                                        <body>child_value = query(&apos;LandslideGroupParams&apos;,query_path);print(child_value)</body>
+                                                                                                    </command>
+                                                                                                    <eventHandlers>
+                                                                                                        <item name="OnInterpreterError">
+                                                                                                            <item actionId="DeclareExecutionIssue">
+                                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
+                                                                                                                    <message> Can not get value from [query_path]</message>
+                                                                                                                </actionProperties>
+                                                                                                            </item>
+                                                                                                            <item actionId="ExitExecution">
+                                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                            </item>
+                                                                                                        </item>
+                                                                                                    </eventHandlers>
+                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                </item>
+                                                                                                <item guid="3d64c394-ab1f-457e-8fcd-2754f6008d7a" action="if" useFieldsInCommand="false">
+                                                                                                    <command>
+                                                                                                        <body>child_value.startswith(&quot;$&quot;):</body>
+                                                                                                    </command>
+                                                                                                    <nestedSteps>
+                                                                                                        <item guid="56d10644-08c8-4192-b2aa-15849a14bd3c" action="eval" useFieldsInCommand="false">
+                                                                                                            <command>
+                                                                                                                <body>query_path = &apos;{0}/{1}/{2}/{3}/{4}&apos;.format(parameter_group_name , ts_group_index, ts_tc_index, param_name, child_name)</body>
+                                                                                                            </command>
+                                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                        </item>
+                                                                                                        <item guid="a5baa7d3-96a4-482c-962e-cf4402b80af2" action="eval" useFieldsInCommand="false">
+                                                                                                            <command>
+                                                                                                                <body>child_value = param(query_path, &quot;&quot;)</body>
+                                                                                                            </command>
+                                                                                                            <eventHandlers>
+                                                                                                                <item name="OnInterpreterError">
+                                                                                                                    <item actionId="DeclareExecutionIssue">
+                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Warning">
+                                                                                                                            <message> Can not get value from [query_path]. Set to empty.</message>
+                                                                                                                        </actionProperties>
+                                                                                                                    </item>
+                                                                                                                    <item actionId="Eval">
+                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                                                            <statement>child_value = &quot;&quot;</statement>
+                                                                                                                        </actionProperties>
+                                                                                                                    </item>
+                                                                                                                </item>
+                                                                                                            </eventHandlers>
+                                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                        </item>
+                                                                                                    </nestedSteps>
+                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                </item>
+                                                                                                <item guid="8a785dd1-43dc-4648-933e-6cde5df22eb2" action="if" useFieldsInCommand="false">
+                                                                                                    <command>
+                                                                                                        <body>not child_value or child_value.lower() == &apos;n/a&apos; or child_value.strip() == &quot;&quot;:</body>
+                                                                                                    </command>
+                                                                                                    <nestedSteps>
+                                                                                                        <item guid="eb728c5c-e7b7-4639-b964-7976b7b9563a" action="eval" useFieldsInCommand="false">
+                                                                                                            <command>
+                                                                                                                <body>parameter_path = &apos;{0}/ts{1}/tc{2}/{3}&apos;.format(parameter_group_name, i - 1, tc_i -1, param_name)</body>
+                                                                                                            </command>
+                                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                        </item>
+                                                                                                        <item guid="3f9d7d52-c252-4733-828c-aaca7f97321e" action="message" useFieldsInCommand="false">
+                                                                                                            <command>
+                                                                                                                <body>Error:This test required next hop for &quot;[parameter_path]&quot;, it should not be left blank, or empty string, or &quot;N/A&quot; value.</body>
+                                                                                                            </command>
+                                                                                                            <postProcessing>
+                                                                                                                <analysisRules>
+                                                                                                                    <item>
+                                                                                                                        <extractorInfo extractorType="query">
+                                                                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                                                <query>isEmpty()</query>
+                                                                                                                            </extractorProperties>
+                                                                                                                        </extractorInfo>
+                                                                                                                        <processorInfo ruleType="assert">
+                                                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                                                                <expression>value == &quot;true&quot;</expression>
+                                                                                                                                <actionsWhenTrue>
+                                                                                                                                    <item actionId="FailTest">
+                                                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                                                    </item>
+                                                                                                                                    <item actionId="ExitExecution">
+                                                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                                                    </item>
+                                                                                                                                </actionsWhenTrue>
+                                                                                                                            </ruleProperties>
+                                                                                                                        </processorInfo>
+                                                                                                                    </item>
+                                                                                                                </analysisRules>
+                                                                                                            </postProcessing>
+                                                                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                                                                                <severity inherit="false">Error</severity>
+                                                                                                                <message inherit="false">This test required next hop for &quot;[parameter_path]&quot;, it should not be left blank, or empty string, or &quot;N/A&quot; value.</message>
+                                                                                                            </applicationProperties>
+                                                                                                        </item>
+                                                                                                    </nestedSteps>
+                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                </item>
+                                                                                            </nestedSteps>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                    </nestedSteps>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                            </nestedSteps>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                    </nestedSteps>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                            </nestedSteps>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+            </steps>
         </item>
         <item name="verify_test_server_state" isPublic="true">
             <steps>
@@ -15568,7 +16233,7 @@ Steps format: &quot;group index:tc index:action:pre group index:pre tc index:pre
         </item>
         <item name="verify_test_servers" isPublic="true">
             <steps>
-                <item guid="87f9577f-118a-4daa-98c8-4b8191b9671a" action="comment" useFieldsInCommand="false">
+                <item guid="87f9577f-118a-4daa-98c8-4b8191b9671a" action="comment" skip="true" useFieldsInCommand="false">
                     <command>
                         <body>Get value from parameter CPA_License_Required</body>
                     </command>
@@ -16331,7 +16996,7 @@ Steps format: &quot;group index:tc index:action:pre group index:pre tc index:pre
                                                     </nestedSteps>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
-                                                <item guid="c0498820-7456-41dd-a4e9-754f362b39b7" action="if" useFieldsInCommand="false">
+                                                <item guid="c0498820-7456-41dd-a4e9-754f362b39b7" action="if" skip="true" useFieldsInCommand="false">
                                                     <command>
                                                         <body>cpa_license_required and str(cpa_license_required).lower() == &apos;true&apos; and cpa_enabled == &quot;false&quot;:</body>
                                                     </command>

@@ -1978,7 +1978,7 @@
                 <item name="test_session_name"/>
                 <item name="test_session_info"/>
                 <item name="param_group_names">
-                    <defaultValue>LS_Nodal_favorite_params;LS_params</defaultValue>
+                    <defaultValue>LS_Nodal_favorite_params</defaultValue>
                     <isMandatory>true</isMandatory>
                 </item>
             </arguments>
@@ -8248,6 +8248,9 @@
                     </nestedSteps>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
+                <item guid="5388cda3-75ac-4467-a2c6-bb6ce31038fe" action="validate_required_nexthop" session="[session]" useFieldsInCommand="false">
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
                 <item guid="cd0560ba-b7bc-4d2b-826e-dcd8a8c506ea" action="return">
                     <command>
                         <body>True</body>
@@ -12069,6 +12072,361 @@ Steps format: &quot;group index:tc index:action:pre group index:pre tc index:pre
             </arguments>
             <response>{}</response>
         </item>
+        <item name="validate_required_nexthop" isPublic="true">
+            <steps>
+                <item guid="32a4f6f2-4eb0-46c2-abbc-093d86920439" action="if" useFieldsInCommand="false">
+                    <command>
+                        <body>info(&apos;exists&apos;, &apos;global&apos;, &apos;required_ts_mode&apos;):</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="8ae45d99-7121-498f-95cf-7fce9a757a4a" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>required_ts_mode = gget(&apos;required_ts_mode&apos;)</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="925658dc-c5e0-4e0b-b3d3-c84da881a1e6" action="if" useFieldsInCommand="false">
+                            <command>
+                                <body>&apos;Fireball&apos; in required_ts_mode:</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="5f28dc9a-d059-4abf-88dd-2ce5c5248777" action="dumpState" responseMap="project://my_project/response_maps/new_map.ffrm" useFieldsInCommand="false">
+                                    <postProcessing>
+                                        <analysisRules>
+                                            <item>
+                                                <extractorInfo extractorType="query">
+                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                        <query>count(data/parameters/*[starts-with(name(), &quot;LS&quot;)])</query>
+                                                    </extractorProperties>
+                                                </extractorInfo>
+                                                <processorInfo ruleType="store">
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                        <storageLocation>ls_count</storageLocation>
+                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                    </ruleProperties>
+                                                </processorInfo>
+                                            </item>
+                                        </analysisRules>
+                                        <storeResponseAt>LandslideGroupParams</storeResponseAt>
+                                    </postProcessing>
+                                    <applicationProperties type="com.fnfr.svt.execution.builtin.exec.DumpStateProperties">
+                                        <appendThreads>false</appendThreads>
+                                        <appendSummary>false</appendSummary>
+                                    </applicationProperties>
+                                </item>
+                                <item guid="00f9ca1f-0feb-4cd9-8f90-288a2c748326" action="for" useFieldsInCommand="false">
+                                    <command>
+                                        <body>i in range(1, int(ls_count) + 1):</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="61b6e439-1d11-4074-97e3-8cea2a78934c" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>query_path = &apos;name(data/parameters/*[starts-with(name(), &quot;LS&quot;)][{0}])&apos;.format(i)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="8372e345-1c15-4578-b5bf-1bdb850acad8" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>parameter_group_name = query(&apos;LandslideGroupParams&apos;,query_path);print(parameter_group_name)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="81bcdf7e-0490-4a89-adb7-0e0cd0caccf7" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>query_path = &apos;name(data/parameters/{0}/*[1])&apos;.format(parameter_group_name)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="4f3c93cf-93e4-4a9b-a3ef-c55ce4e96f75" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>ts_name = query(&apos;LandslideGroupParams&apos;,query_path);print(ts_name)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="af38505f-c89e-415a-908e-0d8eb07d83eb" action="if" useFieldsInCommand="false">
+                                            <command>
+                                                <body>ts_name.startswith(&quot;TS&quot;):</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="1656d8d8-f30c-4f11-a0e3-f829c0316a98" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>parameter_group_name = &quot;{0}/{1}&quot;.format(parameter_group_name, ts_name)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="efbb3ecb-bf39-4075-802a-4ef89285b396" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>query_path = &apos;count(data/parameters/{0}/*)&apos;.format(parameter_group_name)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="d2c0554c-3ca5-408c-94b4-70618b73c5b5" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>numGroupParams = query(&apos;LandslideGroupParams&apos;,query_path);print(numGroupParams)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="8db2f0c7-d525-40cd-9612-0097fc460c07" action="for" useFieldsInCommand="false">
+                                            <command>
+                                                <body>i in range(1, int(numGroupParams) + 1):</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="f2dda67a-f5fa-45ec-8d38-3798a6b7b7a3" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>query_path = &apos;name(data/parameters/{0}/*[{1}])&apos;.format(parameter_group_name , i)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="7de0fe65-57d7-4a86-a80a-e8c663254325" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>ts_group_index = query(&apos;LandslideGroupParams&apos;,query_path);print(ts_group_index)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="b481806b-63dd-4b09-8c01-811e772355c4" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>query_path = &apos;count(data/parameters/{0}/{1}/*)&apos;.format(parameter_group_name , ts_group_index)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="b2d96df8-a731-442b-b81f-6b16f0b23abe" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>tc_count = query(&apos;LandslideGroupParams&apos;,query_path);print(tc_count)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="0bd9dac5-3c7c-42dc-b7b0-50263215338c" action="if" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>int(tc_count) &gt; 0:</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="82c439de-72ad-4e8b-bd9a-3cf8a66fe0e6" action="for" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>tc_i in range(1, int(tc_count) + 1):</body>
+                                                            </command>
+                                                            <nestedSteps>
+                                                                <item guid="20da604e-6e72-40a4-a24b-e6bfa3b7c94a" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>query_path = &apos;name(data/parameters/{0}/{1}/*[{2}])&apos;.format(parameter_group_name , ts_group_index, tc_i)</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                                <item guid="92063ef1-1ee5-4e39-bd9c-159b17e901ad" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>ts_tc_index = query(&apos;LandslideGroupParams&apos;,query_path);print(ts_tc_index)</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                                <item guid="e40f6923-d664-4813-a08b-87488c5c3512" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>query_path = &apos;count(data/parameters/{0}/{1}/{2}/*)&apos;.format(parameter_group_name , ts_group_index, ts_tc_index)</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                                <item guid="714ee409-32ca-43ff-a3e6-ef0f913f4914" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>param_count = query(&apos;LandslideGroupParams&apos;,query_path);print(param_count)</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                                <item guid="07d6780d-89ab-4b0e-a442-69986cff3930" action="for" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>param_i in range(1, int(param_count) + 1):</body>
+                                                                    </command>
+                                                                    <nestedSteps>
+                                                                        <item guid="662f712a-92cb-4217-8aeb-f7edf3313207" action="eval" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>query_path = &apos;name(data/parameters/{0}/{1}/{2}/*[{3}])&apos;.format(parameter_group_name , ts_group_index, ts_tc_index, param_i)</body>
+                                                                            </command>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                        <item guid="ac389dc7-3b87-4c09-95cb-c714430df190" action="eval" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>param_name = query(&apos;LandslideGroupParams&apos;,query_path);print(param_name)</body>
+                                                                            </command>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                        <item guid="412d18ef-7e22-4ebe-a7bb-1cadd3b87812" action="eval" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>query_path = &apos;count(data/parameters/{0}/{1}/{2}/{3}/*)&apos;.format(parameter_group_name , ts_group_index, ts_tc_index, param_name)</body>
+                                                                            </command>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                        <item guid="ca00b0aa-d01f-46bb-a59f-e1419163a2d6" action="eval" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>param_child_count = query(&apos;LandslideGroupParams&apos;,query_path);print(param_child_count)</body>
+                                                                            </command>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                        <item guid="ef524862-15ef-406d-886e-8a2c30a74346" action="if" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>int(param_child_count) &gt; 0:</body>
+                                                                            </command>
+                                                                            <nestedSteps>
+                                                                                <item guid="17ec8a4b-07ee-405b-9c48-e3f4481b0281" action="for" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>child_i in range(1, int(param_child_count) + 1):</body>
+                                                                                    </command>
+                                                                                    <nestedSteps>
+                                                                                        <item guid="beac1b69-cd19-4b2a-841f-c3f82cd4f957" action="eval" useFieldsInCommand="false">
+                                                                                            <command>
+                                                                                                <body>query_path = &apos;name(data/parameters/{0}/{1}/{2}/{3}/*[{4}])&apos;.format(parameter_group_name , ts_group_index, ts_tc_index, param_name, child_i)</body>
+                                                                                            </command>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                        <item guid="aa072a56-5b32-4bba-89f4-479f61848e75" action="eval" useFieldsInCommand="false">
+                                                                                            <command>
+                                                                                                <body>child_name = query(&apos;LandslideGroupParams&apos;,query_path);print(child_name)</body>
+                                                                                            </command>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                        <item guid="2471b4dc-d873-4e5e-9106-dc1da9e0ffcc" action="if" useFieldsInCommand="false">
+                                                                                            <command>
+                                                                                                <body>child_name == &quot;nextHop&quot;:</body>
+                                                                                            </command>
+                                                                                            <nestedSteps>
+                                                                                                <item guid="29a8577a-298b-45f0-a3d1-6bb95436f1f1" action="eval" useFieldsInCommand="false">
+                                                                                                    <command>
+                                                                                                        <body>query_path = &apos;data/parameters/{0}/{1}/{2}/{3}/{4}/@value&apos;.format(parameter_group_name , ts_group_index, ts_tc_index, param_name, child_name)</body>
+                                                                                                    </command>
+                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                </item>
+                                                                                                <item guid="aa40a893-3e1c-4e91-9aa9-e521df7e12fe" action="eval" useFieldsInCommand="false">
+                                                                                                    <command>
+                                                                                                        <body>child_value = query(&apos;LandslideGroupParams&apos;,query_path);print(child_value)</body>
+                                                                                                    </command>
+                                                                                                    <eventHandlers>
+                                                                                                        <item name="OnInterpreterError">
+                                                                                                            <item actionId="DeclareExecutionIssue">
+                                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
+                                                                                                                    <message> Can not get value from [query_path]</message>
+                                                                                                                </actionProperties>
+                                                                                                            </item>
+                                                                                                            <item actionId="ExitExecution">
+                                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                            </item>
+                                                                                                        </item>
+                                                                                                    </eventHandlers>
+                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                </item>
+                                                                                                <item guid="65d4b7db-9082-4d14-b876-cf42a4370d04" action="if" useFieldsInCommand="false">
+                                                                                                    <command>
+                                                                                                        <body>child_value.startswith(&quot;$&quot;):</body>
+                                                                                                    </command>
+                                                                                                    <nestedSteps>
+                                                                                                        <item guid="ee2f5fc2-003f-40b1-9d7c-f5c529706c82" action="eval" useFieldsInCommand="false">
+                                                                                                            <command>
+                                                                                                                <body>query_path = &apos;{0}/{1}/{2}/{3}/{4}&apos;.format(parameter_group_name , ts_group_index, ts_tc_index, param_name, child_name)</body>
+                                                                                                            </command>
+                                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                        </item>
+                                                                                                        <item guid="693211b1-6775-40ee-baa5-7d658aa55514" action="eval" useFieldsInCommand="false">
+                                                                                                            <command>
+                                                                                                                <body>child_value = param(query_path, &quot;&quot;)</body>
+                                                                                                            </command>
+                                                                                                            <eventHandlers>
+                                                                                                                <item name="OnInterpreterError">
+                                                                                                                    <item actionId="DeclareExecutionIssue">
+                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Warning">
+                                                                                                                            <message> Can not get value from [query_path]. Set to empty.</message>
+                                                                                                                        </actionProperties>
+                                                                                                                    </item>
+                                                                                                                    <item actionId="Eval">
+                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                                                            <statement>child_value = &quot;&quot;</statement>
+                                                                                                                        </actionProperties>
+                                                                                                                    </item>
+                                                                                                                </item>
+                                                                                                            </eventHandlers>
+                                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                        </item>
+                                                                                                    </nestedSteps>
+                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                </item>
+                                                                                                <item guid="afcb0fbe-d5ed-43d4-a782-3007b8eb8c4d" action="if" useFieldsInCommand="false">
+                                                                                                    <command>
+                                                                                                        <body>not child_value or child_value.lower() == &apos;n/a&apos; or child_value.strip() == &quot;&quot;:</body>
+                                                                                                    </command>
+                                                                                                    <nestedSteps>
+                                                                                                        <item guid="cd9732f3-afb1-4c30-ab1a-8f019f6cfc3a" action="eval" useFieldsInCommand="false">
+                                                                                                            <command>
+                                                                                                                <body>parameter_path = &apos;{0}/ts{1}/tc{2}/{3}&apos;.format(parameter_group_name, i - 1, tc_i -1, param_name)</body>
+                                                                                                            </command>
+                                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                        </item>
+                                                                                                        <item guid="82a9be5d-59a1-4ee1-ae4e-fc70670f29da" action="message" useFieldsInCommand="false">
+                                                                                                            <command>
+                                                                                                                <body>Error:This test required next hop for &quot;[parameter_path]&quot;, it should not be left blank, or empty string, or &quot;N/A&quot; value.</body>
+                                                                                                            </command>
+                                                                                                            <postProcessing>
+                                                                                                                <analysisRules>
+                                                                                                                    <item>
+                                                                                                                        <extractorInfo extractorType="query">
+                                                                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                                                <query>isEmpty()</query>
+                                                                                                                            </extractorProperties>
+                                                                                                                        </extractorInfo>
+                                                                                                                        <processorInfo ruleType="assert">
+                                                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                                                                <expression>value == &quot;true&quot;</expression>
+                                                                                                                                <actionsWhenTrue>
+                                                                                                                                    <item actionId="FailTest">
+                                                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                                                    </item>
+                                                                                                                                    <item actionId="ExitExecution">
+                                                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                                                    </item>
+                                                                                                                                </actionsWhenTrue>
+                                                                                                                            </ruleProperties>
+                                                                                                                        </processorInfo>
+                                                                                                                    </item>
+                                                                                                                </analysisRules>
+                                                                                                            </postProcessing>
+                                                                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                                                                                <severity inherit="false">Error</severity>
+                                                                                                                <message inherit="false">This test required next hop for &quot;[parameter_path]&quot;, it should not be left blank, or empty string, or &quot;N/A&quot; value.</message>
+                                                                                                            </applicationProperties>
+                                                                                                        </item>
+                                                                                                    </nestedSteps>
+                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                </item>
+                                                                                            </nestedSteps>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                    </nestedSteps>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                            </nestedSteps>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                    </nestedSteps>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                            </nestedSteps>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+            </steps>
+        </item>
         <item name="verify_test_server_state" isPublic="true">
             <steps>
                 <item guid="1006bdb2-e283-4f40-8e32-c33e4b951497" action="if" useFieldsInCommand="false">
@@ -12178,7 +12536,7 @@ Steps format: &quot;group index:tc index:action:pre group index:pre tc index:pre
         </item>
         <item name="verify_test_servers" isPublic="true">
             <steps>
-                <item guid="54bb0142-7326-411c-82ff-34f06e07d701" action="comment" useFieldsInCommand="false">
+                <item guid="54bb0142-7326-411c-82ff-34f06e07d701" action="comment" skip="true" useFieldsInCommand="false">
                     <command>
                         <body>Get value from parameter CPA_License_Required</body>
                     </command>
@@ -12941,7 +13299,7 @@ Steps format: &quot;group index:tc index:action:pre group index:pre tc index:pre
                                                     </nestedSteps>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
-                                                <item guid="e2b5bceb-580c-4df8-8851-cd68c4d4b087" action="if" useFieldsInCommand="false">
+                                                <item guid="e2b5bceb-580c-4df8-8851-cd68c4d4b087" action="if" skip="true" useFieldsInCommand="false">
                                                     <command>
                                                         <body>cpa_license_required and str(cpa_license_required).lower() == &apos;true&apos; and cpa_enabled == &quot;false&quot;:</body>
                                                     </command>
