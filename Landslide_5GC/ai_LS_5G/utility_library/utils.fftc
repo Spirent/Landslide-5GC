@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="8.5.0.202104211757" entryPoint="add_topology_artifactLink">
+<testCase version="8.5.0.202103281748" entryPoint="add_topology_artifactLink">
     <general>
         <isProcedureLibrary>true</isProcedureLibrary>
         <language>Python</language>
@@ -126,6 +126,70 @@
                     <description>Optional. Topology file name - use it when it different with testcase name</description>
                 </item>
             </arguments>
+        </item>
+        <item name="calculate_failure" isPublic="true">
+            <steps>
+                <item guid="22ef63a8-33de-41e4-9a42-f3207d80ea11" action="call" useFieldsInCommand="false">
+                    <command>
+                        <body>is_number(input_str=kpi_successes)</body>
+                    </command>
+                    <postProcessing>
+                        <storeResponseAt>is_kpi_successes</storeResponseAt>
+                        <storeResponseText>true</storeResponseText>
+                    </postProcessing>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="f7801e57-54fb-4478-a83e-4f2406d32541" action="call" useFieldsInCommand="false">
+                    <command>
+                        <body>is_number(input_str=kpi_attempted)</body>
+                    </command>
+                    <postProcessing>
+                        <storeResponseAt>is_kpi_attempted</storeResponseAt>
+                        <storeResponseText>true</storeResponseText>
+                    </postProcessing>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="88d1c81f-b4de-44e8-9ac5-f05ba7b28465" action="if" useFieldsInCommand="false">
+                    <command>
+                        <body>is_kpi_attempted and is_kpi_successes:</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="38a7eef1-d17c-4016-8c25-c06222c7d82b" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>kpi_failure = int(float(kpi_attempted) - float(kpi_successes))</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="e8c82cf0-afba-4811-8586-a20b896d23ca" action="else" useFieldsInCommand="false">
+                    <nestedSteps>
+                        <item guid="cebd543b-679e-49ee-b928-020150355cb2" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>kpi_failure = &quot;&quot;</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="749ab854-9588-4b70-982c-b6dde2d257b1" action="return">
+                    <command>
+                        <body>[kpi_failure]</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+            </steps>
+            <arguments>
+                <item name="kpi_attempted">
+                    <description>Number of Attempted or request</description>
+                </item>
+                <item name="kpi_successes">
+                    <description>KPI successes or accepted value</description>
+                </item>
+            </arguments>
+            <response>{}</response>
         </item>
         <item name="calculate_percentage" isPublic="true">
             <steps>
@@ -318,40 +382,48 @@
                     </nestedSteps>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
-                <item guid="b36c20ef-5b23-4d2c-a035-3e33ccd48e0a" action="comment" useFieldsInCommand="false">
+                <item guid="58221477-ba8b-4806-9744-32d30fd37c78" action="if" useFieldsInCommand="false">
                     <command>
-                        <body>Add &quot;---&quot;</body>
+                        <body>len(percentage_list) &gt; 1:</body>
                     </command>
                     <nestedSteps>
-                        <item guid="bc0788c1-b4e3-4893-9e69-7734585b3571" action="call" useFieldsInCommand="false">
+                        <item guid="b36c20ef-5b23-4d2c-a035-3e33ccd48e0a" action="comment" useFieldsInCommand="false">
                             <command>
-                                <body>insert_devider_string -length 55</body>
+                                <body>Add &quot;---&quot;</body>
                             </command>
+                            <nestedSteps>
+                                <item guid="bc0788c1-b4e3-4893-9e69-7734585b3571" action="call" useFieldsInCommand="false">
+                                    <command>
+                                        <body>insert_devider_string -length 55</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
-                    </nestedSteps>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="5b062c99-bf21-481b-b5c5-43b1380a8731" action="message" useFieldsInCommand="false">
-                    <command>
-                        <body>Information:TS_Percentage:</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
-                        <message inherit="false">TS_Percentage:</message>
-                    </applicationProperties>
-                </item>
-                <item guid="25d675b8-e72d-4b4e-aa27-cc00bbe6b112" action="for" useFieldsInCommand="false">
-                    <command>
-                        <body>idx, percent in enumerate(percentage_list):</body>
-                    </command>
-                    <nestedSteps>
-                        <item guid="adc6d8c4-f83e-40ae-a6a3-9b5925c816a6" action="message" useFieldsInCommand="false">
+                        <item guid="5b062c99-bf21-481b-b5c5-43b1380a8731" action="message" useFieldsInCommand="false">
                             <command>
-                                <body>Information:   + Nodal Instance [idx]:  [percentage_list[idx]]%</body>
+                                <body>Information:TS_Percentage:</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
-                                <message inherit="false">   + Nodal Instance [idx]:  [percentage_list[idx]]%</message>
+                                <message inherit="false">TS_Percentage:</message>
                             </applicationProperties>
+                        </item>
+                        <item guid="25d675b8-e72d-4b4e-aa27-cc00bbe6b112" action="for" useFieldsInCommand="false">
+                            <command>
+                                <body>idx, percent in enumerate(percentage_list):</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="adc6d8c4-f83e-40ae-a6a3-9b5925c816a6" action="message" useFieldsInCommand="false">
+                                    <command>
+                                        <body>Information:   + Nodal Instance [idx]:  [percentage_list[idx]]%</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                        <message inherit="false">   + Nodal Instance [idx]:  [percentage_list[idx]]%</message>
+                                    </applicationProperties>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
                     </nestedSteps>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
@@ -1955,7 +2027,7 @@ The string starting with a dot (.) will not be matched, the procedure will retur
                                                                     <ruleProperties type="com.fnfr.svt.execution.builtin.processors.MessageProcessorPropertyGroup" severity="Information">
                                                                         <message>[kpi_name]: [kpi_value]</message>
                                                                         <extractData>true</extractData>
-                                                                        <tag>[kpi_name]-Instance.[instance]</tag>
+                                                                        <tag>[kpi_name]-[instance_str].[instance]</tag>
                                                                     </ruleProperties>
                                                                 </processorInfo>
                                                             </item>
@@ -2036,6 +2108,12 @@ The string starting with a dot (.) will not be matched, the procedure will retur
                     <isMandatory>true</isMandatory>
                 </item>
                 <item name="instance"/>
+                <item name="instance_str">
+                    <description>The string placed between kpi_name and instance number in the following pattern [kpi_name]-Instance.[instance]
+For example: instace_str = &quot;Nodal Instance&quot; =&gt; [kpi_name]-Nodal Instance.[instance]
+Default value: Instance</description>
+                    <defaultValue>Instance</defaultValue>
+                </item>
             </arguments>
         </item>
         <item name="validate_and_add_to_KPI" isPublic="true">
@@ -3960,6 +4038,129 @@ in which:
                     <isMandatory>true</isMandatory>
                 </item>
                 <item name="targeted_end_rate"/>
+            </arguments>
+            <response>{}</response>
+        </item>
+        <item name="expected_ts_count" isPublic="true">
+            <steps>
+                <item guid="680304b8-9e35-4ea2-97cd-8b818818b385" action="eval" useFieldsInCommand="false">
+                    <command>
+                        <body>b2b_expected_ts_count = number_of_testsession</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="e155cef8-e914-46d8-8675-2328fe0383a6" action="if" useFieldsInCommand="false">
+                    <command>
+                        <body>is_b2b == &quot;true&quot;:</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="10bdbb53-65ca-422a-beb1-ad022a07f4f1" action="if" useFieldsInCommand="false">
+                            <command>
+                                <body>int(tsgroup_count) &lt; b2b_expected_ts_count:</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="ebf3795f-9511-4e90-8014-b00629466d0c" action="message" useFieldsInCommand="false">
+                                    <command>
+                                        <body>Error:Not enough TS to run this test: Expected [b2b_expected_ts_count], Actual [tsgroup_count]</body>
+                                    </command>
+                                    <postProcessing>
+                                        <analysisRules>
+                                            <item>
+                                                <extractorInfo extractorType="none">
+                                                    <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                                </extractorInfo>
+                                                <processorInfo ruleType="assert">
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                        <expression>True</expression>
+                                                        <actionsWhenTrue>
+                                                            <item actionId="FailTest">
+                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                            </item>
+                                                        </actionsWhenTrue>
+                                                    </ruleProperties>
+                                                </processorInfo>
+                                            </item>
+                                        </analysisRules>
+                                    </postProcessing>
+                                    <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                        <severity inherit="false">Error</severity>
+                                        <message inherit="false">Not enough TS to run this test: Expected [b2b_expected_ts_count], Actual [tsgroup_count]</message>
+                                    </applicationProperties>
+                                </item>
+                                <item guid="0ada4649-d8bf-42e8-b0ec-34977c499767" action="exit" useFieldsInCommand="false">
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="753d6048-3f29-455d-b230-cd8891e80aa0" action="else" useFieldsInCommand="false">
+                    <nestedSteps>
+                        <item guid="c8c857da-c8fd-443e-8507-781f77c8fa68" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>e2e_expected_ts_count = b2b_expected_ts_count - 1</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="e61485d9-64f9-4204-b794-4702f42951e4" action="if" useFieldsInCommand="false">
+                            <command>
+                                <body>int(tsgroup_count) &lt; (e2e_expected_ts_count ):</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="3eb8d3b0-1240-427d-b01c-71912d14a724" action="message" useFieldsInCommand="false">
+                                    <command>
+                                        <body>Error:Not enough TS to run this test: Expected [e2e_expected_ts_count], Actual [tsgroup_count]</body>
+                                    </command>
+                                    <postProcessing>
+                                        <analysisRules>
+                                            <item>
+                                                <extractorInfo extractorType="none">
+                                                    <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                                </extractorInfo>
+                                                <processorInfo ruleType="assert">
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                        <expression>True</expression>
+                                                        <actionsWhenTrue>
+                                                            <item actionId="FailTest">
+                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                            </item>
+                                                        </actionsWhenTrue>
+                                                    </ruleProperties>
+                                                </processorInfo>
+                                            </item>
+                                        </analysisRules>
+                                    </postProcessing>
+                                    <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                        <severity inherit="false">Error</severity>
+                                        <message inherit="false">Not enough TS to run this test: Expected [e2e_expected_ts_count], Actual [tsgroup_count]</message>
+                                    </applicationProperties>
+                                </item>
+                                <item guid="77696ddf-b477-4933-86e0-174a2e32320b" action="exit" useFieldsInCommand="false">
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+            </steps>
+            <arguments>
+                <item name="number_of_testsession">
+                    <description>Number of expected TSs for b2b</description>
+                    <isMandatory>true</isMandatory>
+                </item>
+                <item name="tsgroup_count">
+                    <description>Actual TS Group Count</description>
+                    <isMandatory>true</isMandatory>
+                </item>
+                <item name="is_b2b">
+                    <description>B2B check</description>
+                    <defaultValue>true</defaultValue>
+                    <isMandatory>true</isMandatory>
+                </item>
             </arguments>
             <response>{}</response>
         </item>
