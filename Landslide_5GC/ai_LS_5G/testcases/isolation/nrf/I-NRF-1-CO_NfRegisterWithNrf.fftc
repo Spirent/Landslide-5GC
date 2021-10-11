@@ -547,7 +547,7 @@
                     <nestedSteps>
                         <item guid="e49d19dc-fadf-45fd-9dad-172498f12d6f" action="open" session="s1">
                             <command>
-                                <body>project://di_Landslide/session_profiles/landslide_rest_v2.ffsp</body>
+                                <body>project://di_Landslide/session_profiles/landslide_rest.ffsp</body>
                             </command>
                             <postProcessing>
                                 <analysisRules>
@@ -3318,7 +3318,7 @@
                                                                         </item>
                                                                         <item guid="5e9c2b1e-982f-4ab7-b411-455a37eb7880" action="command" session="s4">
                                                                             <command>
-                                                                                <body>query filter set &quot;http2 &amp;&amp; tcp.seq_raw == [request_ack_raw]&quot;</body>
+                                                                                <body>query filter set &quot;http2 &amp;&amp; tcp.seq_raw == [request_ack_raw] &amp;&amp; http2.headers.location contains \\&quot;[request_path]\\&quot;&quot;</body>
                                                                             </command>
                                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                         </item>
@@ -3618,14 +3618,14 @@
                                                                                         </extractorInfo>
                                                                                         <processorInfo ruleType="assert">
                                                                                             <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                                                <expression>int(value) == 1</expression>
+                                                                                                <expression>int(value) &gt;= 1</expression>
                                                                                                 <actionsWhenFalse>
                                                                                                     <item actionId="FailTest">
                                                                                                         <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                                                     </item>
                                                                                                     <item actionId="DeclareExecutionIssue">
                                                                                                         <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                                                                            <message>&quot;[tag_key]&quot; found &quot;{value}&quot; in pcap file. Expected: 1</message>
+                                                                                                            <message>&quot;[tag_key]&quot; found &quot;{value}&quot; in pcap file. Expected: &gt;=1</message>
                                                                                                         </actionProperties>
                                                                                                     </item>
                                                                                                     <item actionId="ExitProcedure">
@@ -3654,13 +3654,17 @@
                                                                                         </processorInfo>
                                                                                     </item>
                                                                                     <item>
-                                                                                        <extractorInfo extractorType="none">
-                                                                                            <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                                                                        <extractorInfo extractorType="query">
+                                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                <query>messages/item/id</query>
+                                                                                            </extractorProperties>
                                                                                         </extractorInfo>
-                                                                                        <processorInfo ruleType="message">
-                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.MessageProcessorPropertyGroup" severity="Information">
-                                                                                                <message>    Validate &quot;NFProfile&quot; in packet &quot;[profile_id]&quot;:</message>
-                                                                                                <tag sub="false" defaultValue=""/>
+                                                                                        <processorInfo ruleType="store">
+                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                                                <storageLocation>list_profile_id</storageLocation>
+                                                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
                                                                                             </ruleProperties>
                                                                                         </processorInfo>
                                                                                     </item>
@@ -3676,6 +3680,72 @@
                                                                                 </item>
                                                                             </eventHandlers>
                                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                        <item guid="ae416244-d919-4e16-9561-37a14f78711c" action="for" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>pro_id in list_profile_id:</body>
+                                                                            </command>
+                                                                            <nestedSteps>
+                                                                                <item guid="129b1872-8dc4-40e8-9778-a558146bf428" action="if" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>int(pro_id) &gt; int(id_1):</body>
+                                                                                    </command>
+                                                                                    <nestedSteps>
+                                                                                        <item guid="60c34bb4-d71f-4a34-9830-90b7c703bfa3" action="command" session="s4">
+                                                                                            <command>
+                                                                                                <body>query details [pro_id] pdml</body>
+                                                                                            </command>
+                                                                                            <postProcessing>
+                                                                                                <analysisRules>
+                                                                                                    <item>
+                                                                                                        <extractorInfo extractorType="query">
+                                                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                                <query>//proto[@name=&quot;json&quot;]//field[@name=&quot;json.member&quot;][@showname=&quot;Member Key: nfInstanceId&quot;]//field[@name=&quot;json.value.string&quot;]/@show</query>
+                                                                                                            </extractorProperties>
+                                                                                                        </extractorInfo>
+                                                                                                        <processorInfo ruleType="store">
+                                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                                                                <storageLocation>request_path_id</storageLocation>
+                                                                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                                                                            </ruleProperties>
+                                                                                                        </processorInfo>
+                                                                                                    </item>
+                                                                                                </analysisRules>
+                                                                                            </postProcessing>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                        <item guid="98d66ab8-b412-4c9d-b251-ef02b9633e42" action="if" useFieldsInCommand="false">
+                                                                                            <command>
+                                                                                                <body>request_path_id in request_path:</body>
+                                                                                            </command>
+                                                                                            <nestedSteps>
+                                                                                                <item guid="49265fb2-4b6b-442a-a5a5-2568d0309b1c" action="eval" useFieldsInCommand="false">
+                                                                                                    <command>
+                                                                                                        <body>profile_id=pro_id</body>
+                                                                                                    </command>
+                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                </item>
+                                                                                                <item guid="0aa0c64d-0543-4057-a5a1-5a9c8e20458a" action="break" useFieldsInCommand="false">
+                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                </item>
+                                                                                            </nestedSteps>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                    </nestedSteps>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                            </nestedSteps>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                        <item guid="c7899839-bc65-490a-8939-489a0103e527" action="message" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>Information:    Validate &quot;NFProfile&quot; in packet &quot;[profile_id]&quot;:</body>
+                                                                            </command>
+                                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                                                <message inherit="false">    Validate &quot;NFProfile&quot; in packet &quot;[profile_id]&quot;:</message>
+                                                                            </applicationProperties>
                                                                         </item>
                                                                         <item guid="b99a3d4b-b7d9-4004-ac18-dea87b7f0599" action="command" session="s4">
                                                                             <command>
@@ -4088,7 +4158,7 @@
                                                                         </item>
                                                                         <item guid="f9cc5761-284d-4113-8c97-27025140715f" action="command" session="s4">
                                                                             <command>
-                                                                                <body>query filter set &quot;http2 &amp;&amp; tcp.seq_raw == [request_ack_raw]&quot;</body>
+                                                                                <body>query filter set &quot;http2 &amp;&amp; tcp.seq_raw == [request_ack_raw] &amp;&amp; (http2.headers.location matches \\&quot;[request_path]\\&quot;)&quot;</body>
                                                                             </command>
                                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                         </item>
@@ -4399,14 +4469,14 @@
                                                                                         </extractorInfo>
                                                                                         <processorInfo ruleType="assert">
                                                                                             <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                                                <expression>int(value) == 1</expression>
+                                                                                                <expression>int(value) &gt;= 1</expression>
                                                                                                 <actionsWhenFalse>
                                                                                                     <item actionId="FailTest">
                                                                                                         <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                                                     </item>
                                                                                                     <item actionId="DeclareExecutionIssue">
                                                                                                         <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                                                                            <message>&quot;[tag_key]&quot; found &quot;{value}&quot; in pcap file. Expected: 1</message>
+                                                                                                            <message>&quot;[tag_key]&quot; found &quot;{value}&quot; in pcap file. Expected: &gt;=1</message>
                                                                                                         </actionProperties>
                                                                                                     </item>
                                                                                                     <item actionId="ExitProcedure">
@@ -4435,13 +4505,17 @@
                                                                                         </processorInfo>
                                                                                     </item>
                                                                                     <item>
-                                                                                        <extractorInfo extractorType="none">
-                                                                                            <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                                                                        <extractorInfo extractorType="query">
+                                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                <query>messages/item/id</query>
+                                                                                            </extractorProperties>
                                                                                         </extractorInfo>
-                                                                                        <processorInfo ruleType="message">
-                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.MessageProcessorPropertyGroup" severity="Information">
-                                                                                                <message>    Validate &quot;NFProfile&quot; in packet &quot;[profile_id]&quot;:</message>
-                                                                                                <tag sub="false" defaultValue=""/>
+                                                                                        <processorInfo ruleType="store">
+                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                                                <storageLocation>list_profile_id</storageLocation>
+                                                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
                                                                                             </ruleProperties>
                                                                                         </processorInfo>
                                                                                     </item>
@@ -4457,6 +4531,72 @@
                                                                                 </item>
                                                                             </eventHandlers>
                                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                        <item guid="cdf34e41-7995-460d-9958-c7e07c4c6711" action="for" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>pro_id in list_profile_id:</body>
+                                                                            </command>
+                                                                            <nestedSteps>
+                                                                                <item guid="512bcf04-57f8-4d55-8bda-958448c5d114" action="if" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>int(pro_id) &gt; int(id_2):</body>
+                                                                                    </command>
+                                                                                    <nestedSteps>
+                                                                                        <item guid="1cad4b54-41c1-42b6-8037-f6e89b75269a" action="command" session="s4">
+                                                                                            <command>
+                                                                                                <body>query details [pro_id] pdml</body>
+                                                                                            </command>
+                                                                                            <postProcessing>
+                                                                                                <analysisRules>
+                                                                                                    <item>
+                                                                                                        <extractorInfo extractorType="query">
+                                                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                                <query>//proto[@name=&quot;json&quot;]//field[@name=&quot;json.member&quot;][@showname=&quot;Member Key: nfInstanceId&quot;]//field[@name=&quot;json.value.string&quot;]/@show</query>
+                                                                                                            </extractorProperties>
+                                                                                                        </extractorInfo>
+                                                                                                        <processorInfo ruleType="store">
+                                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                                                                <storageLocation>request_path_id</storageLocation>
+                                                                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                                                                            </ruleProperties>
+                                                                                                        </processorInfo>
+                                                                                                    </item>
+                                                                                                </analysisRules>
+                                                                                            </postProcessing>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                        <item guid="1540a54a-8986-4650-aadf-ca91660716c9" action="if" useFieldsInCommand="false">
+                                                                                            <command>
+                                                                                                <body>request_path_id in request_path:</body>
+                                                                                            </command>
+                                                                                            <nestedSteps>
+                                                                                                <item guid="2902c9f3-b9f9-4a6a-b151-716a1370311f" action="eval" useFieldsInCommand="false">
+                                                                                                    <command>
+                                                                                                        <body>profile_id=pro_id</body>
+                                                                                                    </command>
+                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                </item>
+                                                                                                <item guid="918ee98e-b42d-4bfd-ae16-824243ebfd70" action="break" useFieldsInCommand="false">
+                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                </item>
+                                                                                            </nestedSteps>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                    </nestedSteps>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                            </nestedSteps>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                        <item guid="ec577b2f-27f3-4d92-ba5e-bd71557cbe4f" action="message" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>Information:    Validate &quot;NFProfile&quot; in packet &quot;[profile_id]&quot;:</body>
+                                                                            </command>
+                                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                                                <message inherit="false">    Validate &quot;NFProfile&quot; in packet &quot;[profile_id]&quot;:</message>
+                                                                            </applicationProperties>
                                                                         </item>
                                                                         <item guid="e79de80f-e8e5-425f-94f4-7abdb9444eca" action="command" session="s4">
                                                                             <command>
