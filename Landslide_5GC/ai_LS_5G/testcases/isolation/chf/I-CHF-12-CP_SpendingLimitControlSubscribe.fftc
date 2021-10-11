@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="8.5.0.202103281748">
+<testCase version="8.5.0.202104211757">
     <general>
         <documentation>I-CHF-12-CP: Spending Limit Control Subscribe - Capacity Testing</documentation>
         <notes masked="true">/b0yBLds2Xe/rF7HdHQjlKz9id7XuUmmcEGa6FT1E0bqa5HGi2JWGnlIgPNiTq/1nNz3XjgvXYG2vKoJEqebpoHXmPIIVXjOFVl3PtmjAAypixZ0duLlOavD+X+iRbMgZxFdhgFBQt6w0faKnxm/kEAhA1bfoseNZBGFn3b+ymjRN4EPT/H83INpM3NZvSnvtUAvQz+CxIFBbrnbklhcV2fN8EfRDZnbH2Ld+jX1LxEjuQsDWMRzwvnf7NdkJCxYGvzddfeADJ4Y2wBBbbfzb6sXOTzQxzAKmXe0VsMvLCl/jolu1iLjiOuUVutlGMBZghqWSxfTyog2BtIGoYy5ASvuxkMbW6R6hYJedcUTJ0JLnYOM4VW1GOqUnZbxVsRiWHCVDdOUreisHBU6tJY/K2ZXefUy0MMKwE0CRBnyFhQuSesGoHols9W+QTtl5URB6VKc7i945xrah+NSE+bi915bnAN8/OAQp/1Oujtq3lg3AknEMKC1UBn4AZIzxSDBoW6OFDF8JPrMaB1EFpoaVAGzl/K7CBAq9usAMl9AuY2RdBQ6VcJPH/DMYw7ZwQpgaKMFkTZE+U2l1FPuqfhy8I4DVE3u1q0ZqhZleKOsM4pneMhNqhN5AfAaAK13MGXWTMCh5Sz598Uo65fDvvp9ph4lJkFKdP4/CbnoGQpTG33OQyRE2DMGWu5F8viIHtGGS1nX5iQ36i8qPWSjzz5m0/nlGY0G9snOCzIbmSCZJJfRVDjPs5fQhherq/i0jAja4P/9PTr+EBRcKZiPt+eptdBiR4sOpGN2ekpRIEoHihUGGIORc3sjev6FYzUJCiaf9Sd7AqSSCj5NDpp2UGOzewrVo3+s4lEp7w5Vu14jeVb9JP+p7mv9NgmivplkhbPO</notes>
@@ -574,7 +574,7 @@
                     <nestedSteps>
                         <item guid="f7748650-2832-4da9-9ebe-a374e91ce437" action="open" session="s1">
                             <command>
-                                <body>project://di_Landslide/session_profiles/landslide_rest_v2.ffsp</body>
+                                <body>project://di_Landslide/session_profiles/landslide_rest.ffsp</body>
                             </command>
                             <postProcessing>
                                 <analysisRules>
@@ -1430,9 +1430,37 @@
                                                         <query>count(mapped/Json/item[result = &apos;PASS&apos;])</query>
                                                     </extractorProperties>
                                                 </extractorInfo>
+                                                <processorInfo ruleType="store">
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                        <storageLocation>pass_count</storageLocation>
+                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                    </ruleProperties>
+                                                </processorInfo>
+                                            </item>
+                                            <item>
+                                                <extractorInfo extractorType="query">
+                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                        <query>count(mapped/Json/item[result = &apos;FAIL&apos;])</query>
+                                                    </extractorProperties>
+                                                </extractorInfo>
+                                                <processorInfo ruleType="store">
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                        <storageLocation>fail_count</storageLocation>
+                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                    </ruleProperties>
+                                                </processorInfo>
+                                            </item>
+                                            <item>
+                                                <extractorInfo extractorType="none">
+                                                    <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                                </extractorInfo>
                                                 <processorInfo ruleType="assert">
                                                     <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                        <expression>int(value) &gt; 0</expression>
+                                                        <expression>not(int(pass_count) &lt;= 1 and (int(fail_count) == 1 or session_capacity != 1))</expression>
                                                         <actionsWhenTrue>
                                                             <item actionId="Eval">
                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
@@ -1450,6 +1478,9 @@
                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
                                                                     <statement>last_success_index = -1</statement>
                                                                 </actionProperties>
+                                                            </item>
+                                                            <item actionId="FailTest">
+                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                             </item>
                                                             <item actionId="SkipRemainingRules">
                                                                 <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
@@ -2450,7 +2481,7 @@
                                                                                     <nestedSteps>
                                                                                         <item guid="3dcaab6d-73f9-4b19-b398-846ac39a1141" action="show_error_and_cleanup" session="s1" useFieldsInCommand="false">
                                                                                             <command>
-                                                                                                <body>-message [node_response] -set_test_fail false -running_node_id [running_node_id] -clean_up [clean_up] -timeout [timeout]</body>
+                                                                                                <body>-message [node_response] -running_node_id [running_node_id] -clean_up [clean_up] -timeout [timeout]</body>
                                                                                             </command>
                                                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                                         </item>
@@ -2575,7 +2606,7 @@
                                                             <nestedSteps>
                                                                 <item guid="edd1649b-ddb6-4b06-a434-33fa5b39e42b" action="show_error_and_cleanup" session="s1" useFieldsInCommand="false">
                                                                     <command>
-                                                                        <body>-message [kpis_list] -set_test_fail false -running_node_id [running_node_id] -running_ids [running_nodal_ids] -clean_up [clean_up] -timeout [timeout]</body>
+                                                                        <body>-message [kpis_list] -running_node_id [running_node_id] -running_ids [running_nodal_ids] -clean_up [clean_up] -timeout [timeout]</body>
                                                                     </command>
                                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                 </item>
@@ -4397,9 +4428,9 @@
                                                                         <body>file_url.endswith(&quot;pcap&quot;):</body>
                                                                     </command>
                                                                     <nestedSteps>
-                                                                        <item guid="0cddc547-782c-47a0-b89c-7826d8014721" action="message">
+                                                                        <item guid="0cddc547-782c-47a0-b89c-7826d8014721" action="message" useFieldsInCommand="false">
                                                                             <command>
-                                                                                <body>Information:\\[file_url]</body>
+                                                                                <body>Information:[file_url]</body>
                                                                             </command>
                                                                             <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
                                                                                 <message inherit="false">[file_url]</message>
