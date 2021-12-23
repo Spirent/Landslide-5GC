@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="8.5.0.202104211757" entryPoint="get_topology_resource_info">
+<testCase version="8.6.1.202109290400" entryPoint="get_topology_resource_info">
     <general>
         <isProcedureLibrary>true</isProcedureLibrary>
         <language>Python</language>
@@ -24,9 +24,21 @@
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
+                        <item guid="057561f9-2fe2-4dd8-99f5-b75502be7f73" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>remote_ts_name = &quot;RemoteNetworkHost&quot;</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
                         <item guid="dce415cc-2148-44cc-9d51-345b39679955" action="eval" useFieldsInCommand="false">
                             <command>
                                 <body>topology_emulated_sut = &quot;Emulated SUT&quot;</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="85f92cff-a5e9-4487-8f7a-79c0c7b43473" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>topology_remote_networkhost = &quot;Remote Network Host&quot;</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
@@ -74,6 +86,41 @@
                         <body>Dump state</body>
                     </command>
                     <nestedSteps>
+                        <item guid="0e7daa74-1236-4189-ac33-8322dc1bbf16" action="dumpState" useFieldsInCommand="false">
+                            <postProcessing>
+                                <storeResponseAt>dumpstate_data</storeResponseAt>
+                                <storeResponseText>true</storeResponseText>
+                            </postProcessing>
+                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.DumpStateProperties"/>
+                        </item>
+                        <item guid="f48c7632-4487-4fe9-ae5d-37b148e5c970" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>start_index = dumpstate_data.find(&quot;&lt;data&quot;)</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="61aaddbf-87dc-4d01-bcae-aea7abb444ae" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>lword=len(&quot;&lt;/data&gt;&quot;)</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="85eeaddf-8aab-4286-a8ac-14b2b4deafa1" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>end_index = dumpstate_data.find(&quot;&lt;/data&gt;&quot;)</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="acb7f016-f22c-478f-aa2f-9ef12be272e0" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>parameter_data = dumpstate_data[start_index: end_index + lword].strip();print(parameter_data)</body>
+                            </command>
+                            <postProcessing isStoreResponseGlobal="true">
+                                <storeResponseAt>parameter_data</storeResponseAt>
+                                <storeResponseText>true</storeResponseText>
+                            </postProcessing>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
                         <item guid="b95bb984-50af-448a-81ba-328abaf078aa" action="dumpState" responseMap="project://my_project/response_maps/new_map.ffrm" useFieldsInCommand="false">
                             <postProcessing>
                                 <analysisRules>
@@ -433,6 +480,36 @@
                                                             <command>
                                                                 <body>topo_device_name = &apos;TS {0}&apos;.format(ts_number)</body>
                                                             </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="296785e5-fdd4-48cd-84ea-cce942bf6aab" action="elif" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>ts_name == remote_ts_name:</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="eae50fbb-ff20-43bf-993a-e94155393d1b" action="if" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>param(&apos;TC_parameters/Enable_RemoteNetworkHost&apos;, False):</body>
+                                                            </command>
+                                                            <nestedSteps>
+                                                                <item guid="c5085f37-1d21-4858-b0c5-9a6dee3c58c3" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>topo_device_name = topology_remote_networkhost</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                            </nestedSteps>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="8eadfd60-919c-4451-af62-43a5e0612fce" action="else" useFieldsInCommand="false">
+                                                            <nestedSteps>
+                                                                <item guid="d00637bb-fb30-4c8a-99c4-e00495d5c606" action="continue" useFieldsInCommand="false">
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                            </nestedSteps>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
                                                     </nestedSteps>
