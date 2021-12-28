@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="8.6.0.202108181042" entryPoint="add_topology_artifactLink">
+<testCase version="8.6.1.202109290400" entryPoint="add_topology_artifactLink">
     <general>
         <isProcedureLibrary>true</isProcedureLibrary>
         <language>Python</language>
@@ -225,178 +225,340 @@
                     </nestedSteps>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
-                <item guid="1e369451-ba0c-4772-b027-d16d8fef9f51" action="for" useFieldsInCommand="false">
+                <item guid="e803c1c1-dedd-436e-8498-024e63a749d8" action="comment" useFieldsInCommand="false">
                     <command>
-                        <body>instance_number in range(1, int(instance_number) + 1):</body>
+                        <body>Calculate percentage</body>
                     </command>
                     <nestedSteps>
-                        <item guid="a0f973d5-844c-4007-b630-8333cf070cc0" action="eval" useFieldsInCommand="false">
+                        <item guid="b58096e7-9f0a-4f84-896f-7b44c368bb56" action="if" useFieldsInCommand="false">
                             <command>
-                                <body>param_name = &quot;TC_parameters/TS_Percentage/TS{0}&quot;.format(instance_number);print(param_name)</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="66ebf63a-bbcd-4720-a6b8-480acd956fea" action="if" useFieldsInCommand="false">
-                            <command>
-                                <body>info(&apos;exists&apos;, &apos;param&apos;, param_name):</body>
+                                <body>info(&apos;exists&apos;, &apos;local&apos;, &apos;run_data_list&apos;) and len(run_data_list) &gt; 0:</body>
                             </command>
                             <nestedSteps>
-                                <item guid="a5c7e2d4-e176-41c2-a469-49603df2f0d7" action="eval" useFieldsInCommand="false">
+                                <item guid="c6152a7c-7c97-447a-9f5a-7d6a57b98e02" action="eval" useFieldsInCommand="false">
                                     <command>
-                                        <body>param_value = param(param_name)</body>
+                                        <body>print(ts_groups)</body>
                                     </command>
+                                    <postProcessing>
+                                        <storeResponseAt>ts_groups_xml</storeResponseAt>
+                                    </postProcessing>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
-                                <item guid="154e9523-6b95-4a9c-95c5-74eae2a76908" action="if" useFieldsInCommand="false">
+                                <item guid="e226dd9b-be0a-4927-9de0-6003d91913f5" action="for" useFieldsInCommand="false">
                                     <command>
-                                        <body>not isinstance(param_value, int):</body>
+                                        <body>run_data in run_data_list:</body>
                                     </command>
                                     <nestedSteps>
-                                        <item guid="f9deaf29-afc9-4474-91ad-822d9fd9cb53" action="eval" useFieldsInCommand="false">
+                                        <item guid="0ffc1fc4-ba4e-4222-a75e-bf8c4be23143" action="eval" useFieldsInCommand="false">
                                             <command>
-                                                <body>message = &apos;TS_Percentage is invalid, please re-check the TS_Percentage parameter: {0}. Expected: percentage number is INTEGER type, actual: {1}&apos;.format(param_name, type(param_value) if param_value else &apos;empty&apos;)</body>
+                                                <body>print(run_data)</body>
+                                            </command>
+                                            <postProcessing>
+                                                <analysisRules>
+                                                    <item>
+                                                        <extractorInfo extractorType="query">
+                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                <query>mapped/Json/reservations/item/tsId</query>
+                                                            </extractorProperties>
+                                                        </extractorInfo>
+                                                        <processorInfo ruleType="store">
+                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                <storageLocation>ts_id</storageLocation>
+                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                            </ruleProperties>
+                                                        </processorInfo>
+                                                    </item>
+                                                </analysisRules>
+                                            </postProcessing>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="7a071b66-79c3-4f3c-a668-fe583eae7ce5" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>query_path = &apos;mapped/Json/item[TS_ID = &quot;{0}&quot;]/ts_param_name&apos;.format(ts_id)</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
-                                        <item guid="63f44b80-c2c0-40f4-a179-c44cdc92204b" action="json" useFieldsInCommand="false">
+                                        <item guid="e047eb21-5a9b-4c32-a1c0-650e57d37154" action="eval" useFieldsInCommand="false">
                                             <command>
-                                                <body>action=&apos;createJson&apos;, documentName=&apos;percentage_list&apos;, fromFile=&apos;false&apos;, jsonString=&apos;{&quot;reason&quot;:&quot;[message]&quot;}&apos;</body>
+                                                <body>ts_param_name = query(&apos;ts_groups_xml&apos;,query_path);print(ts_param_name)</body>
                                             </command>
-                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
-                                                <action inherit="false">createJson</action>
-                                                <jsonString inherit="false" sub="true">{&quot;reason&quot;:&quot;[message]&quot;}</jsonString>
-                                                <documentName inherit="false">percentage_list</documentName>
-                                            </applicationProperties>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
-                                        <item guid="732a0631-236d-4356-9f6b-45ecdf5ffade" action="return">
+                                        <item guid="7828ed83-2406-4609-8b5a-c2323ea92dea" action="eval" useFieldsInCommand="false">
                                             <command>
-                                                <body>[percentage_list]</body>
+                                                <body>param_name = &quot;TC_parameters/TS_Percentage/{0}&quot;.format(ts_param_name);print(param_name)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="6272f661-4d3b-4811-8c9c-1b5a8a56054f" action="if" useFieldsInCommand="false">
+                                            <command>
+                                                <body>ts_param_name and info(&apos;exists&apos;, &apos;param&apos;, param_name):</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="d7ea4c08-3683-4585-980e-252a66e0c0d3" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>param_value = param(param_name)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="6cadff4f-9df4-491a-9e6a-2ae19b42548c" action="if" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>not isinstance(param_value, int):</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="ddf5a40d-cbbe-4a9f-9e32-415a0d2e540e" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>message = &apos;TS_Percentage is invalid, please re-check the TS_Percentage parameter: {0}. Expected: percentage number is INTEGER type, actual: {1}&apos;.format(param_name, type(param_value) if param_value else &apos;empty&apos;)</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="91d419e7-b930-4034-82db-ed2869543a98" action="json" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>action=&apos;createJson&apos;, documentName=&apos;percentage_list&apos;, fromFile=&apos;false&apos;, jsonString=&apos;{&quot;reason&quot;:&quot;[message]&quot;}&apos;</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                                <action inherit="false">createJson</action>
+                                                                <jsonString inherit="false" sub="true">{&quot;reason&quot;:&quot;[message]&quot;}</jsonString>
+                                                                <documentName inherit="false">percentage_list</documentName>
+                                                            </applicationProperties>
+                                                        </item>
+                                                        <item guid="414f62a6-83c9-435c-a7e0-7837e813e89e" action="return">
+                                                            <command>
+                                                                <body>[percentage_list]</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="2cb6d716-054f-4b4e-8835-b9662b3dc890" action="if" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>not param_value:</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="9a648b46-5cb9-41b3-8338-82761034fc63" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>param_value = 0</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="59171f4a-ffb8-4a82-911b-da5b143d2837" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>percentage_list.append(param_value)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="369b291f-5000-4ebb-bbd2-22c881848d68" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>remaining_percent -= param_value</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="84b6bd43-f507-468c-a463-de138bd2e129" action="else" useFieldsInCommand="false">
+                                            <nestedSteps>
+                                                <item guid="23c455cf-9a88-467f-9a92-81191499caab" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>percentage_list.append(0)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="7ec71804-35c3-44cd-9da8-19e67030aa1d" action="else" useFieldsInCommand="false">
+                            <nestedSteps>
+                                <item guid="2743607a-2e2a-4b3f-8038-96aae17492d1" action="for" useFieldsInCommand="false">
+                                    <command>
+                                        <body>instance_number in range(1, int(instance_number) + 1):</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="42bdbceb-e447-4d28-b864-d0d2e376020d" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>param_name = &quot;TC_parameters/TS_Percentage/TS{0}&quot;.format(instance_number);print(param_name)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="42719a3c-0536-4a8d-b543-9aa44db42f99" action="if" useFieldsInCommand="false">
+                                            <command>
+                                                <body>info(&apos;exists&apos;, &apos;param&apos;, param_name):</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="bd0d0f20-c90b-4ab8-afc5-d81a92e02578" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>param_value = param(param_name)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="c3b150a7-84ee-49c9-b344-23940dd65b0f" action="if" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>not isinstance(param_value, int):</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="6ae8b3cb-31cc-420c-8021-a2aba6c431e8" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>message = &apos;TS_Percentage is invalid, please re-check the TS_Percentage parameter: {0}. Expected: percentage number is INTEGER type, actual: {1}&apos;.format(param_name, type(param_value) if param_value else &apos;empty&apos;)</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="768ce5ca-81b0-4728-a5c7-8f59a3d3187c" action="json" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>action=&apos;createJson&apos;, documentName=&apos;percentage_list&apos;, fromFile=&apos;false&apos;, jsonString=&apos;{&quot;reason&quot;:&quot;[message]&quot;}&apos;</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                                <action inherit="false">createJson</action>
+                                                                <jsonString inherit="false" sub="true">{&quot;reason&quot;:&quot;[message]&quot;}</jsonString>
+                                                                <documentName inherit="false">percentage_list</documentName>
+                                                            </applicationProperties>
+                                                        </item>
+                                                        <item guid="1937f412-9320-4947-8435-55161beb63f9" action="return">
+                                                            <command>
+                                                                <body>[percentage_list]</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="def4b291-3017-497c-9a57-4bc1003f5a8a" action="if" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>not param_value:</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="a114ef34-ace0-477d-872e-586927120adf" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>param_value = 0</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="26788cb3-61b0-4a01-9ca3-4f60670e3b0e" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>percentage_list.append(param_value)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="a86ce035-6f24-4cb5-88e2-9487b03f729c" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>remaining_percent -= param_value</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="8d77f0bc-90b4-4c34-b058-f3666688c7b6" action="else" useFieldsInCommand="false">
+                                            <nestedSteps>
+                                                <item guid="3c67a671-a15b-4e9b-9414-401181e439b3" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>percentage_list.append(0)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="c432033c-9447-48c4-8039-34d17fda04db" action="if" useFieldsInCommand="false">
+                            <command>
+                                <body>(0 not in percentage_list and remaining_percent != 0) or (0 in percentage_list and remaining_percent &lt; 0):</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="3e576b45-69db-4d9e-84aa-e104186b7918" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>message = &apos;Invalid TS_Percentage configuration, it should equal 100%, actual: {0}%&apos;.format(sum(percentage_list))</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="3ee1dab6-a923-48ee-b06a-bd3cbea3cda7" action="json" useFieldsInCommand="false">
+                                    <command>
+                                        <body>action=&apos;createJson&apos;, documentName=&apos;percentage_list&apos;, fromFile=&apos;false&apos;, jsonString=&apos;{&quot;reason&quot;:&quot;[message]&quot;}&apos;</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                        <action inherit="false">createJson</action>
+                                        <jsonString inherit="false" sub="true">{&quot;reason&quot;:&quot;[message]&quot;}</jsonString>
+                                        <documentName inherit="false">percentage_list</documentName>
+                                    </applicationProperties>
+                                </item>
+                                <item guid="7ebcefc1-3abc-4698-a0ae-0e6d35de0eb8" action="return">
+                                    <command>
+                                        <body>[percentage_list]</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="bc747647-3e19-4a1b-95ad-bca7313eb8c2" action="elif" useFieldsInCommand="false">
+                            <command>
+                                <body>remaining_percent &gt; 0:</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="59785481-ec0e-474d-a68f-72913c366264" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>zero_count = percentage_list.count(0);print(zero_count)</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="8949b901-7b0d-44bc-af3f-15d030653e67" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>percentage_each_remain_ts = int(remaining_percent/zero_count);print(percentage_each_remain_ts)</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="6e9faaea-dc3d-4e96-8a7d-3d20daf54915" action="if" useFieldsInCommand="false">
+                                    <command>
+                                        <body>percentage_each_remain_ts * zero_count != remaining_percent:</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="2a591e6f-d765-4c03-bcf8-32fd08de982d" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>first_zero_index = percentage_list.index(0);print(first_zero_index)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="ec02c6a1-c475-40d2-82d6-42a3232c794f" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>last_percentage_each_remain_ts = remaining_percent - (percentage_each_remain_ts * (zero_count - 1))</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="5341ba8f-98c6-4d03-88bd-dcf042e8d851" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>percentage_list[first_zero_index] = last_percentage_each_remain_ts</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
                                     </nestedSteps>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
-                                <item guid="0793cbb8-4804-415a-9f35-590bb0ee392e" action="if" useFieldsInCommand="false">
+                                <item guid="553e36c6-4c9d-4fcd-9858-f72df548f30d" action="eval" useFieldsInCommand="false">
                                     <command>
-                                        <body>not param_value:</body>
-                                    </command>
-                                    <nestedSteps>
-                                        <item guid="6da8d7b6-d59a-428e-87ca-4b603a28c45f" action="eval" useFieldsInCommand="false">
-                                            <command>
-                                                <body>param_value = 0</body>
-                                            </command>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                    </nestedSteps>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                                <item guid="5a4fafde-28f2-4470-aeb3-c5f41dc5d0f8" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>percentage_list.append(param_value)</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                                <item guid="54a791a2-0095-49c2-8690-763cf8c36cc9" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>remaining_percent -= param_value</body>
+                                        <body>percentage_list = [x if x != 0 else percentage_each_remain_ts for x in percentage_list]</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
                             </nestedSteps>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="c4e9bd00-a8c6-4cc1-acea-0fe7886bf89b" action="else" useFieldsInCommand="false">
-                            <nestedSteps>
-                                <item guid="a04911f3-2b24-4dfd-b85f-bab5025aac96" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>percentage_list.append(0)</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                            </nestedSteps>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                    </nestedSteps>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="f1ea19e9-4edb-466e-8ed7-0fa2ab52efd1" action="if" useFieldsInCommand="false">
-                    <command>
-                        <body>(0 not in percentage_list and remaining_percent != 0) or (0 in percentage_list and remaining_percent &lt;= 0):</body>
-                    </command>
-                    <nestedSteps>
-                        <item guid="e6e703a1-fda5-4ce3-9dad-d22d676c1005" action="eval" useFieldsInCommand="false">
-                            <command>
-                                <body>message = &apos;Invalid TS_Percentage configuration, it should equal 100%, actual: {0}%&apos;.format(sum(percentage_list))</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="84339182-7e3b-45c8-9300-dbb8ddfe13ac" action="json" useFieldsInCommand="false">
-                            <command>
-                                <body>action=&apos;createJson&apos;, documentName=&apos;percentage_list&apos;, fromFile=&apos;false&apos;, jsonString=&apos;{&quot;reason&quot;:&quot;[message]&quot;}&apos;</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
-                                <action inherit="false">createJson</action>
-                                <jsonString inherit="false" sub="true">{&quot;reason&quot;:&quot;[message]&quot;}</jsonString>
-                                <documentName inherit="false">percentage_list</documentName>
-                            </applicationProperties>
-                        </item>
-                        <item guid="f15a5b8b-d832-49a2-9170-e3b1f0c50b82" action="return">
-                            <command>
-                                <body>[percentage_list]</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                    </nestedSteps>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="22323553-d6f1-409e-ada0-ea296a0d334f" action="elif" useFieldsInCommand="false">
-                    <command>
-                        <body>remaining_percent &gt; 0:</body>
-                    </command>
-                    <nestedSteps>
-                        <item guid="941f4d80-ce98-4177-83ae-e8637dd44d42" action="eval" useFieldsInCommand="false">
-                            <command>
-                                <body>zero_count = percentage_list.count(0);print(zero_count)</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="1256bde9-bc04-40ba-b634-7f067c661906" action="eval" useFieldsInCommand="false">
-                            <command>
-                                <body>percentage_each_remain_ts = int(remaining_percent/zero_count);print(percentage_each_remain_ts)</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="3c5d6b93-2aa3-4dbd-8343-26bc8559acd1" action="if" useFieldsInCommand="false">
-                            <command>
-                                <body>percentage_each_remain_ts * zero_count != remaining_percent:</body>
-                            </command>
-                            <nestedSteps>
-                                <item guid="0034c25b-189f-4e51-95c0-2bfdffa5a1eb" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>first_zero_index = percentage_list.index(0);print(first_zero_index)</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                                <item guid="a0368b80-3aaa-4439-9353-4a6bd20961ce" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>last_percentage_each_remain_ts = remaining_percent - (percentage_each_remain_ts * (zero_count - 1))</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                                <item guid="a1ea4bb6-760c-4980-bf35-240c1901f309" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>percentage_list[first_zero_index] = last_percentage_each_remain_ts</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                            </nestedSteps>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="be419169-d20d-4474-9cce-8d13dd87738e" action="eval" useFieldsInCommand="false">
-                            <command>
-                                <body>percentage_list = [x if x != 0 else percentage_each_remain_ts for x in percentage_list]</body>
-                            </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
                     </nestedSteps>
@@ -461,6 +623,8 @@
                     <defaultValue>1</defaultValue>
                     <isMandatory>true</isMandatory>
                 </item>
+                <item name="run_data_list"/>
+                <item name="ts_groups"/>
             </arguments>
         </item>
         <item name="compare_2_number" isPublic="true">
@@ -730,51 +894,98 @@
                     </nestedSteps>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
-                <item guid="221792f3-b81b-4375-b137-6c387c9dad53" action="if" useFieldsInCommand="false">
+                <item guid="cc3e75ef-7c12-4726-83df-4e2ec2f4b22d" action="if" useFieldsInCommand="false">
                     <command>
-                        <body>unit == &quot;us&quot;:</body>
+                        <body>output == unit:</body>
                     </command>
                     <nestedSteps>
-                        <item guid="197abf8f-8da3-4154-a79e-5bf3951e3bb3" action="eval" useFieldsInCommand="false">
+                        <item guid="02efd7c3-0cea-4c0d-bae9-ea8edb532efa" action="return">
                             <command>
-                                <body>response = value / 1000</body>
+                                <body>[value]</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
                     </nestedSteps>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
-                <item guid="f922e845-0ecf-4829-bfcc-f6fdaef33134" action="elif" useFieldsInCommand="false">
+                <item guid="fbc1d90f-32fd-40de-b61d-141c7da8778b" action="else" useFieldsInCommand="false">
+                    <nestedSteps>
+                        <item guid="221792f3-b81b-4375-b137-6c387c9dad53" action="if" useFieldsInCommand="false">
+                            <command>
+                                <body>unit == &quot;us&quot;:</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="197abf8f-8da3-4154-a79e-5bf3951e3bb3" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>response = value / 1000</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="f922e845-0ecf-4829-bfcc-f6fdaef33134" action="elif" useFieldsInCommand="false">
+                            <command>
+                                <body>unit == &quot;ms&quot;:</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="ecf4a869-8d39-4275-88d9-a463d2631262" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>response = value</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="c341b6aa-9d61-47e8-868e-7a84cabfdc58" action="elif" useFieldsInCommand="false">
+                            <command>
+                                <body>unit == &quot;s&quot;:</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="2065aae1-f17b-4a16-9bb2-1ca7fbeb534e" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>response = value * 1000</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="7b5fff3b-723d-4cb2-829a-f7a1a18c9bef" action="else" useFieldsInCommand="false">
+                            <nestedSteps>
+                                <item guid="3b10bfb1-5ad9-4afd-9354-ed9572e72127" action="return">
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="3a1283ee-4fd3-49cb-841d-1c9fdea9ec31" action="if" useFieldsInCommand="false">
                     <command>
-                        <body>unit == &quot;ms&quot;:</body>
+                        <body>output == &quot;us&quot;:</body>
                     </command>
                     <nestedSteps>
-                        <item guid="ecf4a869-8d39-4275-88d9-a463d2631262" action="eval" useFieldsInCommand="false">
+                        <item guid="b0b6de78-843b-49b7-ae30-22c6a0b92ece" action="eval" useFieldsInCommand="false">
                             <command>
-                                <body>response = value</body>
+                                <body>response *= 1000</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
                     </nestedSteps>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
-                <item guid="c341b6aa-9d61-47e8-868e-7a84cabfdc58" action="elif" useFieldsInCommand="false">
+                <item guid="bbbc5c61-544b-474d-ba2d-1a2295330a17" action="elif" useFieldsInCommand="false">
                     <command>
-                        <body>unit == &quot;s&quot;:</body>
+                        <body>output == &quot;s&quot;:</body>
                     </command>
                     <nestedSteps>
-                        <item guid="2065aae1-f17b-4a16-9bb2-1ca7fbeb534e" action="eval" useFieldsInCommand="false">
+                        <item guid="4d1077f9-6bf6-4cee-9b1e-16f8438c02a0" action="eval" useFieldsInCommand="false">
                             <command>
-                                <body>response = value * 1000</body>
+                                <body>response /= 1000</body>
                             </command>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                    </nestedSteps>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="7b5fff3b-723d-4cb2-829a-f7a1a18c9bef" action="else" useFieldsInCommand="false">
-                    <nestedSteps>
-                        <item guid="3b10bfb1-5ad9-4afd-9354-ed9572e72127" action="return">
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
                     </nestedSteps>
@@ -795,8 +1006,220 @@
                 <item name="unit">
                     <description>Unit of value. Required value. &quot;us&quot; for micro second, &quot;ms&quot; for milisecond, &quot;s&quot; for second</description>
                 </item>
+                <item name="output">
+                    <defaultValue>ms</defaultValue>
+                    <isMandatory>true</isMandatory>
+                </item>
             </arguments>
             <response>{}</response>
+        </item>
+        <item name="get_next_ip" isPublic="true">
+            <steps>
+                <item guid="1a62dc0d-9de6-4cbc-916b-b578eb297cd1" action="if" useFieldsInCommand="false">
+                    <command>
+                        <body>&apos;.&apos; in starting_ip:</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="6a4116cf-40bb-4ce0-9160-3c6658fc7b0c" action="comment" useFieldsInCommand="false">
+                            <command>
+                                <body>Get next ipv4</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="74248cfe-5de3-4d11-a48d-0a50ecd163e6" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>ip_parts = starting_ip.split(&apos;.&apos;)</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="7cf8aa6e-c192-4ceb-a8a1-0ab2528f6ebd" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>idx = 3</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="c89dea94-8f89-4edd-b467-63ff8fdd3148" action="while" useFieldsInCommand="false">
+                                    <command>
+                                        <body>idx &gt;= 0 and numb_nodes != &apos;0&apos;:</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="ed249057-6176-47c0-85c8-471abae622c4" action="call" useFieldsInCommand="false">
+                                            <command>
+                                                <body>calculate_host_number(host_number=ip_parts[idx], numb_nodes=numb_nodes)</body>
+                                            </command>
+                                            <postProcessing>
+                                                <analysisRules>
+                                                    <item>
+                                                        <extractorInfo extractorType="query">
+                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                                                <query>next_host_number()</query>
+                                                            </extractorProperties>
+                                                        </extractorInfo>
+                                                        <processorInfo ruleType="store">
+                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                <storageLocation>next_host_number</storageLocation>
+                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                            </ruleProperties>
+                                                        </processorInfo>
+                                                    </item>
+                                                    <item>
+                                                        <extractorInfo extractorType="query">
+                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                                                <query>inscreament()</query>
+                                                            </extractorProperties>
+                                                        </extractorInfo>
+                                                        <processorInfo ruleType="store">
+                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                <storageLocation>numb_nodes</storageLocation>
+                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                            </ruleProperties>
+                                                        </processorInfo>
+                                                    </item>
+                                                </analysisRules>
+                                            </postProcessing>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="c34eac7f-6b0a-4d84-a5ae-0f2dea95e5d0" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>ip_parts[idx] = next_host_number</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="bb8245b1-a135-4188-8f12-79c32ad81ca7" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>idx -= 1</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="71561faf-91ab-415c-a3e9-d75804fbd9e1" action="if" useFieldsInCommand="false">
+                                    <command>
+                                        <body>numb_nodes != &apos;0&apos;:</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="1ce8a65c-5918-4c72-a89e-d111f5bdb789" action="json" useFieldsInCommand="false">
+                                            <command>
+                                                <body>action=&apos;createJson&apos;, documentName=&apos;response&apos;, fromFile=&apos;false&apos;, jsonString=&apos;{&quot;reason&quot;:&quot;There is not enough nodes for starting ip [starting_ip]&quot;}&apos;</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                <action inherit="false">createJson</action>
+                                                <jsonString inherit="false" sub="true">{&quot;reason&quot;:&quot;There is not enough nodes for starting ip [starting_ip]&quot;}</jsonString>
+                                                <documentName inherit="false">response</documentName>
+                                            </applicationProperties>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="3877c32c-8063-4661-b801-57a97682a0db" action="else" useFieldsInCommand="false">
+                                    <nestedSteps>
+                                        <item guid="9c60a786-8a00-4dec-b57c-978804f8c12e" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>response = &apos;.&apos;.join(ip_parts)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="396b396f-dbac-40bd-b21e-46a1ee788295" action="else" useFieldsInCommand="false">
+                    <nestedSteps>
+                        <item guid="f442db69-940d-4ccc-bb29-5cedc34f94e2" action="comment" useFieldsInCommand="false">
+                            <command>
+                                <body>Get next ipv6</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="0e59d319-6674-4e83-9cfc-c780bbadcb93" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>import ipaddress</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="54b8ecc1-33c0-4d21-b2f8-62cbc2b01ad3" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>response = str(ipaddress.ip_address(starting_ip)+1)</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="099c0a57-decb-4808-8205-962dcf28bd59" action="return">
+                    <command>
+                        <body>[response]</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+            </steps>
+            <arguments>
+                <item name="starting_ip">
+                    <description>Starting IP</description>
+                    <isMandatory>true</isMandatory>
+                </item>
+                <item name="numb_nodes">
+                    <description>Number of Nodes</description>
+                    <isMandatory>true</isMandatory>
+                </item>
+            </arguments>
+        </item>
+        <item name="calculate_host_number" isPublic="true">
+            <steps>
+                <item guid="93ffab99-2317-4b63-93d2-e4c110612d9a" action="eval" useFieldsInCommand="false">
+                    <command>
+                        <body>temp = int(host_number) + int(numb_nodes);print(temp)</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="fb286aea-e3b4-4ee0-bbda-2ae6843c8a94" action="eval" useFieldsInCommand="false">
+                    <command>
+                        <body>next_host_number = int(temp % 255)</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="1bf80465-3c93-4c0f-8551-dfd7b1d8b2fd" action="eval" useFieldsInCommand="false">
+                    <command>
+                        <body>inscreament = int(temp / 255)</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="e7dba1b3-6981-4401-8b36-eeddbeeb808f" action="json" useFieldsInCommand="false">
+                    <command>
+                        <body>action=&apos;createJson&apos;, documentName=&apos;response&apos;, fromFile=&apos;false&apos;, jsonString=&apos;{&quot;inscreament&quot;:&quot;[inscreament]&quot;,&quot;next_host_number&quot;:&quot;[next_host_number]&quot;}&apos;</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                        <action inherit="false">createJson</action>
+                        <jsonString inherit="false" sub="true">{&quot;inscreament&quot;:&quot;[inscreament]&quot;,&quot;next_host_number&quot;:&quot;[next_host_number]&quot;}</jsonString>
+                        <documentName inherit="false">response</documentName>
+                    </applicationProperties>
+                </item>
+                <item guid="7df490bf-b02f-4fe1-9ebf-a53c852ffe86" action="return">
+                    <command>
+                        <body>[response]</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+            </steps>
+            <arguments>
+                <item name="host_number">
+                    <isMandatory>true</isMandatory>
+                </item>
+                <item name="numb_nodes">
+                    <isMandatory>true</isMandatory>
+                </item>
+            </arguments>
         </item>
         <item name="execute_fail_message" isPublic="true">
             <steps>
@@ -1188,7 +1611,7 @@
                                     <ipAddress inherit="false">[ts_ip_address]</ipAddress>
                                     <port inherit="false">[ssh_port]</port>
                                     <user inherit="false">cfguser</user>
-                                    <password inherit="false">bFFdd7YWC4Y=</password>
+                                    <password inherit="false" masked="true">bFFdd7YWC4Y=</password>
                                 </sessionProperties>
                                 <sessionClass type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 <sessionVersion type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
@@ -1403,7 +1826,7 @@
                                     <ipAddress inherit="false">[ts_ip_address]</ipAddress>
                                     <port inherit="false">[ssh_port]</port>
                                     <user inherit="false">cfguser</user>
-                                    <password inherit="false">bFFdd7YWC4Y=</password>
+                                    <password inherit="false" masked="true">bFFdd7YWC4Y=</password>
                                 </sessionProperties>
                                 <sessionClass type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 <sessionVersion type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
@@ -1907,7 +2330,7 @@ The string starting with a dot (.) will not be matched, the procedure will retur
                             <nestedSteps>
                                 <item guid="4f834e7d-f326-4577-9889-05a2b2ad5cd0" action="if" useFieldsInCommand="false">
                                     <command>
-                                        <body>kpi_value.strip():</body>
+                                        <body>kpi_value.strip() and &quot;Not found in test&quot; not in kpi_value:</body>
                                     </command>
                                     <nestedSteps>
                                         <item guid="54bd5d8b-3428-4df9-8369-aaaad1160e57" action="call" useFieldsInCommand="false">
@@ -3489,61 +3912,164 @@ Default value: Instance</description>
                                                                 <body>len(value_range) == 1:</body>
                                                             </command>
                                                             <nestedSteps>
-                                                                <item guid="93946b1c-baea-450d-b272-4cbe2b9ab2dd" action="eval" useFieldsInCommand="false">
+                                                                <item guid="def8f56a-65bd-4ef5-ac61-7fb6b43fcd85" action="if" useFieldsInCommand="false">
                                                                     <command>
-                                                                        <body>min_value = float(value_range[0].strip())</body>
-                                                                    </command>
-                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                </item>
-                                                                <item guid="0307682b-335b-4425-b4cb-e46cd57ac4e4" action="if" useFieldsInCommand="false">
-                                                                    <command>
-                                                                        <body>float(actual_value) &lt; min_value:</body>
+                                                                        <body>value_range[0].startswith(&apos;/&apos;):</body>
                                                                     </command>
                                                                     <nestedSteps>
-                                                                        <item guid="3e32cc6c-61d7-475c-8224-3e08d497ebbc" action="message" useFieldsInCommand="false">
+                                                                        <item guid="d2d2d749-c41c-4748-85f6-d76555bbbfbe" action="eval" useFieldsInCommand="false">
                                                                             <command>
-                                                                                <body>Error:Parameter &quot;[param_name]&quot;: Expected &gt;= &apos;[min_value]&apos;, actual &apos;[actual_value]&apos;</body>
-                                                                            </command>
-                                                                            <postProcessing>
-                                                                                <analysisRules>
-                                                                                    <item>
-                                                                                        <extractorInfo extractorType="none">
-                                                                                            <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
-                                                                                        </extractorInfo>
-                                                                                        <processorInfo ruleType="assert">
-                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                                                <expression>should_fail_test == &quot;true&quot;</expression>
-                                                                                                <actionsWhenTrue>
-                                                                                                    <item actionId="FailTest">
-                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                                    </item>
-                                                                                                </actionsWhenTrue>
-                                                                                            </ruleProperties>
-                                                                                        </processorInfo>
-                                                                                    </item>
-                                                                                </analysisRules>
-                                                                            </postProcessing>
-                                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
-                                                                                <severity inherit="false">Error</severity>
-                                                                                <message inherit="false">Parameter &quot;[param_name]&quot;: Expected &gt;= &apos;[min_value]&apos;, actual &apos;[actual_value]&apos;</message>
-                                                                            </applicationProperties>
-                                                                        </item>
-                                                                        <item guid="722abb36-4a3d-4313-8cf3-9badbf82cb04" action="eval" useFieldsInCommand="false">
-                                                                            <command>
-                                                                                <body>has_error = True</body>
+                                                                                <body>number = value_range[0].replace(&apos;/&apos;, &apos;&apos;);print(number)</body>
                                                                             </command>
                                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                         </item>
-                                                                    </nestedSteps>
-                                                                    <eventHandlers>
-                                                                        <item name="OnInterpreterError">
-                                                                            <item actionId="Eval">
-                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                                    <statement>has_error = True</statement>
-                                                                                </actionProperties>
-                                                                            </item>
+                                                                        <item guid="7090f633-aaa6-4f86-a383-1dbcc8b5412e" action="if" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>int(number) == 0 or int(actual_value) == 0:</body>
+                                                                            </command>
+                                                                            <nestedSteps>
+                                                                                <item guid="d19d3540-8584-4946-ba33-0dc3c3c1ff6d" action="message" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>Error:Parameter &quot;[param_name]&quot;: Expected divisible by &apos;[number]&apos;, actual &apos;[actual_value]&apos;</body>
+                                                                                    </command>
+                                                                                    <postProcessing>
+                                                                                        <analysisRules>
+                                                                                            <item>
+                                                                                                <extractorInfo extractorType="none">
+                                                                                                    <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                                                                                </extractorInfo>
+                                                                                                <processorInfo ruleType="assert">
+                                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                                        <expression>should_fail_test == &quot;true&quot;</expression>
+                                                                                                        <actionsWhenTrue>
+                                                                                                            <item actionId="FailTest">
+                                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                            </item>
+                                                                                                        </actionsWhenTrue>
+                                                                                                    </ruleProperties>
+                                                                                                </processorInfo>
+                                                                                            </item>
+                                                                                        </analysisRules>
+                                                                                    </postProcessing>
+                                                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                                                        <severity inherit="false">Error</severity>
+                                                                                        <message inherit="false">Parameter &quot;[param_name]&quot;: Expected divisible by &apos;[number]&apos;, actual &apos;[actual_value]&apos;</message>
+                                                                                    </applicationProperties>
+                                                                                </item>
+                                                                                <item guid="a01fa71b-d4a3-45b3-b4ec-f409a81cad38" action="eval" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>has_error = True</body>
+                                                                                    </command>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                            </nestedSteps>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                         </item>
-                                                                    </eventHandlers>
+                                                                        <item guid="fbb13df8-e53a-433d-aace-5a24daa37acc" action="elif" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>int(actual_value) % int(number) != 0:</body>
+                                                                            </command>
+                                                                            <nestedSteps>
+                                                                                <item guid="55d442f8-555b-4fdd-ac7d-253c53b958e5" action="message" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>Error:Parameter &quot;[param_name]&quot;: Expected divisible by &apos;[number]&apos;, actual &apos;[actual_value]&apos;</body>
+                                                                                    </command>
+                                                                                    <postProcessing>
+                                                                                        <analysisRules>
+                                                                                            <item>
+                                                                                                <extractorInfo extractorType="none">
+                                                                                                    <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                                                                                </extractorInfo>
+                                                                                                <processorInfo ruleType="assert">
+                                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                                        <expression>should_fail_test == &quot;true&quot;</expression>
+                                                                                                        <actionsWhenTrue>
+                                                                                                            <item actionId="FailTest">
+                                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                            </item>
+                                                                                                        </actionsWhenTrue>
+                                                                                                    </ruleProperties>
+                                                                                                </processorInfo>
+                                                                                            </item>
+                                                                                        </analysisRules>
+                                                                                    </postProcessing>
+                                                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                                                        <severity inherit="false">Error</severity>
+                                                                                        <message inherit="false">Parameter &quot;[param_name]&quot;: Expected divisible by &apos;[number]&apos;, actual &apos;[actual_value]&apos;</message>
+                                                                                    </applicationProperties>
+                                                                                </item>
+                                                                                <item guid="2e713a97-fe65-4b49-9a65-7946f9b58b7e" action="eval" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>has_error = True</body>
+                                                                                    </command>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                            </nestedSteps>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                    </nestedSteps>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                                <item guid="751e0322-7781-43f6-8812-b0228d0aea18" action="else" useFieldsInCommand="false">
+                                                                    <nestedSteps>
+                                                                        <item guid="93946b1c-baea-450d-b272-4cbe2b9ab2dd" action="eval" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>min_value = float(value_range[0].strip())</body>
+                                                                            </command>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                        <item guid="0307682b-335b-4425-b4cb-e46cd57ac4e4" action="if" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>float(actual_value) &lt; min_value:</body>
+                                                                            </command>
+                                                                            <nestedSteps>
+                                                                                <item guid="3e32cc6c-61d7-475c-8224-3e08d497ebbc" action="message" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>Error:Parameter &quot;[param_name]&quot;: Expected &gt;= &apos;[min_value]&apos;, actual &apos;[actual_value]&apos;</body>
+                                                                                    </command>
+                                                                                    <postProcessing>
+                                                                                        <analysisRules>
+                                                                                            <item>
+                                                                                                <extractorInfo extractorType="none">
+                                                                                                    <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                                                                                </extractorInfo>
+                                                                                                <processorInfo ruleType="assert">
+                                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                                        <expression>should_fail_test == &quot;true&quot;</expression>
+                                                                                                        <actionsWhenTrue>
+                                                                                                            <item actionId="FailTest">
+                                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                            </item>
+                                                                                                        </actionsWhenTrue>
+                                                                                                    </ruleProperties>
+                                                                                                </processorInfo>
+                                                                                            </item>
+                                                                                        </analysisRules>
+                                                                                    </postProcessing>
+                                                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                                                        <severity inherit="false">Error</severity>
+                                                                                        <message inherit="false">Parameter &quot;[param_name]&quot;: Expected &gt;= &apos;[min_value]&apos;, actual &apos;[actual_value]&apos;</message>
+                                                                                    </applicationProperties>
+                                                                                </item>
+                                                                                <item guid="722abb36-4a3d-4313-8cf3-9badbf82cb04" action="eval" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>has_error = True</body>
+                                                                                    </command>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                            </nestedSteps>
+                                                                            <eventHandlers>
+                                                                                <item name="OnInterpreterError">
+                                                                                    <item actionId="Eval">
+                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                            <statement>has_error = True</statement>
+                                                                                        </actionProperties>
+                                                                                    </item>
+                                                                                </item>
+                                                                            </eventHandlers>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                    </nestedSteps>
                                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                 </item>
                                                             </nestedSteps>
@@ -4159,12 +4685,6 @@ Default value: Instance</description>
                                         <body>sum_percentage != 100:</body>
                                     </command>
                                     <nestedSteps>
-                                        <item guid="78dab8ce-3c1e-4cda-8127-056c8c060ab4" action="eval" useFieldsInCommand="false">
-                                            <command>
-                                                <body>message = &apos;The TS_Percentage parameter: {0} is invalid, expected INTEGER type and in range (0, 100)&apos;.format(param_path)</body>
-                                            </command>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
                                         <item guid="ad39c79d-6e97-4be5-a4e6-be0f9651d591" action="eval" useFieldsInCommand="false">
                                             <command>
                                                 <body>message = &apos;TS_Percentage is invalid, expected: 100 (%), actual: {0} (%)&apos;.format(sum_percentage)</body>
@@ -4261,6 +4781,7 @@ in which:
 - Param_Name: the path to param. For ex: TC_parameters/Session_Capacity
 - Expected_Values:
 \t+ (m,n): the range from m to n. Either m or n can be empty. If m is empty, the lower limit will not get validated. If n is empty, the higher limit will not get validated. For example: a string of &quot;(0,10000)&quot; will check if the param is in range of 0 - 10000, a string of &quot;(0)&quot; or &quot;(0,)&quot; will check if the param is greater than or equal to 0.
+\t+ (/n): divisible by n.
 \t+ [value1,value2,value3]: the list of desired values, each is separated by a comma. For ex: a &quot;[option1, option2]&quot; string will be check if the param value matches either &quot;option1&quot; or &quot;option2&quot;.
 \t+ Empty: if this is empty, no validation to check (for other types except boolean). Note: For boolean type, this can be left empty, the util will detect automatically to check the true/false value.
 - Required: true or false. If it&apos;s true, the param is required and an error will print if it&apos;s empty or doesn&apos;t exist.</description>
@@ -4547,6 +5068,20 @@ in which:
                     </command>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
+                <item guid="1e6ba4d8-5a2d-485b-b79e-805d85dfd16e" action="if" useFieldsInCommand="false">
+                    <command>
+                        <body>instance_number == 1:</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="7bc752c9-38ac-458d-b32c-bec2c42c5107" action="return">
+                            <command>
+                                <body>[response]</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
                 <item guid="e6f4a3cc-8308-4aeb-bf0c-71d54634c37d" action="eval" useFieldsInCommand="false">
                     <command>
                         <body>t_load_ts_list = {}</body>
@@ -4571,21 +5106,9 @@ in which:
                     </command>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
-                <item guid="2db578ff-2ffe-4013-9f8e-c2014f0ba026" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>min_capacity = int(min(percentage_list)/100 * percent_capacity);print(min_capacity)</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="8ca3a423-e643-457f-9e9a-f67b486ae85f" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>min_targeted = int(min(percentage_list)/100 * percent_targeted);print(min_targeted)</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
                 <item guid="6cbdaba0-8e35-4fff-aa4c-287d19af528e" action="if" useFieldsInCommand="false">
                     <command>
-                        <body>percent_targeted &lt;= instance_number or percent_capacity &lt;= instance_number or min_capacity == 1:</body>
+                        <body>percent_capacity &lt;= instance_number and percent_targeted &lt;= instance_number:</body>
                     </command>
                     <nestedSteps>
                         <item guid="434f2cec-332d-4c92-926e-71a3dfe7fb30" action="eval" useFieldsInCommand="false">
