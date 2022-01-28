@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="8.6.1.202109290400" entryPoint="add_topology_artifactLink">
+<testCase version="8.7.0.202110201311" entryPoint="add_topology_artifactLink">
     <general>
         <isProcedureLibrary>true</isProcedureLibrary>
         <language>Python</language>
@@ -4563,6 +4563,21 @@ Default value: Instance</description>
                                             </ruleProperties>
                                         </processorInfo>
                                     </item>
+                                    <item>
+                                        <extractorInfo extractorType="query">
+                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                <query>count(data/parameters/LS_Nodal_favorite_params/*)</query>
+                                            </extractorProperties>
+                                        </extractorInfo>
+                                        <processorInfo ruleType="store">
+                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                <storageLocation>num_ts_in_ls_nodal_fav_params</storageLocation>
+                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                            </ruleProperties>
+                                        </processorInfo>
+                                    </item>
                                 </analysisRules>
                                 <storeResponseAt>dumpstate_xml</storeResponseAt>
                             </postProcessing>
@@ -4577,6 +4592,103 @@ Default value: Instance</description>
                                     <command>
                                         <body>sum_percentage = 0</body>
                                     </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="abb6008e-15f4-438d-87d3-9877be17f8b7" action="comment" useFieldsInCommand="false">
+                                    <command>
+                                        <body>Get list of TSs in LS_Nodal_favorite_params</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="3834c937-dd59-4a66-bc14-4fabf456c175" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>ts_list_in_fav_params = []</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="57fdb47a-eb60-4065-b881-3559775c70b5" action="for" useFieldsInCommand="false">
+                                            <command>
+                                                <body>i in range(1, int(num_ts_in_ls_nodal_fav_params) + 1):</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="fe6af310-a9a3-45ab-aec5-9b206e1ef295" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>query_path = f&quot;name(data/parameters/LS_Nodal_favorite_params/*[{i}])&quot;</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="bdf6e839-fecd-47be-a64f-5bf3d12d141c" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>ts_name = query(&apos;dumpstate_xml&apos;,query_path);print(ts_name)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="dc1f691f-e1ac-4e46-b39a-5934c61cf608" action="if" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>ts_name in ts_list_in_fav_params:</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="6779b81d-f1a9-4e39-bdd3-7e1c9af55510" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>message = f&quot;LS_Nodal_favorite_params/{ts_name} is duplicate.&quot;</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="f98acc59-fa4d-4996-b89b-79916cd2375e" action="message" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>Error:[message]</body>
+                                                            </command>
+                                                            <postProcessing>
+                                                                <analysisRules>
+                                                                    <item>
+                                                                        <extractorInfo extractorType="none">
+                                                                            <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                                                        </extractorInfo>
+                                                                        <processorInfo ruleType="assert">
+                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                <expression>should_fail_test == &quot;true&quot;</expression>
+                                                                                <actionsWhenTrue>
+                                                                                    <item actionId="FailTest">
+                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                    </item>
+                                                                                </actionsWhenTrue>
+                                                                            </ruleProperties>
+                                                                        </processorInfo>
+                                                                    </item>
+                                                                    <item>
+                                                                        <extractorInfo extractorType="none">
+                                                                            <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                                                        </extractorInfo>
+                                                                        <processorInfo ruleType="assert">
+                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                <expression>should_exit_test == &quot;true&quot;</expression>
+                                                                                <actionsWhenTrue>
+                                                                                    <item actionId="ExitExecution">
+                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                    </item>
+                                                                                </actionsWhenTrue>
+                                                                            </ruleProperties>
+                                                                        </processorInfo>
+                                                                    </item>
+                                                                </analysisRules>
+                                                            </postProcessing>
+                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                                <severity inherit="false">Error</severity>
+                                                                <message inherit="false">[message]</message>
+                                                            </applicationProperties>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="240af7a8-8afd-4310-9357-c010cbcd24af" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>ts_list_in_fav_params.append(ts_name)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
                                 <item guid="d880c6ff-15b1-4aaf-9b1d-bd515cb08184" action="for" useFieldsInCommand="false">
@@ -4602,15 +4714,65 @@ Default value: Instance</description>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
-                                        <item guid="2268656d-c754-4c12-9ded-6eab3ffc109a" action="eval" useFieldsInCommand="false">
+                                        <item guid="6ba7d7b5-21bb-4742-90a7-00b8b7ebebae" action="comment" useFieldsInCommand="false">
                                             <command>
-                                                <body>value = param(param_path)</body>
+                                                <body>is_exist is False when an Integer param is empty</body>
                                             </command>
+                                            <nestedSteps>
+                                                <item guid="4c04784d-1d68-4369-987e-f6325fc8815d" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>is_exist = info(&quot;exists&quot;, &quot;param&quot;, param_path)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="39ee2ea5-e638-4635-8726-e6f78549af22" action="if" useFieldsInCommand="false">
+                                            <command>
+                                                <body>is_exist:</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="663348a3-c77a-491c-be04-23ef9e040c13" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>value = param(param_path)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="eb6d61f1-4ba0-402e-af60-c47d2edd5984" action="comment" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>Error when TS in TC_Parameters/TS_Percentage doesn&apos;t exist in LS_Nodal_favorite_params</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="22406568-4e38-43a4-8612-14946f090d7e" action="if" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>isinstance(value, int) and int(value) != 0 and ts_name not in ts_list_in_fav_params:</body>
+                                                            </command>
+                                                            <nestedSteps>
+                                                                <item guid="2e021ba1-3272-4771-b54b-a516ba038b33" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>message = f&quot;TC_parameters/TS_Percentage/{ts_name} is invalid. To be able to run as an instance, the TS needs to be added in LS_Nodal_favorite_params first.&quot;</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                                <item guid="323e69a9-5437-4005-8d1a-f0ec16db4471" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>has_error = True</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                            </nestedSteps>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
                                         <item guid="d916d256-7dcb-4fc3-a902-14651e0ae11b" action="if" useFieldsInCommand="false">
                                             <command>
-                                                <body>not isinstance(value, int) or value &lt; 0 or value &gt; 100:</body>
+                                                <body>not is_exist or not isinstance(value, int) or value &lt; 0 or value &gt; 100:</body>
                                             </command>
                                             <nestedSteps>
                                                 <item guid="29effa72-db96-4def-a9ba-70bfa27f068d" action="eval" useFieldsInCommand="false">
@@ -4619,7 +4781,21 @@ Default value: Instance</description>
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
-                                                <item guid="d027e9ce-2cb6-4d8c-bacb-f132e8937c8d" action="message" useFieldsInCommand="false">
+                                                <item guid="a68c7549-ed78-4e3e-a73e-c4ce2a79d325" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>has_error = True</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="014866de-6060-499e-b41d-a62f48508917" action="if" useFieldsInCommand="false">
+                                            <command>
+                                                <body>has_error and message:</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="112f1e85-9818-4afd-8fb2-a26f41d237dd" action="message" useFieldsInCommand="false">
                                                     <command>
                                                         <body>Error:[message]</body>
                                                     </command>
@@ -4661,12 +4837,6 @@ Default value: Instance</description>
                                                         <severity inherit="false">Error</severity>
                                                         <message inherit="false">[message]</message>
                                                     </applicationProperties>
-                                                </item>
-                                                <item guid="a68c7549-ed78-4e3e-a73e-c4ce2a79d325" action="eval" useFieldsInCommand="false">
-                                                    <command>
-                                                        <body>has_error = True</body>
-                                                    </command>
-                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
                                             </nestedSteps>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
