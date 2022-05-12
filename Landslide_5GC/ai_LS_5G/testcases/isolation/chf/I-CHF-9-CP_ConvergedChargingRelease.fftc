@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="8.7.0.202112171424">
+<testCase version="9.0.0.202203011533">
     <general>
         <documentation>I-CHF-9-CP: Converged Charging Release - Capacity Testing</documentation>
         <tags>N-3TS</tags>
@@ -251,6 +251,12 @@
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
+                                        <item guid="f2f06c8d-1445-494c-89c9-2fc4669a646f" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>params = params + &quot;;TC_parameters/Start_Threshold_Percent:(50,80):false&quot;</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
                                         <item guid="8fb2051f-d2e7-4358-94dc-c66d71b40133" action="call" useFieldsInCommand="false">
                                             <command>
                                                 <body>project://ai_LS_5G/utility_library/utils.fftc#validate_params -params [params]</body>
@@ -272,6 +278,12 @@
                                         <item guid="5685e6dd-57a8-45fc-9f51-e55e803ab248" action="eval" useFieldsInCommand="false">
                                             <command>
                                                 <body>enable_tac_report = param(&apos;TC_parameters/Enable_TAC_Report&apos;, enable_tac_report)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="846379df-301b-4d24-b6ce-32e86fe3a992" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>start_threshold_percent = param(&apos;TC_parameters/Start_Threshold_Percent&apos;, 80)</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
@@ -1512,7 +1524,7 @@
                     <nestedSteps>
                         <item guid="0899761e-f46b-4a87-b487-0872f787a0a8" action="call" useFieldsInCommand="false">
                             <command>
-                                <body>execute_landslide_procedure -run_data_list [run_data_list] -session_capacity [session_capacity] -targeted_end_rate [targeted_end_rate] -instance_number [instance_number] -is_b2b [is_b2b] -running_node_id [running_node_id] -node_run_data [node_run_data] -restart_sut [restart_sut] -percentage_list [percentage_list] -clean_up [clean_up] -timeout [test_waiting_timeout] -sba_running_id [sba_running_id] -should_restart_sba [should_restart_sba] -node_run_data_sba [node_run_data_sba]</body>
+                                <body>execute_landslide_procedure -run_data_list [run_data_list] -session_capacity [session_capacity] -targeted_end_rate [targeted_end_rate] -instance_number [instance_number] -is_b2b [is_b2b] -running_node_id [running_node_id] -node_run_data [node_run_data] -restart_sut [restart_sut] -percentage_list [percentage_list] -clean_up [clean_up] -timeout [test_waiting_timeout] -sba_running_id [sba_running_id] -should_restart_sba [should_restart_sba] -node_run_data_sba [node_run_data_sba] -start_threshold_percent [start_threshold_percent ]</body>
                             </command>
                             <postProcessing>
                                 <storeResponseAt>result_list</storeResponseAt>
@@ -3030,9 +3042,31 @@
                                                 <body>Run test instance with 80%</body>
                                             </command>
                                             <nestedSteps>
+                                                <item guid="6df05719-7097-4aba-9a1e-35eeb54604c1" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>start_threshold_percent = int(float(start_threshold_percent))</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="8e0f9dcf-ff47-45bc-9073-247685ae0d0c" action="if" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>start_threshold_percent != 80:</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="8f0edb36-74c4-4e88-88f9-8878d01a510c" action="message" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>Information:Run test instance with [start_threshold_percent]% of the target</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                                <message inherit="false">Run test instance with [start_threshold_percent]% of the target</message>
+                                                            </applicationProperties>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
                                                 <item guid="e76962be-deb1-46da-aaea-a52a05076ad0" action="eval" useFieldsInCommand="false">
                                                     <command>
-                                                        <body>t_load = math.ceil(int(session_capacity) * 80/100)</body>
+                                                        <body>t_load = math.ceil(int(session_capacity) * start_threshold_percent/100)</body>
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
@@ -3865,6 +3899,9 @@
                 </item>
                 <item name="timeout">
                     <defaultValue>180</defaultValue>
+                </item>
+                <item name="start_threshold_percent">
+                    <defaultValue>80</defaultValue>
                 </item>
             </arguments>
             <response>{}</response>
@@ -7222,10 +7259,10 @@
                                 </item>
                                 <item guid="4000b986-d789-4d38-aa78-0ccbb0eec4be" action="call" useFieldsInCommand="false">
                                     <command>
-                                        <body>project://ai_LS_5G/utility_library/utils.fftc#validate_and_add_to_KPI(kpi_name=key_tag, kpi_value=actual, kpi_expected=expected, add_to_kpi=add_to_kpi, kpi_response=response, kpi_unit=unit, operation=operation, add_to_extracted=add_to_extracted, validate=validate)</body>
+                                        <body>project://ai_LS_5G/utility_library/utils.fftc#validate_and_add_to_KPI(kpi_name=key_tag, kpi_value=actual, kpi_expected=expected, add_to_kpi=add_to_kpi, kpi_response=kpi_response, kpi_unit=unit, operation=operation, add_to_extracted=add_to_extracted, validate=validate)</body>
                                     </command>
                                     <postProcessing>
-                                        <storeResponseAt>response</storeResponseAt>
+                                        <storeResponseAt>kpi_response</storeResponseAt>
                                         <storeResponseText>true</storeResponseText>
                                     </postProcessing>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
@@ -7294,10 +7331,10 @@
                                 </item>
                                 <item guid="02c95d90-509b-4042-8e20-6e060a86fe59" action="call" useFieldsInCommand="false">
                                     <command>
-                                        <body>project://ai_LS_5G/utility_library/utils.fftc#validate_and_add_to_KPI(kpi_name=key_tag, kpi_value=actual, kpi_expected=expected, add_to_kpi=add_to_kpi, kpi_response=response, kpi_unit=unit, operation=operation, add_to_extracted=add_to_extracted, validate=validate)</body>
+                                        <body>project://ai_LS_5G/utility_library/utils.fftc#validate_and_add_to_KPI(kpi_name=key_tag, kpi_value=actual, kpi_expected=expected, add_to_kpi=add_to_kpi, kpi_response=kpi_response, kpi_unit=unit, operation=operation, add_to_extracted=add_to_extracted, validate=validate)</body>
                                     </command>
                                     <postProcessing>
-                                        <storeResponseAt>response</storeResponseAt>
+                                        <storeResponseAt>kpi_response</storeResponseAt>
                                         <storeResponseText>true</storeResponseText>
                                     </postProcessing>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
@@ -7366,10 +7403,10 @@
                                 </item>
                                 <item guid="a0157bf5-dde5-4e52-801d-057534341074" action="call" useFieldsInCommand="false">
                                     <command>
-                                        <body>project://ai_LS_5G/utility_library/utils.fftc#validate_and_add_to_KPI(kpi_name=key_tag, kpi_value=actual, kpi_expected=expected, add_to_kpi=add_to_kpi, kpi_response=response, kpi_unit=unit, operation=operation, add_to_extracted=add_to_extracted, validate=validate)</body>
+                                        <body>project://ai_LS_5G/utility_library/utils.fftc#validate_and_add_to_KPI(kpi_name=key_tag, kpi_value=actual, kpi_expected=expected, add_to_kpi=add_to_kpi, kpi_response=kpi_response, kpi_unit=unit, operation=operation, add_to_extracted=add_to_extracted, validate=validate)</body>
                                     </command>
                                     <postProcessing>
-                                        <storeResponseAt>response</storeResponseAt>
+                                        <storeResponseAt>kpi_response</storeResponseAt>
                                         <storeResponseText>true</storeResponseText>
                                     </postProcessing>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
@@ -7436,41 +7473,43 @@
                     </nestedSteps>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
-                <item guid="54904abf-4540-4cb3-8fd7-5a313864e253" action="comment" useFieldsInCommand="false">
+                <item guid="04b4d1d4-3ef0-4661-897a-408281f61f92" action="comment" useFieldsInCommand="false">
                     <command>
-                        <body>Show message if all criterias passed or update response FAIL</body>
+                        <body>Show message if all criterias passed</body>
                     </command>
                     <nestedSteps>
-                        <item guid="b3e1ea05-edfa-4aaf-92c7-a6df6c5c0d92" action="if" useFieldsInCommand="false">
+                        <item guid="73e7ced6-e149-47b9-870d-54f59fa2b059" action="eval" useFieldsInCommand="false">
                             <command>
-                                <body>passed == 1:</body>
+                                <body>print(kpi_response)</body>
                             </command>
-                            <nestedSteps>
-                                <item guid="1d1b5e9b-bfd5-497d-a9a5-45858f02f9b6" action="message" useFieldsInCommand="false">
-                                    <command>
-                                        <body>OK:SBA acceptance criteria: PASSED</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
-                                        <severity inherit="false">OK</severity>
-                                        <message inherit="false">SBA acceptance criteria: PASSED</message>
-                                    </applicationProperties>
-                                </item>
-                            </nestedSteps>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="2f417c56-db35-4a59-a9a5-fe053e114f4a" action="else" useFieldsInCommand="false">
-                            <nestedSteps>
-                                <item guid="5b49a9ed-4498-4a8b-9c5d-6fe3d0fb8c32" action="json" useFieldsInCommand="false">
-                                    <command>
-                                        <body>action=&apos;setJsonValue&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;kpi_response&apos;, pathValue=&apos;{&quot;result&quot;:&quot;FAIL&quot;}&apos;</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
-                                        <action inherit="false">setJsonValue</action>
-                                        <pathValue inherit="false">{&quot;result&quot;:&quot;FAIL&quot;}</pathValue>
-                                        <documentName inherit="false">kpi_response</documentName>
-                                    </applicationProperties>
-                                </item>
-                            </nestedSteps>
+                            <postProcessing>
+                                <analysisRules>
+                                    <item>
+                                        <extractorInfo extractorType="query">
+                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                <query>result()</query>
+                                            </extractorProperties>
+                                        </extractorInfo>
+                                        <processorInfo ruleType="assert">
+                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                <expression>value == &quot;PASS&quot;</expression>
+                                                <actionsWhenTrue>
+                                                    <item actionId="DeclareExecutionIssue">
+                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="OK">
+                                                            <message>All acceptance criteria PASSED</message>
+                                                        </actionProperties>
+                                                    </item>
+                                                </actionsWhenTrue>
+                                                <actionsWhenFalse>
+                                                    <item actionId="FailTestIfPassing">
+                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                    </item>
+                                                </actionsWhenFalse>
+                                            </ruleProperties>
+                                        </processorInfo>
+                                    </item>
+                                </analysisRules>
+                            </postProcessing>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
                     </nestedSteps>

@@ -245,6 +245,12 @@
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
+                                        <item guid="83926f0e-ad1c-4d0a-bd1e-dd14772b894c" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>params = params + &quot;;TC_parameters/Start_Threshold_Percent:(50,80):false&quot;</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
                                         <item guid="8a62244c-9f79-4c29-8ad6-8f4e6cde9005" action="call" useFieldsInCommand="false">
                                             <command>
                                                 <body>project://ai_LS_5G/utility_library/utils.fftc#validate_params -params [params]</body>
@@ -266,6 +272,12 @@
                                         <item guid="468c8218-6aec-4d78-8fba-493b2e978ef9" action="eval" useFieldsInCommand="false">
                                             <command>
                                                 <body>enable_tac_report = param(&apos;TC_parameters/Enable_TAC_Report&apos;, enable_tac_report)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="bc6d6e29-d810-464b-beda-6f8965d47795" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>start_threshold_percent = param(&apos;TC_parameters/Start_Threshold_Percent&apos;, 80)</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
@@ -1426,7 +1438,7 @@
                     <nestedSteps>
                         <item guid="2ad9a2eb-795c-4964-96c7-92d7cee1cc87" action="call" useFieldsInCommand="false">
                             <command>
-                                <body>execute_landslide_procedure -run_data_list [run_data_list] -session_capacity [session_capacity] -targeted_end_rate [targeted_end_rate] -testserver_number [testserver_number] -is_b2b [is_b2b] -running_node_id [running_node_id] -running_sba_id [running_sba_id] -node_run_data [node_run_data] -clean_up [clean_up] -timeout [test_waiting_timeout] -should_restart_sba [should_restart_sba] -node_run_data_sba [node_run_data_sba]</body>
+                                <body>execute_landslide_procedure -run_data_list [run_data_list] -session_capacity [session_capacity] -targeted_end_rate [targeted_end_rate] -testserver_number [testserver_number] -is_b2b [is_b2b] -running_node_id [running_node_id] -running_sba_id [running_sba_id] -node_run_data [node_run_data] -clean_up [clean_up] -timeout [test_waiting_timeout] -should_restart_sba [should_restart_sba] -node_run_data_sba [node_run_data_sba] -start_threshold_percent [start_threshold_percent]</body>
                             </command>
                             <postProcessing>
                                 <storeResponseAt>result_list</storeResponseAt>
@@ -1910,11 +1922,6 @@
                                                             <item actionId="PassTestIfNotAlreadyFailed">
                                                                 <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                             </item>
-                                                            <item actionId="DeclareExecutionIssue">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Information">
-                                                                    <message>KPIs and Favorite Measurements</message>
-                                                                </actionProperties>
-                                                            </item>
                                                         </actionsWhenTrue>
                                                     </ruleProperties>
                                                 </processorInfo>
@@ -2009,6 +2016,21 @@
                                                     </ruleProperties>
                                                 </processorInfo>
                                             </item>
+                                            <item>
+                                                <extractorInfo extractorType="query">
+                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                        <query>sba_favorites_measurements()</query>
+                                                    </extractorProperties>
+                                                </extractorInfo>
+                                                <processorInfo ruleType="store">
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                        <storageLocation>sba_favs</storageLocation>
+                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                    </ruleProperties>
+                                                </processorInfo>
+                                            </item>
                                         </analysisRules>
                                     </postProcessing>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
@@ -2018,6 +2040,14 @@
                                         <body>Print KPIs</body>
                                     </command>
                                     <nestedSteps>
+                                        <item guid="7b89c0e3-a608-4ef5-8638-2b2da9d0e8c4" action="message" useFieldsInCommand="false">
+                                            <command>
+                                                <body>Information:KPIs of Nodal:</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                <message inherit="false">KPIs of Nodal:</message>
+                                            </applicationProperties>
+                                        </item>
                                         <item guid="7464be34-f35b-4f88-af89-7b11ca9d8e94" action="call" useFieldsInCommand="false">
                                             <command>
                                                 <body>project://ai_LS_5G/utility_library/utils.fftc#print_extracted_data(data=instance_kpis, instance=last_idx)</body>
@@ -2032,6 +2062,28 @@
                                         <body>Print SBA measurements</body>
                                     </command>
                                     <nestedSteps>
+                                        <item guid="6d2746f3-7b0a-43a7-942f-f5ebfbcb837e" action="comment" useFieldsInCommand="false" skippReporting="false">
+                                            <command>
+                                                <body>Add &quot;---&quot;</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="0b1ebe64-a6f0-4204-87f5-5d1b19ca97f1" action="call" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>project://ai_LS_5G/utility_library/utils.fftc#insert_devider_string -length 70</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="3ba8d0aa-4965-4709-90fd-9bd7db610b24" action="message" useFieldsInCommand="false">
+                                            <command>
+                                                <body>Information:KPIs of SBA:</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                <message inherit="false">KPIs of SBA:</message>
+                                            </applicationProperties>
+                                        </item>
                                         <item guid="e52767ee-d160-4cd2-a7d2-8685c0b702cd" action="call" useFieldsInCommand="false">
                                             <command>
                                                 <body>project://ai_LS_5G/utility_library/utils.fftc#print_extracted_data(data=sba_kpis, instance=last_idx)</body>
@@ -2046,9 +2098,59 @@
                                         <body>Print favorites measurements</body>
                                     </command>
                                     <nestedSteps>
+                                        <item guid="7cdfeeba-0576-4205-a626-209636d882a2" action="comment" useFieldsInCommand="false" skippReporting="false">
+                                            <command>
+                                                <body>Add &quot;---&quot;</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="cca43a40-09d2-438e-9392-75d4c77e92b3" action="call" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>project://ai_LS_5G/utility_library/utils.fftc#insert_devider_string -length 70</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="285ebb1f-9035-4d2e-b05d-00aa589a1e90" action="message" useFieldsInCommand="false">
+                                            <command>
+                                                <body>Information:Favorites Measurements of Nodal:</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                <message inherit="false">Favorites Measurements of Nodal:</message>
+                                            </applicationProperties>
+                                        </item>
                                         <item guid="f01ece81-5752-49fd-b47d-c354b79e9d5c" action="call" useFieldsInCommand="false">
                                             <command>
                                                 <body>project://ai_LS_5G/utility_library/utils.fftc#print_extracted_data(data=instance_favs, instance=last_idx)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="d77f6555-69ab-4c6f-9bca-23e488e601d1" action="comment" useFieldsInCommand="false" skippReporting="false">
+                                            <command>
+                                                <body>Add &quot;---&quot;</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="79a0eff9-da83-4864-81ea-37b3488890b8" action="call" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>project://ai_LS_5G/utility_library/utils.fftc#insert_devider_string -length 70</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="8fb8bb92-d950-4227-886a-ddba8c06ea38" action="message" useFieldsInCommand="false">
+                                            <command>
+                                                <body>Information:Favorites Measurements of SBA:</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                <message inherit="false">Favorites Measurements of SBA:</message>
+                                            </applicationProperties>
+                                        </item>
+                                        <item guid="dca629b4-cd60-4b7a-9aa1-20bde411edce" action="call" useFieldsInCommand="false">
+                                            <command>
+                                                <body>project://ai_LS_5G/utility_library/utils.fftc#print_extracted_data(data=sba_favs, instance=last_idx)</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
@@ -3025,9 +3127,31 @@
                                                     </nestedSteps>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
+                                                <item guid="a725deca-7071-4867-aea9-93cc5f4b2613" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>start_threshold_percent = int(float(start_threshold_percent))</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="468247f3-422c-4f4f-843b-2bcb5aac2db7" action="if" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>start_threshold_percent != 80:</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="9c0dd725-d941-4997-90f8-dc97d42cabfb" action="message" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>Information:Run test instance with [start_threshold_percent]% of the target</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                                <message inherit="false">Run test instance with [start_threshold_percent]% of the target</message>
+                                                            </applicationProperties>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
                                                 <item guid="7fa9d654-0431-4b46-aee3-8a4e9e21ae24" action="eval" useFieldsInCommand="false">
                                                     <command>
-                                                        <body>t_load = math.ceil(int(session_capacity) * 80/100)</body>
+                                                        <body>t_load = math.ceil(int(session_capacity) * start_threshold_percent/100)</body>
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
@@ -3972,6 +4096,9 @@
                 </item>
                 <item name="timeout">
                     <defaultValue>180</defaultValue>
+                </item>
+                <item name="start_threshold_percent">
+                    <defaultValue>80</defaultValue>
                 </item>
             </arguments>
             <response>{}</response>
@@ -7043,7 +7170,7 @@
                     <nestedSteps>
                         <item guid="4548f126-e262-4bce-87ce-ae0d269d0b6e" action="add_favorites_to_KPIs" session="s1" useFieldsInCommand="false">
                             <command>
-                                <body>-running_id &quot;&quot; -favorites [favorite_measurements] -response [response] -skip_duplicate false</body>
+                                <body>-running_id &quot;&quot; -favorites [favorite_measurements] -favorites_key_name &quot;sba_favorites_measurements&quot; -response [response] -skip_duplicate false</body>
                             </command>
                             <postProcessing>
                                 <storeResponseAt>response</storeResponseAt>

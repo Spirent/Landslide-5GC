@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="8.7.0.202112171424">
+<testCase version="8.7.0.202112151246">
     <general>
         <documentation>E-5GC-1-CP: PDU Session Creation 1PDU per UE (low user plane traffic stateless) - Capacity Testing </documentation>
         <tags>B-2TS, B-3TS-RNH</tags>
@@ -227,7 +227,7 @@
                                         </item>
                                         <item guid="a757b467-8a15-4e27-b852-cca273e6845d" action="eval" useFieldsInCommand="false">
                                             <command>
-                                                <body>enable_remote = param(&apos;TC_parameters/Enable_RemoteNetworkHost&apos;, False)</body>
+                                                <body>enable_remote = str(param(&apos;TC_parameters/Enable_RemoteNetworkHost&apos;, False)).lower()</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
@@ -294,6 +294,12 @@
                                         <item guid="460edca8-6d33-41b6-aef9-364c2cf3b4da" action="eval" useFieldsInCommand="false">
                                             <command>
                                                 <body>enable_tac_report = param(&apos;TC_parameters/Enable_TAC_Report&apos;, enable_tac_report)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="6a8954dd-d1df-4e3a-9337-107348865b35" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>start_threshold_percent = param(&apos;TC_parameters/Start_Threshold_Percent&apos;, 80)</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
@@ -552,7 +558,7 @@
                                         </extractorInfo>
                                         <processorInfo ruleType="assert">
                                             <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                <expression>value == &quot;false&quot; and enable_remote == True</expression>
+                                                <expression>value == &quot;false&quot; and enable_remote == &quot;true&quot;</expression>
                                                 <actionsWhenTrue>
                                                     <item actionId="FailTest">
                                                         <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
@@ -710,6 +716,12 @@
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
+                        <item guid="e696928d-142b-4935-843a-ad6460c821f1" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>params = params + &quot;;TC_parameters/Start_Threshold_Percent:(50,80):false&quot;</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
                         <item guid="c4815e13-daa5-4d0e-acaf-17feeaadc75d" action="call" useFieldsInCommand="false">
                             <command>
                                 <body>project://ai_LS_5G/utility_library/utils.fftc#validate_params(params=params, validate_ts_percentage=&apos;true&apos;)</body>
@@ -828,7 +840,7 @@
                         </item>
                         <item guid="88ee954d-61dc-4d61-8b69-3e08a116c418" action="if" useFieldsInCommand="false">
                             <command>
-                                <body>enable_remote:</body>
+                                <body>enable_remote == &quot;true&quot;:</body>
                             </command>
                             <nestedSteps>
                                 <item guid="9eb88be8-9066-4b1b-acd6-c3f82278d53a" action="eval" useFieldsInCommand="false">
@@ -1425,7 +1437,7 @@
                     <nestedSteps>
                         <item guid="854fd8ac-7a39-404a-9d17-1e46d48ceac5" action="if" useFieldsInCommand="false">
                             <command>
-                                <body>enable_remote:</body>
+                                <body>enable_remote == &quot;true&quot;:</body>
                             </command>
                             <nestedSteps>
                                 <item guid="2131abe6-2ef7-4a03-a4cc-807718599023" action="comment" useFieldsInCommand="false">
@@ -1594,7 +1606,7 @@
                     <nestedSteps>
                         <item guid="894a67a6-263b-4c63-823f-19235f68b9ec" action="call" useFieldsInCommand="false">
                             <command>
-                                <body>execute_landslide_procedure -run_data_list [run_data_list] -session_capacity [session_capacity] -targeted_end_rate [targeted_end_rate] -instance_number [instance_number] -is_b2b [is_b2b] -running_node_id [running_node_id] -node_run_data [node_run_data] -restart_sut [restart_sut] -percentage_list [percentage_list] -clean_up [clean_up] -timeout [test_waiting_timeout] -remote_run_data [remote_testsession_data]</body>
+                                <body>execute_landslide_procedure -run_data_list [run_data_list] -session_capacity [session_capacity] -targeted_end_rate [targeted_end_rate] -instance_number [instance_number] -is_b2b [is_b2b] -running_node_id [running_node_id] -node_run_data [node_run_data] -restart_sut [restart_sut] -percentage_list [percentage_list] -clean_up [clean_up] -timeout [test_waiting_timeout] -remote_run_data [remote_testsession_data] -start_threshold_percent [start_threshold_percent]</body>
                             </command>
                             <postProcessing>
                                 <storeResponseAt>result_list</storeResponseAt>
@@ -1867,7 +1879,7 @@
                         </item>
                         <item guid="34d9725d-eb55-4341-9a0e-2a85d76f8e96" action="if" useFieldsInCommand="false">
                             <command>
-                                <body>len(last_success_list) &gt; 0:</body>
+                                <body>len(last_success_list) &gt; 0 and info(&apos;status&apos;) != &quot;Fail&quot;:</body>
                             </command>
                             <nestedSteps>
                                 <item guid="2ffcc844-fd2b-4ca4-8748-f8ab08e6412a" action="eval" useFieldsInCommand="false">
@@ -1931,20 +1943,6 @@
                                         <message inherit="false">Number of Nodal Instance: [instance_number]</message>
                                     </applicationProperties>
                                 </item>
-                                <item guid="327baf8a-8fb3-4085-a40c-8d85cf1f3325" action="comment" useFieldsInCommand="false">
-                                    <command>
-                                        <body>Add &quot;---&quot;</body>
-                                    </command>
-                                    <nestedSteps>
-                                        <item guid="9564be95-8a96-4506-8555-240ad90f2fa5" action="call" useFieldsInCommand="false">
-                                            <command>
-                                                <body>project://ai_LS_5G/utility_library/utils.fftc#insert_devider_string -length 135</body>
-                                            </command>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                    </nestedSteps>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
                             </nestedSteps>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
@@ -1959,6 +1957,20 @@
                                 <body>info(&apos;status&apos;) != &quot;Fail&quot;:</body>
                             </command>
                             <nestedSteps>
+                                <item guid="93ec9db6-33fc-421b-8abb-4fe8a06a4341" action="comment" useFieldsInCommand="false">
+                                    <command>
+                                        <body>Add &quot;---&quot;</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="3c3bcb03-302f-484d-89dd-83b914d1aca2" action="call" useFieldsInCommand="false">
+                                            <command>
+                                                <body>project://ai_LS_5G/utility_library/utils.fftc#insert_devider_string -length 135</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
                                 <item guid="2c7fb864-e71f-455a-ae72-d3ea9988f096" action="while" useFieldsInCommand="false">
                                     <command>
                                         <body>last_idx &lt;  len(last_success_list):</body>
@@ -2218,10 +2230,18 @@
                         <body>Show charts</body>
                     </command>
                     <nestedSteps>
-                        <item guid="526398d4-a872-461b-a525-ad2563a4958b" action="call" useFieldsInCommand="false">
+                        <item guid="d1789f92-343e-4502-b44a-cc7bcb4b7190" action="if" useFieldsInCommand="false">
                             <command>
-                                <body>build_charts -reportData [result_list]</body>
+                                <body>info(&apos;status&apos;) != &quot;Fail&quot;:</body>
                             </command>
+                            <nestedSteps>
+                                <item guid="526398d4-a872-461b-a525-ad2563a4958b" action="call" useFieldsInCommand="false">
+                                    <command>
+                                        <body>build_charts -reportData [result_list]</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
                     </nestedSteps>
@@ -2423,26 +2443,6 @@
         </item>
         <item name="execute_landslide_procedure" isPublic="true">
             <steps>
-                <item guid="ae058a02-5ea4-43e8-9a25-8f3ee6a24f3f" action="comment" useFieldsInCommand="false">
-                    <command>
-                        <body>Create node running test list</body>
-                    </command>
-                    <nestedSteps>
-                        <item guid="e5a614f6-ef22-4613-b645-8cbd2d4c7aad" action="eval" useFieldsInCommand="false">
-                            <command>
-                                <body>node_running_id_list = []</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="1f2d816e-de1d-4dc3-b802-c1a87753e6cf" action="eval" useFieldsInCommand="false">
-                            <command>
-                                <body>node_running_id_list.append(running_node_id)</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                    </nestedSteps>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
                 <item guid="e4fd0b23-4ae4-439e-9198-dac142a8e886" action="comment" useFieldsInCommand="false">
                     <command>
                         <body>Create JSON response</body>
@@ -2481,33 +2481,52 @@
                 </item>
                 <item guid="8ad7451f-1ad4-4bbd-822e-d0e7471d682a" action="comment" useFieldsInCommand="false">
                     <command>
-                        <body>Run Sanity Checking</body>
+                        <body>Run Sanity Checking or 100%</body>
                     </command>
                     <nestedSteps>
-                        <item guid="51c6689c-f8a8-42cc-ad1c-1a6437a4a94f" action="eval" useFieldsInCommand="false">
+                        <item guid="10d90b23-521d-4c76-86e2-b045b6f35b6e" action="eval" useFieldsInCommand="false">
                             <command>
-                                <body>t_load = 1</body>
+                                <body>array_index = 0</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
-                        <item guid="3049bb1e-1066-4bc2-9fe4-c2f6f1c66a43" action="eval" useFieldsInCommand="false">
+                        <item guid="50dd66e8-2148-414f-a388-247f93e9a3a3" action="eval" useFieldsInCommand="false">
                             <command>
-                                <body>t_rate = 1</body>
+                                <body>optimistic_mode = str(param(&apos;TC_parameters/Optimistic_Mode&apos;, False)).lower()</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
-                        <item guid="c97d787b-6ec8-4e9d-870c-7f30164d216c" action="eval" useFieldsInCommand="false">
+                        <item guid="79b0c544-3416-41d2-beb7-ee424225e016" action="if" useFieldsInCommand="false">
                             <command>
-                                <body>enable_port_capture = param(&apos;TC_parameters/Enable_Port_Capture&apos;, &apos;False&apos;)</body>
+                                <body>optimistic_mode == &apos;true&apos;:</body>
                             </command>
+                            <nestedSteps>
+                                <item guid="51a21250-7423-4d99-a1e5-03fd4497ef56" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>switch_flag = 2</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
-                        <item guid="9f01185e-d13f-4a27-8740-d5bf83450259" action="comment" useFieldsInCommand="false">
+                        <item guid="fbc077d1-a827-410b-be32-d732590e0403" action="else" useFieldsInCommand="false">
+                            <nestedSteps>
+                                <item guid="6ae5c081-b93f-4b9f-b6fa-028553e02cf4" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>switch_flag = 1</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="e2699162-1970-48c4-90e2-0118ea7c7f17" action="comment" useFieldsInCommand="false">
                             <command>
                                 <body>Add &quot;---&quot;</body>
                             </command>
                             <nestedSteps>
-                                <item guid="055f373e-17e5-4adb-9926-abef88818c31" action="call" useFieldsInCommand="false">
+                                <item guid="01c2a0c1-811e-43d6-9422-47e5451cad86" action="call" useFieldsInCommand="false">
                                     <command>
                                         <body>project://ai_LS_5G/utility_library/utils.fftc#insert_devider_string -length 135</body>
                                     </command>
@@ -2516,257 +2535,282 @@
                             </nestedSteps>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
-                        <item guid="f3abda71-f1de-4538-a684-a851ca0469f1" action="call" useFieldsInCommand="false">
+                        <item guid="57b920e1-463f-465f-9874-946cbfca25bd" action="while" useFieldsInCommand="false">
                             <command>
-                                <body>execute_nodal_tests -run_data_list [run_data_list] -session_capacity [t_load] -targeted_end_rate [t_rate] -instance_number [instance_number] -enable_port_capture [enable_port_capture] -is_b2b [is_b2b] -timeout [timeout] -percentage_list [percentage_list] -remote_run_data [remote_run_data]</body>
-                            </command>
-                            <postProcessing>
-                                <analysisRules>
-                                    <item>
-                                        <extractorInfo extractorType="contains">
-                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.ExtractorContainsPropertyGroup">
-                                                <searchString>&quot;result&quot;:&quot;FAIL&quot;</searchString>
-                                            </extractorProperties>
-                                        </extractorInfo>
-                                        <processorInfo ruleType="assert">
-                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                <expression>value == 1</expression>
-                                                <actionsWhenTrue>
-                                                    <item actionId="Eval">
-                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                            <statement>kpi_pass = False</statement>
-                                                        </actionProperties>
-                                                    </item>
-                                                </actionsWhenTrue>
-                                                <actionsWhenFalse>
-                                                    <item actionId="Eval">
-                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                            <statement>kpi_pass = True</statement>
-                                                        </actionProperties>
-                                                    </item>
-                                                </actionsWhenFalse>
-                                            </ruleProperties>
-                                        </processorInfo>
-                                    </item>
-                                    <item>
-                                        <extractorInfo extractorType="contains">
-                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.ExtractorContainsPropertyGroup">
-                                                <searchString>&quot;nodal_state&quot;:&quot;error&quot;</searchString>
-                                            </extractorProperties>
-                                        </extractorInfo>
-                                        <processorInfo ruleType="assert">
-                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                <expression>value == 1</expression>
-                                                <actionsWhenTrue>
-                                                    <item actionId="Eval">
-                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                            <statement>should_abort = &quot;true&quot;</statement>
-                                                        </actionProperties>
-                                                    </item>
-                                                </actionsWhenTrue>
-                                                <actionsWhenFalse>
-                                                    <item actionId="Eval">
-                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                            <statement>should_abort = &quot;false&quot;</statement>
-                                                        </actionProperties>
-                                                    </item>
-                                                </actionsWhenFalse>
-                                            </ruleProperties>
-                                        </processorInfo>
-                                    </item>
-                                    <item>
-                                        <extractorInfo extractorType="query">
-                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                <query>count(mapped/Json/reason)</query>
-                                            </extractorProperties>
-                                        </extractorInfo>
-                                        <processorInfo ruleType="assert">
-                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                <expression>int(value) &gt; 0</expression>
-                                                <actionsWhenTrue>
-                                                    <item actionId="Eval">
-                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                            <statement>error = True</statement>
-                                                        </actionProperties>
-                                                    </item>
-                                                </actionsWhenTrue>
-                                                <actionsWhenFalse>
-                                                    <item actionId="Eval">
-                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                            <statement>error = False</statement>
-                                                        </actionProperties>
-                                                    </item>
-                                                    <item actionId="SkipRemainingRules">
-                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                    </item>
-                                                </actionsWhenFalse>
-                                            </ruleProperties>
-                                        </processorInfo>
-                                    </item>
-                                    <item>
-                                        <extractorInfo extractorType="query">
-                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                <query>running_nodal_ids()</query>
-                                            </extractorProperties>
-                                        </extractorInfo>
-                                        <processorInfo ruleType="store">
-                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
-                                                <storageLocation>running_nodal_ids</storageLocation>
-                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
-                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
-                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
-                                            </ruleProperties>
-                                        </processorInfo>
-                                    </item>
-                                </analysisRules>
-                                <storeResponseAt>kpis_list</storeResponseAt>
-                                <storeResponseText>true</storeResponseText>
-                            </postProcessing>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="9036af80-968f-4f83-8af3-49c880773d53" action="if" useFieldsInCommand="false">
-                            <command>
-                                <body>error:</body>
+                                <body>switch_flag != 0:</body>
                             </command>
                             <nestedSteps>
-                                <item guid="90f249dc-315b-4db8-87ae-9333dc716e90" action="show_error_and_cleanup" session="s1" useFieldsInCommand="false">
+                                <item guid="bcc83e7d-3199-44db-b4b7-c0d493eb037d" action="if" useFieldsInCommand="false">
                                     <command>
-                                        <body>-message [kpis_list] -running_node_id [running_node_id] -running_ids [running_nodal_ids] -clean_up [clean_up]</body>
+                                        <body>switch_flag == 1:</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="60bf603a-42cb-47a4-88ed-c65cbfd407a1" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>t_load = 1</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="fef2eca0-3c11-410c-a41a-1d7c0f01efe6" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>t_rate = 1</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="74dcfad7-92fe-4923-ade4-3d3bff938c9c" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>enable_port_capture = param(&apos;TC_parameters/Enable_Port_Capture&apos;, &apos;False&apos;)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="0f8e217f-ed87-441b-8e65-061e3f3bd451" action="else" useFieldsInCommand="false">
+                                    <nestedSteps>
+                                        <item guid="bccb0cac-cd05-4856-b996-8a2de6fce7c0" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>t_load = int(session_capacity)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="c4ff15b4-5734-4862-838c-78e1a552b126" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>t_rate = int(targeted_end_rate)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="a7fbe12d-3a8f-4008-be5a-dc44c30e205c" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>enable_port_capture = &apos;False&apos;</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="f6b57059-a0de-46dc-b38d-450a0e555aa7" action="call" useFieldsInCommand="false">
+                                            <command>
+                                                <body>project://ai_LS_5G/utility_library/utils.fftc#validate_percentage_list(percentage_list=percentage_list, session_capacity=session_capacity, targeted_end_rate=targeted_end_rate, threshold_percent=100, min_number_for_threshold=0)</body>
+                                            </command>
+                                            <postProcessing>
+                                                <storeResponseAt>is_valid</storeResponseAt>
+                                                <storeResponseText>true</storeResponseText>
+                                            </postProcessing>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="f62ee108-1aa1-4ff9-84ea-09daf56068fe" action="if" useFieldsInCommand="false">
+                                            <command>
+                                                <body>not is_valid:</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="798b79ed-3745-4c71-97ab-84758d011831" action="if" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>is_b2b == &quot;true&quot; and running_node_id:</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="c3b77b95-fe85-4dd0-9a42-4b2fe17fae19" action="stop_or_abort_test" session="s1" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>-running_id [running_node_id] -abort true -clean_up [clean_up] -timeout [timeout]</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="69752301-f200-4592-9ed1-81077fc9fe55" action="exit" useFieldsInCommand="false">
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="80af2d20-66c1-4e4f-9f0a-361dc37c2bdd" action="call" useFieldsInCommand="false">
+                                    <command>
+                                        <body>execute_nodal_tests -run_data_list [run_data_list] -session_capacity [t_load] -targeted_end_rate [t_rate] -instance_number [instance_number] -enable_port_capture [enable_port_capture] -is_b2b [is_b2b] -timeout [timeout] -percentage_list [percentage_list] -remote_run_data [remote_run_data]</body>
                                     </command>
                                     <postProcessing>
                                         <analysisRules>
                                             <item>
-                                                <extractorInfo extractorType="none">
-                                                    <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                                <extractorInfo extractorType="contains">
+                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.ExtractorContainsPropertyGroup">
+                                                        <searchString>&quot;result&quot;:&quot;FAIL&quot;</searchString>
+                                                    </extractorProperties>
                                                 </extractorInfo>
                                                 <processorInfo ruleType="assert">
                                                     <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                        <expression>False</expression>
+                                                        <expression>value == 1</expression>
+                                                        <actionsWhenTrue>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>kpi_pass = False</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                        </actionsWhenTrue>
                                                         <actionsWhenFalse>
-                                                            <item actionId="FailTest">
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>kpi_pass = True</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                        </actionsWhenFalse>
+                                                    </ruleProperties>
+                                                </processorInfo>
+                                            </item>
+                                            <item>
+                                                <extractorInfo extractorType="contains">
+                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.ExtractorContainsPropertyGroup">
+                                                        <searchString>&quot;nodal_state&quot;:&quot;error&quot;</searchString>
+                                                    </extractorProperties>
+                                                </extractorInfo>
+                                                <processorInfo ruleType="assert">
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                        <expression>value == 1</expression>
+                                                        <actionsWhenTrue>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>should_abort = &quot;true&quot;</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                        </actionsWhenTrue>
+                                                        <actionsWhenFalse>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>should_abort = &quot;false&quot;</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                        </actionsWhenFalse>
+                                                    </ruleProperties>
+                                                </processorInfo>
+                                            </item>
+                                            <item>
+                                                <extractorInfo extractorType="query">
+                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                        <query>count(mapped/Json/reason)</query>
+                                                    </extractorProperties>
+                                                </extractorInfo>
+                                                <processorInfo ruleType="assert">
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                        <expression>int(value) &gt; 0</expression>
+                                                        <actionsWhenTrue>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>error = True</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                        </actionsWhenTrue>
+                                                        <actionsWhenFalse>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>error = False</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                            <item actionId="SkipRemainingRules">
                                                                 <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                             </item>
                                                         </actionsWhenFalse>
                                                     </ruleProperties>
                                                 </processorInfo>
                                             </item>
+                                            <item>
+                                                <extractorInfo extractorType="query">
+                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                        <query>running_nodal_ids()</query>
+                                                    </extractorProperties>
+                                                </extractorInfo>
+                                                <processorInfo ruleType="store">
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                        <storageLocation>running_nodal_ids</storageLocation>
+                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                    </ruleProperties>
+                                                </processorInfo>
+                                            </item>
                                         </analysisRules>
-                                    </postProcessing>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                                <item guid="6b14745f-06f3-4b5b-a81d-5c74f19c5494" action="exit" useFieldsInCommand="false">
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                            </nestedSteps>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                    </nestedSteps>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="7283739e-7051-4e54-bc78-aa254e08d4c0" action="comment" useFieldsInCommand="false">
-                    <command>
-                        <body>Add Sanity checking result to response</body>
-                    </command>
-                    <nestedSteps>
-                        <item guid="848d8d25-40ac-4640-bafa-160b48c5fd69" action="for" useFieldsInCommand="false">
-                            <command>
-                                <body>i in range(0, int(instance_number)):</body>
-                            </command>
-                            <nestedSteps>
-                                <item guid="a40417ed-d9b3-49b7-a8e1-d3230e28960d" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>kpis = kpis_list[i]</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                                <item guid="0d32d475-09ee-4fbb-be73-111c02453a20" action="json" useFieldsInCommand="false">
-                                    <command>
-                                        <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;response&apos;, pathValue=&apos;{&quot;\\\\[[i]]/\\\\[0]&quot;:[kpis]}&apos;</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
-                                        <action inherit="false">addJsonNode</action>
-                                        <pathValue inherit="false" sub="true">{&quot;\\[[i]]/\\[0]&quot;:[kpis]}</pathValue>
-                                        <documentName inherit="false">response</documentName>
-                                    </applicationProperties>
-                                </item>
-                            </nestedSteps>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                    </nestedSteps>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="348fbed2-8a42-405c-acf6-d30b03e09d99" action="comment" useFieldsInCommand="false">
-                    <command>
-                        <body>Increase Session Capacity and repeat if KPI passed</body>
-                    </command>
-                    <nestedSteps>
-                        <item guid="62339bc5-ccad-4991-b6e5-3b39e49e7bad" action="if" useFieldsInCommand="false">
-                            <command>
-                                <body>kpi_pass:</body>
-                            </command>
-                            <nestedSteps>
-                                <item guid="9863f4c6-ea1a-4d73-9328-66c866959089" action="call" useFieldsInCommand="false">
-                                    <command>
-                                        <body>project://ai_LS_5G/utility_library/utils.fftc#validate_percentage_list(percentage_list=percentage_list, session_capacity=session_capacity, targeted_end_rate=targeted_end_rate)</body>
-                                    </command>
-                                    <postProcessing>
-                                        <storeResponseAt>is_valid</storeResponseAt>
+                                        <storeResponseAt>kpis_list</storeResponseAt>
                                         <storeResponseText>true</storeResponseText>
                                     </postProcessing>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
-                                <item guid="48390c82-cc3f-48b9-ab67-4b298c1f943c" action="if" useFieldsInCommand="false">
+                                <item guid="00a5f7a2-d58b-4d10-bbe5-2f1a3340f08d" action="if" useFieldsInCommand="false">
                                     <command>
-                                        <body>int(session_capacity) &gt; 1 and is_valid:</body>
+                                        <body>error:</body>
                                     </command>
                                     <nestedSteps>
-                                        <item guid="c22366aa-0ce3-4ded-906a-2c624ef3698c" action="comment" useFieldsInCommand="false">
+                                        <item guid="088c2787-1c25-4581-8c14-5e2c1e9a4702" action="show_error_and_cleanup" session="s1" useFieldsInCommand="false">
                                             <command>
-                                                <body>Restart SUT for B2B testing or store running id list for E2E</body>
+                                                <body>-message [kpis_list] -running_node_id [running_node_id] -running_ids [running_nodal_ids] -clean_up [clean_up] -set_test_fail false</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="359095e9-0d71-4a93-bdae-e63e0eaff844" action="if" useFieldsInCommand="false">
+                                            <command>
+                                                <body>switch_flag == 1:</body>
                                             </command>
                                             <nestedSteps>
-                                                <item guid="e35210a1-2ef5-4930-b286-c0fc7e386144" action="eval" useFieldsInCommand="false">
+                                                <item guid="6c73f1fc-8039-4a6b-81a9-699f7591a6d5" action="eval" useFieldsInCommand="false">
                                                     <command>
-                                                        <body>running_id_list = []</body>
+                                                        <body>print(&quot;True&quot;)</body>
                                                     </command>
+                                                    <postProcessing>
+                                                        <analysisRules>
+                                                            <item>
+                                                                <extractorInfo extractorType="none">
+                                                                    <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                                                </extractorInfo>
+                                                                <processorInfo ruleType="assert">
+                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                        <expression>False</expression>
+                                                                        <actionsWhenFalse>
+                                                                            <item actionId="FailTest">
+                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                            </item>
+                                                                        </actionsWhenFalse>
+                                                                    </ruleProperties>
+                                                                </processorInfo>
+                                                            </item>
+                                                        </analysisRules>
+                                                    </postProcessing>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
-                                                <item guid="d992bfb5-7c3b-48c4-93ec-c0fa08a9d893" action="if" useFieldsInCommand="false">
+                                                <item guid="69cd07c4-13d8-4c9c-8b67-d90acac9c163" action="exit" useFieldsInCommand="false">
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="c0c1d38d-8e0c-417f-90d7-7ccf13a7b47f" action="else" useFieldsInCommand="false">
+                                            <nestedSteps>
+                                                <item guid="a0c46c02-9ee5-4bc8-ad40-a787b6599934" action="comment" useFieldsInCommand="false">
                                                     <command>
-                                                        <body>is_b2b == &quot;true&quot; and running_node_id and node_run_data and restart_sut == &quot;true&quot;:</body>
+                                                        <body>Switch floag to 1 to run sanity checking and restart SUT</body>
                                                     </command>
                                                     <nestedSteps>
-                                                        <item guid="ad907379-96d5-4467-b535-9fb37a3637c9" action="comment" useFieldsInCommand="false">
+                                                        <item guid="3cd45bd5-1f82-4d3f-9966-f620ebac2194" action="eval" useFieldsInCommand="false">
                                                             <command>
-                                                                <body>Restart Node Test</body>
+                                                                <body>switch_flag = 1</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="6eb42f73-0039-48d1-97e0-bac5af981cd1" action="comment" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>Restart SUT for B2B testing</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="3d04afb5-045c-4859-8550-c3453ffdc76f" action="if" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>is_b2b == &quot;true&quot; and running_node_id and node_run_data and restart_sut == &quot;true&quot;:</body>
                                                             </command>
                                                             <nestedSteps>
-                                                                <item guid="13ee0891-1fb9-48d7-b286-c3ce3ff937b6" action="comment" useFieldsInCommand="false">
+                                                                <item guid="52534ea9-b39d-4ed8-980a-4427c1350aff" action="comment" useFieldsInCommand="false">
                                                                     <command>
-                                                                        <body>Stop running SUT session</body>
+                                                                        <body>Start SUT again</body>
                                                                     </command>
                                                                     <nestedSteps>
-                                                                        <item guid="06534de0-e01c-43d1-ab0f-884d70b2c49f" action="stop_or_abort_test" session="s1" useFieldsInCommand="false">
-                                                                            <command>
-                                                                                <body>-running_id [running_node_id] -abort [should_abort] -timeout 180</body>
-                                                                            </command>
-                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                        </item>
-                                                                        <item guid="2037bb48-6864-40ee-bb5f-835600b9ddf3" action="eval" useFieldsInCommand="false">
-                                                                            <command>
-                                                                                <body>should_abort = &quot;false&quot;</body>
-                                                                            </command>
-                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                        </item>
-                                                                    </nestedSteps>
-                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                </item>
-                                                                <item guid="ab3f73ab-2b6e-4521-991b-a99f095afacb" action="comment" useFieldsInCommand="false">
-                                                                    <command>
-                                                                        <body>Start SUT test again</body>
-                                                                    </command>
-                                                                    <nestedSteps>
-                                                                        <item guid="4cb4ecd2-8fc2-451a-926a-9fff97d6bc1b" action="run_test_using_run_data" session="s1" useFieldsInCommand="false">
+                                                                        <item guid="7dee6dc2-a6e1-48a8-9292-81e538bfccf2" action="run_test_using_run_data" session="s1" useFieldsInCommand="false">
                                                                             <command>
                                                                                 <body>-run_data [node_run_data]</body>
                                                                             </command>
@@ -2822,40 +2866,18 @@
                                                                             </postProcessing>
                                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                         </item>
-                                                                        <item guid="c6464bf6-40eb-4b75-81d2-9a5c4e599bba" action="if" useFieldsInCommand="false">
+                                                                        <item guid="f4451cd5-c7f4-4a2c-96ac-563bfccfb33a" action="if" useFieldsInCommand="false">
                                                                             <command>
                                                                                 <body>error:</body>
                                                                             </command>
                                                                             <nestedSteps>
-                                                                                <item guid="0892a5b8-f7f8-4b99-ba14-6ca3ca99b3b1" action="show_error_and_cleanup" session="s1" useFieldsInCommand="false">
+                                                                                <item guid="553cd8e3-1072-4f4f-8921-e10dcf47bece" action="show_error_and_cleanup" session="s1" useFieldsInCommand="false">
                                                                                     <command>
                                                                                         <body>-message [node_response]</body>
                                                                                     </command>
                                                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                                 </item>
-                                                                                <item guid="bc669406-0b30-4331-b7bf-e80eb8b12be5" action="comment" useFieldsInCommand="false">
-                                                                                    <command>
-                                                                                        <body>Delete all node running test</body>
-                                                                                    </command>
-                                                                                    <nestedSteps>
-                                                                                        <item guid="7def8640-d1be-4db2-8704-933fc31c7349" action="if" useFieldsInCommand="false">
-                                                                                            <command>
-                                                                                                <body>clean_up == &quot;true&quot;:</body>
-                                                                                            </command>
-                                                                                            <nestedSteps>
-                                                                                                <item guid="97da1cc5-9e95-4c86-9f3e-485d63d87001" action="delete_running_tests" session="s1" useFieldsInCommand="false">
-                                                                                                    <command>
-                                                                                                        <body>-running_id_list [node_running_id_list]</body>
-                                                                                                    </command>
-                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                                </item>
-                                                                                            </nestedSteps>
-                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                        </item>
-                                                                                    </nestedSteps>
-                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                </item>
-                                                                                <item guid="0620df68-fe80-4ad9-81bb-be46939e5037" action="return">
+                                                                                <item guid="e1bfde37-7ca9-433a-8eea-702a9976c308" action="return">
                                                                                     <command>
                                                                                         <body>[response]</body>
                                                                                     </command>
@@ -2864,16 +2886,273 @@
                                                                             </nestedSteps>
                                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                         </item>
-                                                                        <item guid="87afc304-c8d7-4903-8910-1f876e6f6c49" action="waiting_for_test_get_expected_state" session="s1" useFieldsInCommand="false">
+                                                                        <item guid="de715f42-7d66-4834-aca4-3b46c1cefdfa" action="waiting_for_test_get_expected_state" session="s1" useFieldsInCommand="false">
                                                                             <command>
                                                                                 <body>-running_test_id [running_node_id] -expected_state RUNNING -time_out [timeout]</body>
                                                                             </command>
                                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                         </item>
-                                                                        <item guid="4c7ae77d-8138-4513-8d69-b80f3b7a53e2" action="eval" useFieldsInCommand="false">
+                                                                    </nestedSteps>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                            </nestedSteps>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="d453c1b9-e5e4-4f25-9539-6dbae1b889bf" action="continue" useFieldsInCommand="false">
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="5c8e452f-5c35-4e87-8bc5-e272ebc4a931" action="if" useFieldsInCommand="false">
+                                    <command>
+                                        <body>switch_flag == 2:</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="270fca33-e84a-4553-90ad-f0c98428d8b7" action="comment" useFieldsInCommand="false">
+                                            <command>
+                                                <body>Add 100% checking result to response</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="90f5fef3-8518-43cd-a4db-1120630bf0f4" action="for" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>i in range(0, int(instance_number)):</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="1ba879ff-8cb0-46ba-9927-bad3ccb61b39" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>kpis = kpis_list[i]</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="17c368c6-ad4e-46e8-80e1-ad5dca6c6afb" action="json" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;response&apos;, pathValue=&apos;{&quot;\\\\[[i]]/\\\\[0]&quot;:[kpis]}&apos;</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                                <action inherit="false">addJsonNode</action>
+                                                                <pathValue inherit="false" sub="true">{&quot;\\[[i]]/\\[0]&quot;:[kpis]}</pathValue>
+                                                                <documentName inherit="false">response</documentName>
+                                                            </applicationProperties>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="62795e6f-d772-4fe8-baba-ab417363f314" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>array_index += 1</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="59b3456f-f9d5-4b99-9077-efaa379698b3" action="if" useFieldsInCommand="false">
+                                            <command>
+                                                <body>kpi_pass:</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="668e9a71-4fb8-4765-b5d1-04e5c9a61d26" action="comment" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>Stop SUT session if B2B testing</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="d2a20256-2dd9-4349-bf13-4f4bbd2ea376" action="if" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>is_b2b == &quot;true&quot;:</body>
+                                                            </command>
+                                                            <nestedSteps>
+                                                                <item guid="1d4e23f5-1fb0-4a26-83c9-98e6a694f1f7" action="stop_or_abort_test" session="s1" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>-running_id [running_node_id] -abort [should_abort] -clean_up [clean_up] -timeout [timeout]</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                            </nestedSteps>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="06a7c98e-c2c5-4ecc-abb1-85c2a9fcc257" action="else" useFieldsInCommand="false">
+                                                            <nestedSteps>
+                                                                <item guid="67109fe2-0357-4785-9331-301cda95b89a" action="comment" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>// TODO: Implement for E2E</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                            </nestedSteps>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="945ea125-165a-42bb-b6d4-52fec9f67dc1" action="return">
+                                                    <command>
+                                                        <body>[response]</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="6738a231-70d8-4b66-b484-d0bbbf6db9f8" action="else" useFieldsInCommand="false">
+                                            <nestedSteps>
+                                                <item guid="7f0dc723-c952-4ae0-b36d-e51ceb7e0bea" action="comment" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>Set last kpis list</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="2c696c69-82d3-4f8d-9778-2c9a4e29c308" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>last_kpis_list = kpis_list</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="4b90f275-a039-4bd1-8e21-57ae5db9f016" action="comment" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>Switch floag to 1 to run sanity checking and restart SUT</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="002610ae-9070-4481-abe3-6db1cc6207cf" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>switch_flag = 1</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="5f4ae454-d24d-40a2-828f-4e28b884587a" action="comment" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>Restart SUT for B2B testing</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="bad1c404-d018-4417-b4ea-647e31f061c5" action="if" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>is_b2b == &quot;true&quot; and running_node_id and node_run_data and restart_sut == &quot;true&quot;:</body>
+                                                            </command>
+                                                            <nestedSteps>
+                                                                <item guid="4faec8d7-4f87-4451-addc-daf4b0c6404b" action="comment" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>Restart Node Test</body>
+                                                                    </command>
+                                                                    <nestedSteps>
+                                                                        <item guid="8fb09b92-a1ce-4e50-afd4-222f3cd7f465" action="comment" useFieldsInCommand="false">
                                                                             <command>
-                                                                                <body>node_running_id_list.append(running_node_id)</body>
+                                                                                <body>Stop running SUT session</body>
                                                                             </command>
+                                                                            <nestedSteps>
+                                                                                <item guid="6bda4061-7a47-4bbc-becd-114821b19102" action="stop_or_abort_test" session="s1" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>-running_id [running_node_id] -abort [should_abort] -timeout [timeout]</body>
+                                                                                    </command>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                                <item guid="7eb99ebe-6ac3-4556-ba71-5860b634de01" action="eval" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>should_abort = &quot;false&quot;</body>
+                                                                                    </command>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                            </nestedSteps>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                        <item guid="38503a03-45bd-46e8-9a25-2d17a8ec3ee6" action="comment" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>Start SUT again</body>
+                                                                            </command>
+                                                                            <nestedSteps>
+                                                                                <item guid="b99cd04a-642d-4e97-b5e7-eb5c47ed54df" action="run_test_using_run_data" session="s1" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>-run_data [node_run_data]</body>
+                                                                                    </command>
+                                                                                    <postProcessing>
+                                                                                        <analysisRules>
+                                                                                            <item>
+                                                                                                <extractorInfo extractorType="query">
+                                                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                        <query>count(mapped/Json/runId)</query>
+                                                                                                    </extractorProperties>
+                                                                                                </extractorInfo>
+                                                                                                <processorInfo ruleType="assert">
+                                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                                        <expression>int(value) &gt; 0</expression>
+                                                                                                        <actionsWhenTrue>
+                                                                                                            <item actionId="Eval">
+                                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                                                    <statement>error = False</statement>
+                                                                                                                </actionProperties>
+                                                                                                            </item>
+                                                                                                        </actionsWhenTrue>
+                                                                                                        <actionsWhenFalse>
+                                                                                                            <item actionId="Eval">
+                                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                                                    <statement>error = True</statement>
+                                                                                                                </actionProperties>
+                                                                                                            </item>
+                                                                                                            <item actionId="SkipRemainingRules">
+                                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                            </item>
+                                                                                                        </actionsWhenFalse>
+                                                                                                    </ruleProperties>
+                                                                                                </processorInfo>
+                                                                                            </item>
+                                                                                            <item>
+                                                                                                <extractorInfo extractorType="query">
+                                                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                        <query>runId()</query>
+                                                                                                    </extractorProperties>
+                                                                                                </extractorInfo>
+                                                                                                <processorInfo ruleType="store">
+                                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                                                        <storageLocation>running_node_id</storageLocation>
+                                                                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                                                                    </ruleProperties>
+                                                                                                </processorInfo>
+                                                                                            </item>
+                                                                                        </analysisRules>
+                                                                                        <storeResponseAt>node_response</storeResponseAt>
+                                                                                        <storeResponseText>true</storeResponseText>
+                                                                                    </postProcessing>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                                <item guid="010dc6b0-ed79-4314-bfeb-a44a79381455" action="if" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>error:</body>
+                                                                                    </command>
+                                                                                    <nestedSteps>
+                                                                                        <item guid="d8ef53db-ae30-4e8c-98c2-2183b00d5d85" action="show_error_and_cleanup" session="s1" useFieldsInCommand="false">
+                                                                                            <command>
+                                                                                                <body>-message [node_response]</body>
+                                                                                            </command>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                        <item guid="dd3acf97-3876-4675-9781-ad635da595d4" action="return">
+                                                                                            <command>
+                                                                                                <body>[response]</body>
+                                                                                            </command>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                    </nestedSteps>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                                <item guid="d27e1927-241d-46de-928e-04c6abfccb3c" action="waiting_for_test_get_expected_state" session="s1" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>-running_test_id [running_node_id] -expected_state RUNNING -time_out [timeout]</body>
+                                                                                    </command>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                            </nestedSteps>
                                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                         </item>
                                                                     </nestedSteps>
@@ -2888,14 +3167,113 @@
                                             </nestedSteps>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="e1047c1f-fa52-45c4-87dd-f8cacf2ef3f3" action="else" useFieldsInCommand="false">
+                                    <nestedSteps>
+                                        <item guid="af3726c2-8189-46c1-a122-f99e0580c2f6" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>switch_flag = 0</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="7283739e-7051-4e54-bc78-aa254e08d4c0" action="comment" useFieldsInCommand="false">
+                    <command>
+                        <body>Add Sanity checking result to response</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="848d8d25-40ac-4640-bafa-160b48c5fd69" action="for" useFieldsInCommand="false">
+                            <command>
+                                <body>i in range(0, int(instance_number)):</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="a40417ed-d9b3-49b7-a8e1-d3230e28960d" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>kpis = kpis_list[i]</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="0d32d475-09ee-4fbb-be73-111c02453a20" action="json" useFieldsInCommand="false">
+                                    <command>
+                                        <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;response&apos;, pathValue=&apos;{&quot;\\\\[[i]]/\\\\[[array_index]]&quot;:[kpis]}&apos;</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                        <action inherit="false">addJsonNode</action>
+                                        <pathValue inherit="false" sub="true">{&quot;\\[[i]]/\\[[array_index]]&quot;:[kpis]}</pathValue>
+                                        <documentName inherit="false">response</documentName>
+                                    </applicationProperties>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="348fbed2-8a42-405c-acf6-d30b03e09d99" action="comment" useFieldsInCommand="false">
+                    <command>
+                        <body>Increase Session Capacity and repeat if KPI passed</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="62339bc5-ccad-4991-b6e5-3b39e49e7bad" action="if" useFieldsInCommand="false">
+                            <command>
+                                <body>kpi_pass:</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="2b6e31c6-30f3-41d8-80f4-02b8c8779901" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>start_threshold_percent = int(float(start_threshold_percent))</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="9863f4c6-ea1a-4d73-9328-66c866959089" action="call" useFieldsInCommand="false">
+                                    <command>
+                                        <body>project://ai_LS_5G/utility_library/utils.fftc#validate_percentage_list(percentage_list=percentage_list, session_capacity=session_capacity, targeted_end_rate=targeted_end_rate, threshold_percent=start_threshold_percent)</body>
+                                    </command>
+                                    <postProcessing>
+                                        <storeResponseAt>is_valid</storeResponseAt>
+                                        <storeResponseText>true</storeResponseText>
+                                    </postProcessing>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="48390c82-cc3f-48b9-ab67-4b298c1f943c" action="if" useFieldsInCommand="false">
+                                    <command>
+                                        <body>int(session_capacity) &gt; 1 and is_valid:</body>
+                                    </command>
+                                    <nestedSteps>
                                         <item guid="ceecdbac-6b8f-4de5-a27c-15072c422501" action="comment" useFieldsInCommand="false">
                                             <command>
-                                                <body>Run test instance with 80%</body>
+                                                <body>Run test instance with threshold percent of the target</body>
                                             </command>
                                             <nestedSteps>
+                                                <item guid="2e22a9f1-cb4d-47b5-aa5c-b0fb5ac80df0" action="if" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>start_threshold_percent != 80:</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="9df9032d-5f42-4167-b8a7-6519802856f2" action="message" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>Information:Run test instance with [start_threshold_percent]% of the target</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                                <message inherit="false">Run test instance with [start_threshold_percent]% of the target</message>
+                                                            </applicationProperties>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
                                                 <item guid="63670097-4f58-4d15-9093-74fb4d18450a" action="eval" useFieldsInCommand="false">
                                                     <command>
-                                                        <body>t_load = math.ceil(int(session_capacity) * 80/100)</body>
+                                                        <body>t_load = math.ceil(int(session_capacity) * start_threshold_percent/100)</body>
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
@@ -2903,6 +3281,185 @@
                                                     <command>
                                                         <body>t_rate = int(targeted_end_rate)</body>
                                                     </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="bde9224d-5057-444f-9464-f4d478cbe609" action="if" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>t_load == int(session_capacity) and optimistic_mode == &apos;true&apos;:</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="382a2b16-f043-4d43-835a-8f8dd65dfe73" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>print(&quot;True&quot;)</body>
+                                                            </command>
+                                                            <postProcessing>
+                                                                <analysisRules>
+                                                                    <item>
+                                                                        <extractorInfo extractorType="none">
+                                                                            <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                                                        </extractorInfo>
+                                                                        <processorInfo ruleType="assert">
+                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                <expression>False</expression>
+                                                                                <actionsWhenFalse>
+                                                                                    <item actionId="FailTest">
+                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                    </item>
+                                                                                </actionsWhenFalse>
+                                                                            </ruleProperties>
+                                                                        </processorInfo>
+                                                                    </item>
+                                                                </analysisRules>
+                                                            </postProcessing>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="94471b79-716d-41cf-b45c-5f8ad85db133" action="stop_or_abort_test" session="s1" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>-running_id [running_node_id] -abort [should_abort] -clean_up [clean_up] -timeout [timeout]</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="3e556822-c891-4e38-8fdd-2e29d89c5826" action="return">
+                                                            <command>
+                                                                <body>[response]</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="f6e5d3b3-5bf4-4e74-8616-63673fb59d66" action="comment" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>Restart SUT for B2B testing</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="c06b3012-ff7c-4987-b1d7-7d4bba412f88" action="if" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>is_b2b == &quot;true&quot; and running_node_id and node_run_data and restart_sut == &quot;true&quot;:</body>
+                                                            </command>
+                                                            <nestedSteps>
+                                                                <item guid="eb0808d8-75f4-48b1-b69a-d44618cf0bfd" action="comment" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>Restart Node Test</body>
+                                                                    </command>
+                                                                    <nestedSteps>
+                                                                        <item guid="6d72d1e4-ae2d-4dad-9e34-bfc73020009b" action="comment" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>Stop running SUT session</body>
+                                                                            </command>
+                                                                            <nestedSteps>
+                                                                                <item guid="5ed09d16-ccc2-41e0-a2e1-8117d42e3181" action="stop_or_abort_test" session="s1" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>-running_id [running_node_id] -abort [should_abort] -clean_up [clean_up] -timeout [timeout]</body>
+                                                                                    </command>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                                <item guid="27f7986d-2a77-4e9b-8c2b-fba3d37344c0" action="eval" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>should_abort = &quot;false&quot;</body>
+                                                                                    </command>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                            </nestedSteps>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                        <item guid="475276b6-628b-4039-b549-a649e8413c0e" action="comment" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>Start SUT again</body>
+                                                                            </command>
+                                                                            <nestedSteps>
+                                                                                <item guid="6e923fad-91b7-430a-8bed-e49d270bc2ee" action="run_test_using_run_data" session="s1" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>-run_data [node_run_data]</body>
+                                                                                    </command>
+                                                                                    <postProcessing>
+                                                                                        <analysisRules>
+                                                                                            <item>
+                                                                                                <extractorInfo extractorType="query">
+                                                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                        <query>count(mapped/Json/runId)</query>
+                                                                                                    </extractorProperties>
+                                                                                                </extractorInfo>
+                                                                                                <processorInfo ruleType="assert">
+                                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                                        <expression>int(value) &gt; 0</expression>
+                                                                                                        <actionsWhenTrue>
+                                                                                                            <item actionId="Eval">
+                                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                                                    <statement>error = False</statement>
+                                                                                                                </actionProperties>
+                                                                                                            </item>
+                                                                                                        </actionsWhenTrue>
+                                                                                                        <actionsWhenFalse>
+                                                                                                            <item actionId="Eval">
+                                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                                                    <statement>error = True</statement>
+                                                                                                                </actionProperties>
+                                                                                                            </item>
+                                                                                                            <item actionId="SkipRemainingRules">
+                                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                            </item>
+                                                                                                        </actionsWhenFalse>
+                                                                                                    </ruleProperties>
+                                                                                                </processorInfo>
+                                                                                            </item>
+                                                                                            <item>
+                                                                                                <extractorInfo extractorType="query">
+                                                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                        <query>runId()</query>
+                                                                                                    </extractorProperties>
+                                                                                                </extractorInfo>
+                                                                                                <processorInfo ruleType="store">
+                                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                                                        <storageLocation>running_node_id</storageLocation>
+                                                                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                                                                    </ruleProperties>
+                                                                                                </processorInfo>
+                                                                                            </item>
+                                                                                        </analysisRules>
+                                                                                        <storeResponseAt>node_response</storeResponseAt>
+                                                                                        <storeResponseText>true</storeResponseText>
+                                                                                    </postProcessing>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                                <item guid="7e31eb99-b395-4120-8cd9-399f9c930975" action="if" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>error:</body>
+                                                                                    </command>
+                                                                                    <nestedSteps>
+                                                                                        <item guid="4de0defb-d72d-4be3-b8b8-a6d4426d7788" action="show_error_and_cleanup" session="s1" useFieldsInCommand="false">
+                                                                                            <command>
+                                                                                                <body>-message [node_response]</body>
+                                                                                            </command>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                        <item guid="68601fc1-83f8-4ae0-a0fd-498f2e1e1460" action="return">
+                                                                                            <command>
+                                                                                                <body>[response]</body>
+                                                                                            </command>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                    </nestedSteps>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                                <item guid="544d0674-4bed-461e-843f-b91ff6a5c3f1" action="waiting_for_test_get_expected_state" session="s1" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>-running_test_id [running_node_id] -expected_state RUNNING -time_out [timeout]</body>
+                                                                                    </command>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                            </nestedSteps>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                    </nestedSteps>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                            </nestedSteps>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
                                                 <item guid="dbfb20ad-e875-4a17-aec9-fb61680e7f72" action="call" useFieldsInCommand="false">
@@ -3036,17 +3593,17 @@
                                                     </nestedSteps>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
-                                                <item guid="a8ae19e3-20c9-4beb-910c-4d1cde171247" action="eval" useFieldsInCommand="false">
-                                                    <command>
-                                                        <body>array_index = 1</body>
-                                                    </command>
-                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                </item>
                                                 <item guid="d392be13-3241-4b05-ba56-7c8b4de385f3" action="while" useFieldsInCommand="false">
                                                     <command>
                                                         <body>kpi_pass and t_load &lt; int(session_capacity):</body>
                                                     </command>
                                                     <nestedSteps>
+                                                        <item guid="841ca38d-3f62-406f-9c45-447d3cc171f5" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>array_index += 1</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
                                                         <item guid="8aa64eb3-f352-4522-b446-cc6fd30fb6b8" action="for" useFieldsInCommand="false">
                                                             <command>
                                                                 <body>i in range(0, int(instance_number)):</body>
@@ -3071,174 +3628,6 @@
                                                             </nestedSteps>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
-                                                        <item guid="841ca38d-3f62-406f-9c45-447d3cc171f5" action="eval" useFieldsInCommand="false">
-                                                            <command>
-                                                                <body>array_index += 1</body>
-                                                            </command>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                        <item guid="e70ba59d-f957-41a4-9254-8c58e519de2e" action="comment" useFieldsInCommand="false">
-                                                            <command>
-                                                                <body>Restart SUT for B2B testing or store running id list for E2E</body>
-                                                            </command>
-                                                            <nestedSteps>
-                                                                <item guid="cb3bcab7-2d20-45a7-b1df-8327807cf54b" action="if" useFieldsInCommand="false">
-                                                                    <command>
-                                                                        <body>is_b2b == &quot;true&quot; and running_node_id and node_run_data and restart_sut == &quot;true&quot;:</body>
-                                                                    </command>
-                                                                    <nestedSteps>
-                                                                        <item guid="70382442-71d0-443b-aef4-5d7a6c1574a1" action="comment" useFieldsInCommand="false">
-                                                                            <command>
-                                                                                <body>Restart SUT</body>
-                                                                            </command>
-                                                                            <nestedSteps>
-                                                                                <item guid="6e4c3556-69e7-40e8-9440-09ccd656d3ab" action="comment" useFieldsInCommand="false">
-                                                                                    <command>
-                                                                                        <body>Stop running SUT session</body>
-                                                                                    </command>
-                                                                                    <nestedSteps>
-                                                                                        <item guid="280bc5b3-b6c6-4cb3-b40b-758b90fff928" action="stop_or_abort_test" session="s1" useFieldsInCommand="false">
-                                                                                            <command>
-                                                                                                <body>-running_id [running_node_id] -abort [should_abort] -timeout 180</body>
-                                                                                            </command>
-                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                        </item>
-                                                                                        <item guid="14245689-bacf-4a65-9087-bb59e40d6ba9" action="eval" useFieldsInCommand="false">
-                                                                                            <command>
-                                                                                                <body>should_abort = &quot;false&quot;</body>
-                                                                                            </command>
-                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                        </item>
-                                                                                    </nestedSteps>
-                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                </item>
-                                                                                <item guid="5e37c250-cfbf-40cf-8e0e-859e3d6f5992" action="comment" useFieldsInCommand="false">
-                                                                                    <command>
-                                                                                        <body>Start SUT test again</body>
-                                                                                    </command>
-                                                                                    <nestedSteps>
-                                                                                        <item guid="c8927db1-f59e-4828-b76b-3e04a4812b0d" action="run_test_using_run_data" session="s1" useFieldsInCommand="false">
-                                                                                            <command>
-                                                                                                <body>-run_data [node_run_data]</body>
-                                                                                            </command>
-                                                                                            <postProcessing>
-                                                                                                <analysisRules>
-                                                                                                    <item>
-                                                                                                        <extractorInfo extractorType="query">
-                                                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                                                <query>count(mapped/Json/runId)</query>
-                                                                                                            </extractorProperties>
-                                                                                                        </extractorInfo>
-                                                                                                        <processorInfo ruleType="assert">
-                                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                                                                <expression>int(value) &gt; 0</expression>
-                                                                                                                <actionsWhenTrue>
-                                                                                                                    <item actionId="Eval">
-                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                                                                            <statement>error = False</statement>
-                                                                                                                        </actionProperties>
-                                                                                                                    </item>
-                                                                                                                </actionsWhenTrue>
-                                                                                                                <actionsWhenFalse>
-                                                                                                                    <item actionId="Eval">
-                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                                                                            <statement>error = True</statement>
-                                                                                                                        </actionProperties>
-                                                                                                                    </item>
-                                                                                                                    <item actionId="SkipRemainingRules">
-                                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                                                    </item>
-                                                                                                                </actionsWhenFalse>
-                                                                                                            </ruleProperties>
-                                                                                                        </processorInfo>
-                                                                                                    </item>
-                                                                                                    <item>
-                                                                                                        <extractorInfo extractorType="query">
-                                                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                                                <query>runId()</query>
-                                                                                                            </extractorProperties>
-                                                                                                        </extractorInfo>
-                                                                                                        <processorInfo ruleType="store">
-                                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
-                                                                                                                <storageLocation>running_node_id</storageLocation>
-                                                                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
-                                                                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
-                                                                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
-                                                                                                            </ruleProperties>
-                                                                                                        </processorInfo>
-                                                                                                    </item>
-                                                                                                </analysisRules>
-                                                                                                <storeResponseAt>node_response</storeResponseAt>
-                                                                                                <storeResponseText>true</storeResponseText>
-                                                                                            </postProcessing>
-                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                        </item>
-                                                                                        <item guid="a86af99a-6d60-4d31-afbe-c9f259e8ff02" action="if" useFieldsInCommand="false">
-                                                                                            <command>
-                                                                                                <body>error:</body>
-                                                                                            </command>
-                                                                                            <nestedSteps>
-                                                                                                <item guid="d3f74685-65ce-4c1e-b713-e5d9181f4774" action="show_error_and_cleanup" session="s1" useFieldsInCommand="false">
-                                                                                                    <command>
-                                                                                                        <body>-message [node_response] -set_test_fail false</body>
-                                                                                                    </command>
-                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                                </item>
-                                                                                                <item guid="8379e6e5-f428-419b-945a-21ae8ecb0225" action="comment" useFieldsInCommand="false">
-                                                                                                    <command>
-                                                                                                        <body>Delete all node running test</body>
-                                                                                                    </command>
-                                                                                                    <nestedSteps>
-                                                                                                        <item guid="50249064-4bce-4c17-8c70-b567121c6609" action="if" useFieldsInCommand="false">
-                                                                                                            <command>
-                                                                                                                <body>clean_up == &quot;true&quot;:</body>
-                                                                                                            </command>
-                                                                                                            <nestedSteps>
-                                                                                                                <item guid="1f2bb52f-a301-479d-b863-b49da686efe6" action="delete_running_tests" session="s1" useFieldsInCommand="false">
-                                                                                                                    <command>
-                                                                                                                        <body>-running_id_list [node_running_id_list]</body>
-                                                                                                                    </command>
-                                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                                                </item>
-                                                                                                            </nestedSteps>
-                                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                                        </item>
-                                                                                                    </nestedSteps>
-                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                                </item>
-                                                                                                <item guid="a20d6e74-33f5-4b72-a45a-370d904a0934" action="return">
-                                                                                                    <command>
-                                                                                                        <body>[response]</body>
-                                                                                                    </command>
-                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                                </item>
-                                                                                            </nestedSteps>
-                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                        </item>
-                                                                                        <item guid="a54607a8-6edd-4632-9486-5d4d842eb6b0" action="waiting_for_test_get_expected_state" session="s1" useFieldsInCommand="false">
-                                                                                            <command>
-                                                                                                <body>-running_test_id [running_node_id] -expected_state RUNNING -time_out [timeout]</body>
-                                                                                            </command>
-                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                        </item>
-                                                                                        <item guid="5f62d14c-b1cc-430d-804c-c9d58a56476a" action="eval" useFieldsInCommand="false">
-                                                                                            <command>
-                                                                                                <body>node_running_id_list.append(running_node_id)</body>
-                                                                                            </command>
-                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                        </item>
-                                                                                    </nestedSteps>
-                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                </item>
-                                                                            </nestedSteps>
-                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                        </item>
-                                                                    </nestedSteps>
-                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                </item>
-                                                            </nestedSteps>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
                                                         <item guid="80b9a045-740b-4541-888e-a701b03b5435" action="comment" useFieldsInCommand="false">
                                                             <command>
                                                                 <body>Increase 10%</body>
@@ -3259,6 +3648,183 @@
                                                                             <command>
                                                                                 <body>t_load = int(session_capacity)</body>
                                                                             </command>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                    </nestedSteps>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                                <item guid="0c6b8fbc-8671-4194-b77e-1ffccd3312e9" action="if" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>t_load == int(session_capacity) and optimistic_mode == &apos;true&apos;:</body>
+                                                                    </command>
+                                                                    <nestedSteps>
+                                                                        <item guid="38fd4c9d-e6aa-48b1-a452-9f466898d9c0" action="comment" skip="true" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>Add 100% checking result to response</body>
+                                                                            </command>
+                                                                            <nestedSteps>
+                                                                                <item guid="d1e39152-9893-4173-8a58-98ca525148f5" action="for" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>i in range(0, int(instance_number)):</body>
+                                                                                    </command>
+                                                                                    <nestedSteps>
+                                                                                        <item guid="e3d8296d-2362-4291-8876-57ef3fd2b612" action="eval" useFieldsInCommand="false">
+                                                                                            <command>
+                                                                                                <body>kpis = last_kpis_list[i]</body>
+                                                                                            </command>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                        <item guid="5175a02b-7a9c-43f4-a743-7cd73b56dee2" action="json" useFieldsInCommand="false">
+                                                                                            <command>
+                                                                                                <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;response&apos;, pathValue=&apos;{&quot;\\\\[[i]]/\\\\[0]&quot;:[kpis]}&apos;</body>
+                                                                                            </command>
+                                                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                                                                <action inherit="false">addJsonNode</action>
+                                                                                                <pathValue inherit="false" sub="true">{&quot;\\[[i]]/\\[0]&quot;:[kpis]}</pathValue>
+                                                                                                <documentName inherit="false">response</documentName>
+                                                                                            </applicationProperties>
+                                                                                        </item>
+                                                                                    </nestedSteps>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                            </nestedSteps>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                        <item guid="db5e071d-35cb-467e-9df2-db984753fd3e" action="break" useFieldsInCommand="false">
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                    </nestedSteps>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                                <item guid="06a1afc2-68eb-465e-95d1-5b114d4f3c01" action="comment" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>Restart SUT for B2B testing or store running id list for E2E</body>
+                                                                    </command>
+                                                                    <nestedSteps>
+                                                                        <item guid="fb45e0fd-9625-42d8-b71a-5588c780446c" action="if" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>is_b2b == &quot;true&quot; and running_node_id and node_run_data and restart_sut == &quot;true&quot;:</body>
+                                                                            </command>
+                                                                            <nestedSteps>
+                                                                                <item guid="52ed5e9d-0047-465f-9b85-7d26830f06e7" action="comment" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>Restart SUT</body>
+                                                                                    </command>
+                                                                                    <nestedSteps>
+                                                                                        <item guid="136e8011-03b4-48be-ad84-f04a522e4e42" action="comment" useFieldsInCommand="false">
+                                                                                            <command>
+                                                                                                <body>Stop running SUT session</body>
+                                                                                            </command>
+                                                                                            <nestedSteps>
+                                                                                                <item guid="404feccb-de89-448a-8b29-a8d84c080a04" action="stop_or_abort_test" session="s1" useFieldsInCommand="false">
+                                                                                                    <command>
+                                                                                                        <body>-running_id [running_node_id] -abort [should_abort] -clean_up [clean_up] -timeout [timeout]</body>
+                                                                                                    </command>
+                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                </item>
+                                                                                                <item guid="6e8db67a-6c6d-4e22-be10-6cdf8a1780f9" action="eval" useFieldsInCommand="false">
+                                                                                                    <command>
+                                                                                                        <body>should_abort = &quot;false&quot;</body>
+                                                                                                    </command>
+                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                </item>
+                                                                                            </nestedSteps>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                        <item guid="25c450bc-8187-4ad5-9758-c213e264c236" action="comment" useFieldsInCommand="false">
+                                                                                            <command>
+                                                                                                <body>Start SUT again</body>
+                                                                                            </command>
+                                                                                            <nestedSteps>
+                                                                                                <item guid="2ad38f71-b358-4956-bdb6-768ea794a2cd" action="run_test_using_run_data" session="s1" useFieldsInCommand="false">
+                                                                                                    <command>
+                                                                                                        <body>-run_data [node_run_data]</body>
+                                                                                                    </command>
+                                                                                                    <postProcessing>
+                                                                                                        <analysisRules>
+                                                                                                            <item>
+                                                                                                                <extractorInfo extractorType="query">
+                                                                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                                        <query>count(mapped/Json/runId)</query>
+                                                                                                                    </extractorProperties>
+                                                                                                                </extractorInfo>
+                                                                                                                <processorInfo ruleType="assert">
+                                                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                                                        <expression>int(value) &gt; 0</expression>
+                                                                                                                        <actionsWhenTrue>
+                                                                                                                            <item actionId="Eval">
+                                                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                                                                    <statement>error = False</statement>
+                                                                                                                                </actionProperties>
+                                                                                                                            </item>
+                                                                                                                        </actionsWhenTrue>
+                                                                                                                        <actionsWhenFalse>
+                                                                                                                            <item actionId="Eval">
+                                                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                                                                    <statement>error = True</statement>
+                                                                                                                                </actionProperties>
+                                                                                                                            </item>
+                                                                                                                            <item actionId="SkipRemainingRules">
+                                                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                                            </item>
+                                                                                                                        </actionsWhenFalse>
+                                                                                                                    </ruleProperties>
+                                                                                                                </processorInfo>
+                                                                                                            </item>
+                                                                                                            <item>
+                                                                                                                <extractorInfo extractorType="query">
+                                                                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                                        <query>runId()</query>
+                                                                                                                    </extractorProperties>
+                                                                                                                </extractorInfo>
+                                                                                                                <processorInfo ruleType="store">
+                                                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                                                                        <storageLocation>running_node_id</storageLocation>
+                                                                                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                                                                                    </ruleProperties>
+                                                                                                                </processorInfo>
+                                                                                                            </item>
+                                                                                                        </analysisRules>
+                                                                                                        <storeResponseAt>node_response</storeResponseAt>
+                                                                                                        <storeResponseText>true</storeResponseText>
+                                                                                                    </postProcessing>
+                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                </item>
+                                                                                                <item guid="d55eafbf-927d-46dc-8485-5de5b316ddd2" action="if" useFieldsInCommand="false">
+                                                                                                    <command>
+                                                                                                        <body>error:</body>
+                                                                                                    </command>
+                                                                                                    <nestedSteps>
+                                                                                                        <item guid="cbfb14e3-2e85-4619-969f-cd4260258bbf" action="show_error_and_cleanup" session="s1" useFieldsInCommand="false">
+                                                                                                            <command>
+                                                                                                                <body>-message [node_response] -set_test_fail false</body>
+                                                                                                            </command>
+                                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                        </item>
+                                                                                                        <item guid="898df38c-42eb-41a6-87a6-c01c0caf5367" action="return">
+                                                                                                            <command>
+                                                                                                                <body>[response]</body>
+                                                                                                            </command>
+                                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                        </item>
+                                                                                                    </nestedSteps>
+                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                </item>
+                                                                                                <item guid="ec41f2b7-508e-461a-a98a-21383e15f6d7" action="waiting_for_test_get_expected_state" session="s1" useFieldsInCommand="false">
+                                                                                                    <command>
+                                                                                                        <body>-running_test_id [running_node_id] -expected_state RUNNING -time_out [timeout]</body>
+                                                                                                    </command>
+                                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                </item>
+                                                                                            </nestedSteps>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                    </nestedSteps>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                            </nestedSteps>
                                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                         </item>
                                                                     </nestedSteps>
@@ -3398,6 +3964,12 @@
                                                     </nestedSteps>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
+                                                <item guid="472b6efc-7d42-4e72-94f1-efa85c1c9038" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>array_index += 1</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
                                                 <item guid="c762f2c7-cc01-49cd-bd2a-c619b31d8c4e" action="for" useFieldsInCommand="false">
                                                     <command>
                                                         <body>i in range(0, int(instance_number)):</body>
@@ -3485,30 +4057,8 @@
                             <nestedSteps>
                                 <item guid="de837425-7ca8-4f5f-b823-423f0044bf15" action="stop_or_abort_test" session="s1" useFieldsInCommand="false">
                                     <command>
-                                        <body>-running_id [running_node_id] -abort [should_abort] -timeout 180</body>
+                                        <body>-running_id [running_node_id] -abort [should_abort] -clean_up [clean_up] -timeout [timeout]</body>
                                     </command>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                                <item guid="b9b87d73-2f65-474e-a9e6-63bd4c379f58" action="comment" useFieldsInCommand="false">
-                                    <command>
-                                        <body>Delete all node running test</body>
-                                    </command>
-                                    <nestedSteps>
-                                        <item guid="7f9cbb39-91d6-4896-b86b-2e1a5f17a5bf" action="if" useFieldsInCommand="false">
-                                            <command>
-                                                <body>clean_up == &quot;true&quot;:</body>
-                                            </command>
-                                            <nestedSteps>
-                                                <item guid="0fe84fe7-b3ea-436f-ac01-b053e92da245" action="delete_running_tests" session="s1" useFieldsInCommand="false">
-                                                    <command>
-                                                        <body>-running_id_list [node_running_id_list]</body>
-                                                    </command>
-                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                </item>
-                                            </nestedSteps>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                    </nestedSteps>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
                             </nestedSteps>
@@ -3564,6 +4114,9 @@
                 </item>
                 <item name="timeout">
                     <defaultValue>180</defaultValue>
+                </item>
+                <item name="start_threshold_percent">
+                    <defaultValue>80</defaultValue>
                 </item>
             </arguments>
             <response>{}</response>
@@ -3904,14 +4457,22 @@
                         <body>Configure for multiple instances</body>
                     </command>
                     <nestedSteps>
-                        <item guid="e221086f-9d95-45c9-9b86-74cec53a86c8" action="call" useFieldsInCommand="false">
+                        <item guid="93a2bbe8-49b5-4ecc-b60e-34cacd4d2798" action="if" useFieldsInCommand="false">
                             <command>
-                                <body>reconfigure_parameters_for_multiple_instances -run_data_list [run_data_list] -t_load_ts_list [t_load_ts_list]</body>
+                                <body>info(&apos;exists&apos;, &apos;param&apos;, &apos;TC_parameters/Starting_SUPI&apos;) and info(&apos;exists&apos;, &apos;param&apos;, &apos;TC_parameters/Starting_IMEI&apos;):</body>
                             </command>
-                            <postProcessing>
-                                <storeResponseAt>run_data_list</storeResponseAt>
-                                <storeResponseText>true</storeResponseText>
-                            </postProcessing>
+                            <nestedSteps>
+                                <item guid="e221086f-9d95-45c9-9b86-74cec53a86c8" action="call" useFieldsInCommand="false">
+                                    <command>
+                                        <body>reconfigure_parameters_for_multiple_instances -run_data_list [run_data_list] -t_load_ts_list [t_load_ts_list]</body>
+                                    </command>
+                                    <postProcessing>
+                                        <storeResponseAt>run_data_list</storeResponseAt>
+                                        <storeResponseText>true</storeResponseText>
+                                    </postProcessing>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
                     </nestedSteps>
@@ -4614,7 +5175,7 @@
                         </item>
                         <item guid="ecb2cc90-bb81-475b-a2fd-793372812aea" action="eval" useFieldsInCommand="false">
                             <command>
-                                <body>reduce_time = 60</body>
+                                <body>reduce_time = 180</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
@@ -5664,7 +6225,7 @@
                 </item>
                 <item guid="4b4bd6a0-7b16-4c41-9186-6c4b885e10ea" action="eval" useFieldsInCommand="false">
                     <command>
-                        <body>supi = param(&apos;TC_parameters/Starting_SUPI&apos;, &apos;10000000000000&apos;);print(supi)</body>
+                        <body>supi = param(&apos;TC_parameters/Starting_SUPI&apos;, &apos;10000000000000&apos;).strip();print(supi)</body>
                     </command>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
@@ -5925,7 +6486,7 @@
                                                         </item>
                                                         <item guid="2851562e-d688-4efe-9da3-3e61080bd117" action="eval" useFieldsInCommand="false">
                                                             <command>
-                                                                <body>new_value = new_value if len(str(new_value)) in supi_range else &apos;0&apos; * ((15 if len(supi) == 15 else 14) - len(str(new_value))) + str(new_value)</body>
+                                                                <body>new_value = &apos;0&apos; * ((15 if len(supi) == 15 else 14) - len(str(new_value))) + str(new_value)</body>
                                                             </command>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
@@ -7209,6 +7770,32 @@
                                             </ruleProperties>
                                         </processorInfo>
                                     </item>
+                                    <item>
+                                        <extractorInfo extractorType="query">
+                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                <query>count(mapped/Json/item[result = &quot;FAIL&quot;])</query>
+                                            </extractorProperties>
+                                        </extractorInfo>
+                                        <processorInfo ruleType="assert">
+                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                <expression>int(value) &gt; 1</expression>
+                                                <actionsWhenTrue>
+                                                    <item actionId="Eval">
+                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                            <statement>starting_index = 1</statement>
+                                                        </actionProperties>
+                                                    </item>
+                                                </actionsWhenTrue>
+                                                <actionsWhenFalse>
+                                                    <item actionId="Eval">
+                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                            <statement>starting_index = 0</statement>
+                                                        </actionProperties>
+                                                    </item>
+                                                </actionsWhenFalse>
+                                            </ruleProperties>
+                                        </processorInfo>
+                                    </item>
                                 </analysisRules>
                                 <storeResponseAt>report_data_instance[i]</storeResponseAt>
                                 <storeResponseText>true</storeResponseText>
@@ -7221,7 +7808,7 @@
                         </item>
                         <item guid="7e5ea668-5b5f-4988-a09f-0ab12ebae7e3" action="for" useFieldsInCommand="false">
                             <command>
-                                <body>j in range(0, int(countTimesRun)):</body>
+                                <body>j in range(starting_index, int(countTimesRun)):</body>
                             </command>
                             <nestedSteps>
                                 <item guid="cfa385c2-5d9a-4b2d-b584-a61cbf7e2f4f" action="comment" useFieldsInCommand="false">

@@ -273,6 +273,12 @@
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
+                                        <item guid="272ec53d-9d7d-4e4d-a8f7-bf143ef33007" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>params = params + &quot;;TC_parameters/Start_Threshold_Percent:(50,80):false&quot;</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
                                         <item guid="c69f83bc-7fb0-42ad-96a1-12c493bf9260" action="call" useFieldsInCommand="false">
                                             <command>
                                                 <body>project://ai_LS_5G/utility_library/utils.fftc#validate_params -params [params]</body>
@@ -306,6 +312,12 @@
                                         <item guid="460edca8-6d33-41b6-aef9-364c2cf3b4da" action="eval" useFieldsInCommand="false">
                                             <command>
                                                 <body>enable_tac_report = param(&apos;TC_parameters/Enable_TAC_Report&apos;, enable_tac_report)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="04925f5c-6e37-42e3-8eed-a240242bb1df" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>start_threshold_percent = param(&apos;TC_parameters/Start_Threshold_Percent&apos;, 80)</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
@@ -1693,7 +1705,7 @@
                     <nestedSteps>
                         <item guid="894a67a6-263b-4c63-823f-19235f68b9ec" action="call" useFieldsInCommand="false">
                             <command>
-                                <body>execute_landslide_procedure -run_data_list [run_data_list] -session_capacity [session_capacity] -targeted_end_rate [targeted_end_rate] -instance_number [instance_number] -is_b2b [is_b2b] -running_node_id [running_node_id] -running_node_id_sba [running_node_id_sba] -node_run_data [node_run_data] -node_run_data_sba [node_run_data_sba] -percentage_list [percentage_list] -restart_sut [restart_sut] -restart_sba [restart_sba] -clean_up [clean_up] -timeout [test_waiting_timeout]</body>
+                                <body>execute_landslide_procedure -run_data_list [run_data_list] -session_capacity [session_capacity] -targeted_end_rate [targeted_end_rate] -instance_number [instance_number] -is_b2b [is_b2b] -running_node_id [running_node_id] -running_node_id_sba [running_node_id_sba] -node_run_data [node_run_data] -node_run_data_sba [node_run_data_sba] -percentage_list [percentage_list] -restart_sut [restart_sut] -restart_sba [restart_sba] -clean_up [clean_up] -timeout [test_waiting_timeout] -start_threshold_percent [start_threshold_percent]</body>
                             </command>
                             <postProcessing>
                                 <storeResponseAt>result_list</storeResponseAt>
@@ -3214,6 +3226,28 @@
                                                 <body>Run test instance with 80% targeted end rate</body>
                                             </command>
                                             <nestedSteps>
+                                                <item guid="4c0ed05e-af7a-496a-b891-62879a5861a3" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>start_threshold_percent = int(float(start_threshold_percent))</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="61141791-81c1-453f-84a3-78c4473662de" action="if" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>start_threshold_percent != 80:</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="824113e1-c86d-4666-addc-33c9cb6f9c87" action="message" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>Information:Run test instance with [start_threshold_percent]% of the target</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                                <message inherit="false">Run test instance with [start_threshold_percent]% of the target</message>
+                                                            </applicationProperties>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
                                                 <item guid="63670097-4f58-4d15-9093-74fb4d18450a" action="eval" useFieldsInCommand="false">
                                                     <command>
                                                         <body>t_load = int(session_capacity)</body>
@@ -3222,7 +3256,7 @@
                                                 </item>
                                                 <item guid="01089f4b-b051-4af9-9584-d47429b20ad0" action="eval" useFieldsInCommand="false">
                                                     <command>
-                                                        <body>t_rate = math.ceil(int(targeted_end_rate) * 0.8)</body>
+                                                        <body>t_rate = math.ceil(int(targeted_end_rate) * start_threshold_percent/100)</body>
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
@@ -4043,6 +4077,9 @@
                 </item>
                 <item name="timeout">
                     <defaultValue>180</defaultValue>
+                </item>
+                <item name="start_threshold_percent">
+                    <defaultValue>80</defaultValue>
                 </item>
             </arguments>
             <response>{}</response>

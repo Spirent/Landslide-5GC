@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
-<testCase version="8.7.0.202112171424" entryPoint="add_favorites_to_KPIs">
+<testCase version="9.0.0.202203140149" entryPoint="add_favorites_to_KPIs">
     <general>
         <sessionClass includeTestCase="true" sessionType="project://di_Landslide/session_profiles/landslide_rest.ffsp"/>
         <language>Python</language>
     </general>
     <execution>
-        <parameters version="8.7.0.202112171424">
+        <parameters version="9.0.0.202203140149">
             <parameters escape="true">
                 <parameters xmlns:pt="http://www.fnfr.com/schemas/parameterTree">
                     <NetworkHost_MaxNumClientIpAddress>
@@ -9928,7 +9928,7 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                             <nestedSteps>
                                 <item guid="50bd3d25-6123-4275-abd2-a0cdd5ac61ec" action="get_parameters_from_group" session="[session]" useFieldsInCommand="false">
                                     <command>
-                                        <body>-parameter_group_name LS_Nodal_favorite_params -is_multiple true</body>
+                                        <body>-parameter_group_name [param_group_names] -is_multiple true</body>
                                     </command>
                                     <postProcessing>
                                         <analysisRules>
@@ -17168,14 +17168,14 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                     <postProcessing>
                                         <analysisRules>
                                             <item>
-                                                <extractorInfo extractorType="contains">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.ExtractorContainsPropertyGroup">
-                                                        <searchString>errorsAndWarnings</searchString>
+                                                <extractorInfo extractorType="query">
+                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                        <query>boolean(mapped/Json/errorsAndWarnings)</query>
                                                     </extractorProperties>
                                                 </extractorInfo>
                                                 <processorInfo ruleType="assert">
                                                     <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                        <expression>value == 1</expression>
+                                                        <expression>str(value) == &quot;true&quot;</expression>
                                                         <actionsWhenFalse>
                                                             <item actionId="Eval">
                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
@@ -17208,6 +17208,24 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                     </postProcessing>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
+                                <item guid="9f61a586-2f33-4d32-8c3e-3d88285629de" action="if" useFieldsInCommand="false">
+                                    <command>
+                                        <body>errorsAndWarnings and errorsAndWarnings.startswith(&apos;[&apos;):</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="e7ea0545-a432-4691-8ee6-8f179baadb72" action="json" useFieldsInCommand="false">
+                                            <command>
+                                                <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;response&apos;, pathValue=&apos;{&quot;/&quot;:{&quot;errorsAndWarnings&quot;:[errorsAndWarnings]}}&apos;</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                <action inherit="false">addJsonNode</action>
+                                                <pathValue inherit="false" sub="true">{&quot;/&quot;:{&quot;errorsAndWarnings&quot;:[errorsAndWarnings]}}</pathValue>
+                                                <documentName inherit="false">response</documentName>
+                                            </applicationProperties>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
                                 <item guid="9b806398-4d40-4be6-b2d7-69f4d38c99d1" action="if" useFieldsInCommand="false">
                                     <command>
                                         <body>errorsAndWarnings and show_warning == &quot;true&quot;:</body>
@@ -17226,17 +17244,6 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                         <item guid="09a9003b-973f-4a16-9cf8-c7e1a58f3343" action="show_error_and_cleanup" session="[session]" useFieldsInCommand="false">
                                             <command>
                                                 <body>-message [warning] -set_test_fail false -clean_up false -is_warning &quot;true&quot;</body>
-                                            </command>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                    </nestedSteps>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                                <item guid="f10350b7-7c9d-45a8-b04b-ef632a07a73d" action="else" useFieldsInCommand="false">
-                                    <nestedSteps>
-                                        <item guid="dcf82e2e-3803-424d-9f41-c5fc959ffe30" action="comment" useFieldsInCommand="false">
-                                            <command>
-                                                <body>Insert steps here for when expression is false</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
@@ -18433,6 +18440,20 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                         <item guid="26c52f68-7db3-436d-b90e-dcf9796dd50b" action="eval" useFieldsInCommand="false">
                             <command>
                                 <body>running_id_list = running_id</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="e7e76df1-cdab-4f99-a833-f76334fdfee1" action="elif" useFieldsInCommand="false">
+                    <command>
+                        <body>isinstance(running_id, set):</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="e833d306-91a3-4459-80bd-1b841950c965" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>running_id_list = list(running_id)</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
