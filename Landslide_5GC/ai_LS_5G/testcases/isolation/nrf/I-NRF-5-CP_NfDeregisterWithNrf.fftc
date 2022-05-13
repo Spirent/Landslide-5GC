@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="8.7.0.202112171424">
+<testCase version="9.0.0.202203011533">
     <general>
         <documentation>I-NRF-5-CP: NF Deregister With NRF - Capacity Testing</documentation>
         <tags>I-2TS</tags>
@@ -211,6 +211,12 @@
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
+                                        <item guid="083eab31-3c7d-4294-8cbd-c75a5df58c26" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>params = params + &quot;;TC_parameters/Start_Threshold_Percent:(50,80):false&quot;</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
                                         <item guid="340357c5-608b-465b-964f-7b538a32e8ab" action="call" useFieldsInCommand="false">
                                             <command>
                                                 <body>project://ai_LS_5G/utility_library/utils.fftc#validate_params -params [params]</body>
@@ -232,6 +238,12 @@
                                         <item guid="460edca8-6d33-41b6-aef9-364c2cf3b4da" action="eval" useFieldsInCommand="false">
                                             <command>
                                                 <body>enable_tac_report = param(&apos;TC_parameters/Enable_TAC_Report&apos;, enable_tac_report)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="aa4c3f18-286b-413e-a1b4-2f90d141332f" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>start_threshold_percent = param(&apos;TC_parameters/Start_Threshold_Percent&apos;, 80)</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
@@ -1363,7 +1375,7 @@
                     <nestedSteps>
                         <item guid="894a67a6-263b-4c63-823f-19235f68b9ec" action="call" useFieldsInCommand="false">
                             <command>
-                                <body>execute_landslide_procedure(run_data_list=run_data_list, session_capacity=session_capacity, targeted_end_rate=targeted_end_rate, node_running_id=node_running_id, node_run_data=node_run_data, node_restart=node_restart, sba_running_id=sba_running_id, sba_run_data=sba_run_data, sba_restart=sba_restart, is_b2b=is_b2b, clean_up=clean_up, timeout=test_waiting_timeout, instance_number=instance_number, percentage_list=percentage_list)</body>
+                                <body>execute_landslide_procedure(run_data_list=run_data_list, session_capacity=session_capacity, targeted_end_rate=targeted_end_rate, node_running_id=node_running_id, node_run_data=node_run_data, node_restart=node_restart, sba_running_id=sba_running_id, sba_run_data=sba_run_data, sba_restart=sba_restart, is_b2b=is_b2b, clean_up=clean_up, timeout=test_waiting_timeout, instance_number=instance_number, percentage_list=percentage_list, start_threshold_percent=start_threshold_percent)</body>
                             </command>
                             <postProcessing>
                                 <storeResponseAt>result_list</storeResponseAt>
@@ -2426,9 +2438,31 @@
                                                 <body>Run test instance with 80%</body>
                                             </command>
                                             <nestedSteps>
+                                                <item guid="25fea28f-454c-45b2-b807-9e12b12f0ba9" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>start_threshold_percent = int(float(start_threshold_percent))</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="1d4b01e3-69c0-4786-86fe-304b405d21b8" action="if" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>start_threshold_percent != 80:</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="0bfbb47a-7b90-4c01-a292-bf2c6c679c6e" action="message" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>Information:Run test instance with [start_threshold_percent]% of the target</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                                <message inherit="false">Run test instance with [start_threshold_percent]% of the target</message>
+                                                            </applicationProperties>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
                                                 <item guid="b23c0595-30bd-47b1-a6cc-5edabfdf066e" action="eval" useFieldsInCommand="false">
                                                     <command>
-                                                        <body>t_load = int(int(session_capacity) * 80/100)</body>
+                                                        <body>t_load = int(int(session_capacity) * start_threshold_percent/100)</body>
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
@@ -3055,6 +3089,9 @@
                     <isMandatory>true</isMandatory>
                 </item>
                 <item name="percentage_list"/>
+                <item name="start_threshold_percent">
+                    <defaultValue>80</defaultValue>
+                </item>
             </arguments>
             <response>{}</response>
         </item>
@@ -5133,7 +5170,7 @@
                                                             <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
                                                         </extractorInfo>
                                                         <processorInfo ruleType="chart_as_xy">
-                                                            <ruleProperties type="com.fnfr.svt.execution.charting.processors.ChartUsingXYPropertyGroup" chartName="Requests vs Successes NF Deregister of Nodal Instance [i]" style="LINE" xAxisLabel="NF Deregister Requests (Deregistrations)" yAxisLabel="NF Deregister Successes (Deregistrations)" highlightDataPoint="true" series="Session Connects rate (Deregistration(s)/sec)">
+                                                            <ruleProperties type="com.fnfr.svt.execution.charting.processors.ChartUsingXYPropertyGroup" chartName="Requests vs Successes NF Deregister of Nodal Instance [i]" style="LINE" xAxisLabel="NF Deregister Requests (Deregistrations)" yAxisLabel="NF Deregister Successes (Deregistrations)" highlightDataPoint="true" series="NF Deregister (Deregistrations)">
                                                                 <title>Requests vs Successes NF Deregister</title>
                                                                 <xValue>attempted</xValue>
                                                                 <yValue>actual</yValue>

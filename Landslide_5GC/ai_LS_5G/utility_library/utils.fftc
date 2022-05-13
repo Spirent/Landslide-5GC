@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="8.7.0.202110201311" entryPoint="add_topology_artifactLink">
+<testCase version="9.0.0.202203011533" entryPoint="add_topology_artifactLink">
     <general>
         <isProcedureLibrary>true</isProcedureLibrary>
         <language>Python</language>
@@ -258,7 +258,7 @@
                                                     <item>
                                                         <extractorInfo extractorType="query">
                                                             <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                <query>mapped/Json/reservations/item/tsId</query>
+                                                                <query>//tsGroups/item/tsId</query>
                                                             </extractorProperties>
                                                         </extractorInfo>
                                                         <processorInfo ruleType="store">
@@ -284,6 +284,36 @@
                                             <command>
                                                 <body>ts_param_name = query(&apos;ts_groups_xml&apos;,query_path);print(ts_param_name)</body>
                                             </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="3eb0bbf6-d5eb-4914-8846-a802ba034e0b" action="if" useFieldsInCommand="false">
+                                            <command>
+                                                <body>not isinstance(ts_param_name, str):</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="52813598-f680-4e86-8366-bb41b6f1872e" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>message = &apos;Same resource is being used to configure for multiple test servers. Please check the parameter file&apos;</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="78ca61b8-03f8-491f-80cc-cf61ada44b25" action="json" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>action=&apos;createJson&apos;, documentName=&apos;percentage_list&apos;, fromFile=&apos;false&apos;, jsonString=&apos;{&quot;reason&quot;:&quot;[message]&quot;}&apos;</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                        <action inherit="false">createJson</action>
+                                                        <jsonString inherit="false" sub="true">{&quot;reason&quot;:&quot;[message]&quot;}</jsonString>
+                                                        <documentName inherit="false">percentage_list</documentName>
+                                                    </applicationProperties>
+                                                </item>
+                                                <item guid="21bfc9c2-c7b0-4ca1-ab3e-b0f5522f440b" action="return">
+                                                    <command>
+                                                        <body>[percentage_list]</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
                                         <item guid="7828ed83-2406-4609-8b5a-c2323ea92dea" action="eval" useFieldsInCommand="false">
@@ -4566,7 +4596,7 @@ Default value: Instance</description>
                                     <item>
                                         <extractorInfo extractorType="query">
                                             <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                <query>count(data/parameters/LS_Nodal_favorite_params/*)</query>
+                                                <query sub="true">count(data/parameters/[nodal_fav_param]/*)</query>
                                             </extractorProperties>
                                         </extractorInfo>
                                         <processorInfo ruleType="store">
@@ -4612,7 +4642,7 @@ Default value: Instance</description>
                                             <nestedSteps>
                                                 <item guid="fe6af310-a9a3-45ab-aec5-9b206e1ef295" action="eval" useFieldsInCommand="false">
                                                     <command>
-                                                        <body>query_path = f&quot;name(data/parameters/LS_Nodal_favorite_params/*[{i}])&quot;</body>
+                                                        <body>query_path = f&quot;name(data/parameters/{nodal_fav_param}/*[{i}])&quot;</body>
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
@@ -4629,7 +4659,7 @@ Default value: Instance</description>
                                                     <nestedSteps>
                                                         <item guid="6779b81d-f1a9-4e39-bdd3-7e1c9af55510" action="eval" useFieldsInCommand="false">
                                                             <command>
-                                                                <body>message = f&quot;LS_Nodal_favorite_params/{ts_name} is duplicate.&quot;</body>
+                                                                <body>message = f&quot;{nodal_fav_param}/{ts_name} is duplicate.&quot;</body>
                                                             </command>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
@@ -4751,7 +4781,7 @@ Default value: Instance</description>
                                                             <nestedSteps>
                                                                 <item guid="2e021ba1-3272-4771-b54b-a516ba038b33" action="eval" useFieldsInCommand="false">
                                                                     <command>
-                                                                        <body>message = f&quot;TC_parameters/TS_Percentage/{ts_name} is invalid. To be able to run as an instance, the TS needs to be added in LS_Nodal_favorite_params first.&quot;</body>
+                                                                        <body>message = f&quot;TC_parameters/TS_Percentage/{ts_name} is invalid. To be able to run as an instance, the TS needs to be added in {nodal_fav_param} first.&quot;</body>
                                                                     </command>
                                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                 </item>
@@ -4960,6 +4990,9 @@ in which:
                 <item name="validate_ts_percentage">
                     <defaultValue>false</defaultValue>
                     <isMandatory>true</isMandatory>
+                </item>
+                <item name="nodal_fav_param">
+                    <defaultValue>LS_Nodal_favorite_params</defaultValue>
                 </item>
                 <item name="should_fail_test">
                     <description>true/false</description>
@@ -5252,39 +5285,111 @@ in which:
                     </nestedSteps>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
-                <item guid="e6f4a3cc-8308-4aeb-bf0c-71d54634c37d" action="eval" useFieldsInCommand="false">
+                <item guid="72901ded-f12a-46e3-9418-bbdb87eb3bc3" action="if" useFieldsInCommand="false">
                     <command>
-                        <body>t_load_ts_list = {}</body>
+                        <body>not min_number_for_threshold:</body>
                     </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="45966661-8e01-4d97-b474-224ae107ab27" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>c_rate_ts = {}</body>
-                    </command>
+                    <nestedSteps>
+                        <item guid="76ac19d5-d32d-4c34-bcbe-1b984328696c" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>min_number_for_threshold = instance_number</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
                 <item guid="d2c45acf-3133-42f8-abb9-061fb0454fa9" action="eval" useFieldsInCommand="false">
                     <command>
-                        <body>percent_capacity =  math.ceil(int(80/100 * float(session_capacity)));print(percent_capacity)</body>
+                        <body>session_capacity_threshold =  math.ceil(float(session_capacity) * int(threshold_percent) / 100);print(session_capacity_threshold)</body>
                     </command>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
                 <item guid="0177a6c3-fff7-4061-b74a-9023fb09fc1e" action="eval" useFieldsInCommand="false">
                     <command>
-                        <body>percent_targeted = math.ceil(int(targeted_end_rate)*80/100);print(percent_targeted)</body>
+                        <body>end_rate_threshold = math.ceil(int(targeted_end_rate) * int(threshold_percent) / 100);print(end_rate_threshold)</body>
                     </command>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
                 <item guid="6cbdaba0-8e35-4fff-aa4c-287d19af528e" action="if" useFieldsInCommand="false">
                     <command>
-                        <body>percent_capacity &lt;= instance_number and percent_targeted &lt;= instance_number:</body>
+                        <body>int(session_capacity_threshold) &lt;= int(min_number_for_threshold) and int(end_rate_threshold) &lt;= int(min_number_for_threshold):</body>
                     </command>
                     <nestedSteps>
                         <item guid="434f2cec-332d-4c92-926e-71a3dfe7fb30" action="eval" useFieldsInCommand="false">
                             <command>
                                 <body>response = False</body>
                             </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="60134389-6a6d-43b2-a34a-590d64796526" action="else" useFieldsInCommand="false">
+                    <nestedSteps>
+                        <item guid="66c8b42b-1510-4b3e-a4ae-6f720d075924" action="for" useFieldsInCommand="false">
+                            <command>
+                                <body>idx, percent in enumerate(percentage_list):</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="34b5005a-b902-4051-a5be-1b00cf3a557b" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>load_percent = int(session_capacity_threshold * int(percent) / 100);print(load_percent)</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="6fff8137-3fa3-450f-95a3-463bec45e272" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>rate_percent = int(end_rate_threshold * int(percent) / 100);print(rate_percent)</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="e2eb6ebb-debc-4c59-bcd2-7b59b6b12747" action="if" useFieldsInCommand="false">
+                                    <command>
+                                        <body>load_percent &lt; int(min_number_per_instance) or rate_percent &lt; int(min_number_per_instance):</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="21941020-7a64-4117-93ac-78f77519a7ed" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>response = False</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="62492698-b27d-4e54-95b2-2bebbb152c3a" action="message" useFieldsInCommand="false">
+                                            <command>
+                                                <body>Error:Cannot run Nodal Instance [idx] with load = [load_percent], rate = [rate_percent]. Please check the TS_Percentage configured in parameter file.</body>
+                                            </command>
+                                            <postProcessing>
+                                                <analysisRules>
+                                                    <item>
+                                                        <extractorInfo extractorType="none">
+                                                            <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                                        </extractorInfo>
+                                                        <processorInfo ruleType="assert">
+                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                <expression>False</expression>
+                                                                <actionsWhenFalse>
+                                                                    <item actionId="FailTest">
+                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                    </item>
+                                                                </actionsWhenFalse>
+                                                            </ruleProperties>
+                                                        </processorInfo>
+                                                    </item>
+                                                </analysisRules>
+                                            </postProcessing>
+                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                <severity inherit="false">Error</severity>
+                                                <message inherit="false">Cannot run Nodal Instance [idx] with load = [load_percent], rate = [rate_percent]. Please check the TS_Percentage configured in parameter file.</message>
+                                            </applicationProperties>
+                                        </item>
+                                        <item guid="2117f56f-3122-4341-858e-ee0cb94c85cb" action="break" useFieldsInCommand="false">
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
                     </nestedSteps>
@@ -5305,6 +5410,16 @@ in which:
                     <isMandatory>true</isMandatory>
                 </item>
                 <item name="targeted_end_rate"/>
+                <item name="threshold_percent">
+                    <isMandatory>true</isMandatory>
+                </item>
+                <item name="min_number_per_instance">
+                    <description>for which tests have more than 1 tc in 1 nodal</description>
+                    <defaultValue>1</defaultValue>
+                </item>
+                <item name="min_number_for_threshold">
+                    <description>If the threshold percent number is less than or equal to this minimum number, the procedure returns False.</description>
+                </item>
             </arguments>
             <response>{}</response>
         </item>
@@ -5430,6 +5545,278 @@ in which:
                 </item>
             </arguments>
             <response>{}</response>
+        </item>
+        <item name="get_nodal_testserver_list" isPublic="true">
+            <steps>
+                <item guid="e8691260-df18-4ae2-b51e-fa28291e57c4" action="eval" useFieldsInCommand="false">
+                    <command>
+                        <body>ts_nodal_list = []</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="6aec65a6-faa6-4b5a-a575-d77659104782" action="comment" useFieldsInCommand="false">
+                    <command>
+                        <body>Check required TS number in TestServer params</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="0f6cba8c-1181-4f4e-b7aa-39ae2f753a09" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>start_nodal_id = int(ts_nodal_name.replace(&apos;TS&apos;, &apos;&apos;))</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="2d3d3209-817e-4ecc-add9-e9431f4c2933" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>print(ts_groups)</body>
+                            </command>
+                            <postProcessing>
+                                <analysisRules>
+                                    <item>
+                                        <extractorInfo extractorType="query">
+                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                <query>count(mapped/Json/item[starts-with(ts_param_name, &apos;TS&apos;)])</query>
+                                            </extractorProperties>
+                                        </extractorInfo>
+                                        <processorInfo ruleType="store">
+                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                <storageLocation>count_nodal_ts</storageLocation>
+                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                            </ruleProperties>
+                                        </processorInfo>
+                                    </item>
+                                </analysisRules>
+                            </postProcessing>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="36cfc9f9-5877-44d7-9a64-a6489e6b67df" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>count_nodal_ts = int(count_nodal_ts) - start_nodal_id + 1</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="cfac85e2-3322-467a-873c-92f0c6e0bd17" action="if" useFieldsInCommand="false">
+                            <command>
+                                <body>int(count_nodal_ts) &lt; int(required_instance_number):</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="486c9bdf-c1d6-4afb-9c59-1b96f09bc56f" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>message = f&quot;Number of Nodal instance need to least {required_instance_number} instance&quot;</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="c9659219-8c0e-40c7-aacf-93bfccea40bb" action="message" useFieldsInCommand="false">
+                                    <command>
+                                        <body>Error:[message]</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                        <severity inherit="false">Error</severity>
+                                        <message inherit="false">[message]</message>
+                                    </applicationProperties>
+                                </item>
+                                <item guid="9cd7611c-e777-4afa-95f9-2dbec2b07166" action="return">
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="43e78e19-bd28-4fa2-8310-4ff9157c08a2" action="comment" useFieldsInCommand="false">
+                    <command>
+                        <body>Check required TS number in LS_Nodal_favorite_params</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="655fd128-f589-4f9f-aeb7-8236b69b1f60" action="dumpState" useFieldsInCommand="false">
+                            <postProcessing>
+                                <analysisRules>
+                                    <item>
+                                        <extractorInfo extractorType="query">
+                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                <query>count(data/parameters/LS_Nodal_favorite_params/*)</query>
+                                            </extractorProperties>
+                                        </extractorInfo>
+                                        <processorInfo ruleType="store">
+                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                <storageLocation>num_ts_in_ls_nodal_fav_params</storageLocation>
+                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                            </ruleProperties>
+                                        </processorInfo>
+                                    </item>
+                                </analysisRules>
+                                <storeResponseAt>dumpstate_xml</storeResponseAt>
+                            </postProcessing>
+                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.DumpStateProperties"/>
+                        </item>
+                        <item guid="878afc11-f34d-49c7-8e3e-3225bdb02dc2" action="if" useFieldsInCommand="false">
+                            <command>
+                                <body>int(num_ts_in_ls_nodal_fav_params) &lt; int(required_instance_number):</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="7afdc62d-01ff-4b92-a795-79fe91a4e0ed" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>message = f&quot;To be able to run as an instance, the TS needs to be added in LS_Nodal_favorite_params first&quot;</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="4dd80602-8398-4478-a0dd-c8ae3be9b5fe" action="message" useFieldsInCommand="false">
+                                    <command>
+                                        <body>Error:[message]</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                        <severity inherit="false">Error</severity>
+                                        <message inherit="false">[message]</message>
+                                    </applicationProperties>
+                                </item>
+                                <item guid="c293d79c-1c01-4c22-b8e3-bac7cd178619" action="return">
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="b5780f79-6cb2-44fd-8c51-c5a9a0ec61ee" action="comment" useFieldsInCommand="false">
+                    <command>
+                        <body>Get Nodal TS</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="41e4f525-5811-46a5-8cc5-43ced9ae39f0" action="for" useFieldsInCommand="false">
+                            <command>
+                                <body>required_idx in range(0, int(required_instance_number)):</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="76ad2c32-de88-4e6a-8fee-4801a68a8ff1" action="for" useFieldsInCommand="false">
+                                    <command>
+                                        <body>ts_idx in range(1, int(num_ts_in_ls_nodal_fav_params) + 1):</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="03818ca0-609c-4f0f-90a8-7539ab105999" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>query_path = f&quot;name(data/parameters/LS_Nodal_favorite_params/*[{ts_idx}])&quot;</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="e65a9280-9866-4a75-a143-125c98b3d3ad" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>ts_fav_name = query(&apos;dumpstate_xml&apos;,query_path);print(ts_fav_name)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="4dfc7fbf-6b90-4bb3-a626-a83e56c5c00f" action="if" useFieldsInCommand="false">
+                                            <command>
+                                                <body>ts_fav_name in ts_nodal_list:</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="156e72f3-fa15-4c88-b50d-e9f843414726" action="continue" useFieldsInCommand="false">
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="85a06587-3817-4275-b638-289e82d8adeb" action="comment" useFieldsInCommand="false">
+                                            <command>
+                                                <body>Check exist param</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="17d99cd6-8b17-4561-961b-97b138472142" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>query_path = &apos;name(data/parameters/Topology_parameters/Testservers/{0})&apos;.format(ts_fav_name)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="ff75abf2-d1f5-49bb-8ef0-8aa7db154ff0" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>ts_name = query(&apos;dumpstate_xml&apos;,query_path);print(ts_name)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="f36c89ff-b27c-498b-9856-26b9bcd1de14" action="if" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>ts_name:</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="53d5f899-ac6e-4316-869c-cf40b4a91bfd" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>ts_nodal_list.append(ts_name)</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="4371b269-0b95-49e1-b25f-ad3c6272a6b0" action="break" useFieldsInCommand="false">
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="2c8bb632-7092-42a3-bb02-00be8e540e97" action="comment" useFieldsInCommand="false">
+                    <command>
+                        <body>Check number of nodal list</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="4e22279e-31a8-472c-882c-91cc6ccb1f8f" action="if" useFieldsInCommand="false">
+                            <command>
+                                <body>len(ts_nodal_list) != int(required_instance_number):</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="236d0d17-ef9c-4cc9-bcfe-4f68a430b406" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>message = f&quot;To be able to run as an instance, the TS needs to be added in LS_Nodal_favorite_params first&quot;</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="db5bea67-85e8-42bd-8b60-e88544826849" action="message" useFieldsInCommand="false">
+                                    <command>
+                                        <body>Error:[message]</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                        <severity inherit="false">Error</severity>
+                                        <message inherit="false">[message]</message>
+                                    </applicationProperties>
+                                </item>
+                                <item guid="e60166d1-f4fc-44c2-a838-06057154c9ab" action="return">
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="3be509f8-eead-4097-adbe-1a38a832d4e3" action="return">
+                    <command>
+                        <body>[ts_nodal_list]</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+            </steps>
+            <arguments>
+                <item name="required_instance_number">
+                    <description>The required instance number need have in this test</description>
+                    <isMandatory>true</isMandatory>
+                </item>
+                <item name="ts_nodal_name">
+                    <defaultValue>TS1</defaultValue>
+                </item>
+                <item name="ts_groups"/>
+            </arguments>
         </item>
     </procedures>
 </testCase>
