@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="9.0.0.202203011533">
+<testCase version="9.1.0.202208100613">
     <general>
         <documentation>A-AMF-SMF-6-PF: Inter NG-RAN node N2 based handover Execution - Performance Testing</documentation>
         <tags>N-3TS</tags>
@@ -3511,22 +3511,6 @@
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
-                                                <item guid="62264396-a562-4009-bd32-bb4c8f02ec5f" action="if" useFieldsInCommand="false">
-                                                    <command>
-                                                        <body>start_threshold_percent != 80:</body>
-                                                    </command>
-                                                    <nestedSteps>
-                                                        <item guid="7c5cf980-936d-45af-9fed-ec11a79c3c8c" action="message" useFieldsInCommand="false">
-                                                            <command>
-                                                                <body>Information:Run test instance with [start_threshold_percent]% of the target</body>
-                                                            </command>
-                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
-                                                                <message inherit="false">Run test instance with [start_threshold_percent]% of the target</message>
-                                                            </applicationProperties>
-                                                        </item>
-                                                    </nestedSteps>
-                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                </item>
                                                 <item guid="63670097-4f58-4d15-9093-74fb4d18450a" action="eval" useFieldsInCommand="false">
                                                     <command>
                                                         <body>t_load = int(session_capacity)</body>
@@ -3608,6 +3592,22 @@
                                                                 <body>project://ai_LS_5G/utility_library/utils.fftc#insert_devider_string -length 135</body>
                                                             </command>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="62264396-a562-4009-bd32-bb4c8f02ec5f" action="if" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>start_threshold_percent != 80:</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="7c5cf980-936d-45af-9fed-ec11a79c3c8c" action="message" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>Information:Run test instance with [start_threshold_percent]% of the target</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                                <message inherit="false">Run test instance with [start_threshold_percent]% of the target</message>
+                                                            </applicationProperties>
                                                         </item>
                                                     </nestedSteps>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
@@ -4812,6 +4812,21 @@
                                                     <item>
                                                         <extractorInfo extractorType="query">
                                                             <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                <query>boolean(mapped/Json/reason)</query>
+                                                            </extractorProperties>
+                                                        </extractorInfo>
+                                                        <processorInfo ruleType="store">
+                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                <storageLocation>is_error_exist</storageLocation>
+                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                            </ruleProperties>
+                                                        </processorInfo>
+                                                    </item>
+                                                    <item>
+                                                        <extractorInfo extractorType="query">
+                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
                                                                 <query>count(mapped/Json/runId)</query>
                                                             </extractorProperties>
                                                         </extractorInfo>
@@ -4829,6 +4844,11 @@
                                                                     <item actionId="Eval">
                                                                         <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
                                                                             <statement>error = True</statement>
+                                                                        </actionProperties>
+                                                                    </item>
+                                                                    <item actionId="Eval">
+                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                            <statement>error_msg = &quot;Test session error&quot;</statement>
                                                                         </actionProperties>
                                                                     </item>
                                                                     <item actionId="SkipRemainingRules">
@@ -4853,6 +4873,42 @@
                                                             </ruleProperties>
                                                         </processorInfo>
                                                     </item>
+                                                    <item>
+                                                        <extractorInfo extractorType="query">
+                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                <query>boolean(//errorsAndWarnings/item[contains(text(), &apos;AMF Nodal - Mobility Rate&apos;)])</query>
+                                                            </extractorProperties>
+                                                        </extractorInfo>
+                                                        <processorInfo ruleType="assert">
+                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                <expression>str(value) == &apos;true&apos;</expression>
+                                                                <actionsWhenTrue>
+                                                                    <item actionId="Eval">
+                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                            <statement>error = True</statement>
+                                                                        </actionProperties>
+                                                                    </item>
+                                                                    <item actionId="Eval">
+                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                            <statement>running_id_list.append(running_nodal_id)</statement>
+                                                                        </actionProperties>
+                                                                    </item>
+                                                                    <item actionId="Eval">
+                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                            <statement>error_msg = &quot;Mobility Rate {} is greater than maximum licensed value.&quot;.format(c_rate_ts)</statement>
+                                                                        </actionProperties>
+                                                                    </item>
+                                                                </actionsWhenTrue>
+                                                                <actionsWhenFalse>
+                                                                    <item actionId="Eval">
+                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                            <statement>error_msg = &quot;&quot;</statement>
+                                                                        </actionProperties>
+                                                                    </item>
+                                                                </actionsWhenFalse>
+                                                            </ruleProperties>
+                                                        </processorInfo>
+                                                    </item>
                                                 </analysisRules>
                                                 <storeResponseAt>response</storeResponseAt>
                                                 <storeResponseText>true</storeResponseText>
@@ -4870,7 +4926,25 @@
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
-                                                <item guid="de05856e-1052-4410-9bbc-56806df59bd1" action="json" useFieldsInCommand="false">
+                                                <item guid="6c9b48d1-f977-4640-a235-c394029dc11e" action="if" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>str(is_error_exist).lower() == &quot;false&quot;:</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="fc6405e4-1787-473b-b5f0-b7446dc39901" action="json" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;response&apos;, pathValue=&apos;{&quot;/&quot;:{&quot;reason&quot;:&quot;[error_msg]&quot;}}&apos;</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                                <action inherit="false">addJsonNode</action>
+                                                                <pathValue inherit="false" sub="true">{&quot;/&quot;:{&quot;reason&quot;:&quot;[error_msg]&quot;}}</pathValue>
+                                                                <documentName inherit="false">response</documentName>
+                                                            </applicationProperties>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="f5b10dcf-cd37-41d7-9e15-aa0ccf698bd1" action="json" useFieldsInCommand="false">
                                                     <command>
                                                         <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;response&apos;, pathValue=&apos;{&quot;/&quot;:{&quot;running_nodal_ids&quot;:&quot;[running_nodal_ids]&quot;}}&apos;</body>
                                                     </command>
