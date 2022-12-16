@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="9.0.0.202203240704">
+<testCase version="9.1.0.202206261803">
     <general>
         <documentation>A-SMF-UPF-2-PF: PDU Session Establishment-Srv_Voice - Performance Testing</documentation>
         <tags>R-3TS</tags>
@@ -1509,7 +1509,7 @@
                             <nestedSteps>
                                 <item guid="69e31cfa-aef2-4cd6-96e1-6bd007dae640" action="get_run_data_for_multi_test_instance" session="s1" useFieldsInCommand="false">
                                     <command>
-                                        <body>-run_data [testsession_data] -ts_groups [ts_groups] -param_group_names &quot;LS_Nodal_favorite_params&quot; -include_ports_capture true</body>
+                                        <body>-run_data [testsession_data] -ts_groups [ts_groups] -param_group_names &quot;LS_Nodal_favorite_params&quot; -reserveProcesses false -include_ports_capture true</body>
                                     </command>
                                     <postProcessing>
                                         <analysisRules>
@@ -5125,6 +5125,73 @@
                                                             </ruleProperties>
                                                         </processorInfo>
                                                     </item>
+                                                    <item>
+                                                        <extractorInfo extractorType="query">
+                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                <query>//reservations/item/phySubnets/item/name</query>
+                                                            </extractorProperties>
+                                                        </extractorInfo>
+                                                        <processorInfo ruleType="store">
+                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                <storageLocation>reserved_phy_subnet_name_list</storageLocation>
+                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                            </ruleProperties>
+                                                        </processorInfo>
+                                                    </item>
+                                                    <item>
+                                                        <extractorInfo extractorType="query">
+                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                <query>boolean(//reservations/item/phySubnets/item[not(name)])</query>
+                                                            </extractorProperties>
+                                                        </extractorInfo>
+                                                        <processorInfo ruleType="assert">
+                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                <expression>value == &quot;true&quot;</expression>
+                                                                <actionsWhenFalse>
+                                                                    <item actionId="Eval">
+                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                            <statement>empty_reserved_phy_item_index = -1</statement>
+                                                                        </actionProperties>
+                                                                    </item>
+                                                                    <item actionId="SkipRemainingRules">
+                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                    </item>
+                                                                </actionsWhenFalse>
+                                                            </ruleProperties>
+                                                        </processorInfo>
+                                                    </item>
+                                                    <item>
+                                                        <extractorInfo extractorType="query">
+                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                <query>count(//reservations/item/phySubnets/item[not(name)]/preceding-sibling::item)</query>
+                                                            </extractorProperties>
+                                                        </extractorInfo>
+                                                        <processorInfo ruleType="store">
+                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                <storageLocation>empty_reserved_phy_item_index</storageLocation>
+                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                            </ruleProperties>
+                                                        </processorInfo>
+                                                    </item>
+                                                    <item>
+                                                        <extractorInfo extractorType="query">
+                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                <query>//reservations/item/tsId</query>
+                                                            </extractorProperties>
+                                                        </extractorInfo>
+                                                        <processorInfo ruleType="store">
+                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                <storageLocation>ts_id</storageLocation>
+                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                            </ruleProperties>
+                                                        </processorInfo>
+                                                    </item>
                                                 </analysisRules>
                                                 <storeResponseAt>data</storeResponseAt>
                                                 <storeResponseText>true</storeResponseText>
@@ -5152,6 +5219,116 @@
                                                         <storeResponseAt>data</storeResponseAt>
                                                         <storeResponseText>true</storeResponseText>
                                                     </postProcessing>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="567462d1-ef23-4bf5-951e-d735d6cfa43e" action="comment" useFieldsInCommand="false">
+                                    <command>
+                                        <body>Set Extra Phys, this is needed to run routing and the extra phy name has to be the same as N6 Node</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="fa1dab03-cde3-4096-a9f7-d02a7a653679" action="if" useFieldsInCommand="false">
+                                            <command>
+                                                <body>is_b2b == &quot;true&quot;:</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="fae246f7-85eb-4705-8238-90864490d656" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>n6_phy_name = param(&quot;LS_Emulated_SUT_favorite_params/ts0/tc1/N6NodeAddr/phy&quot;, &quot;eth2&quot;);print(n6_phy_name)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="ece417fa-f924-42ef-bf62-5df5be9cb6f0" action="if" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>n6_phy_name not in reserved_phy_subnet_name_list and int(empty_reserved_phy_item_index) &gt;= 0:</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="f9bc5f2b-08ab-4a06-9b8d-2212588798d7" action="comment" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>Get starting IP for phy name from test server</body>
+                                                            </command>
+                                                            <nestedSteps>
+                                                                <item guid="14cf8cdc-c09f-42ff-a888-7c0c3259eb15" action="Custom" session="s1">
+                                                                    <command>
+                                                                        <body>-requestMethod GET -dataType json -rawResponse true -url testServers/[ts_id]</body>
+                                                                    </command>
+                                                                    <postProcessing>
+                                                                        <analysisRules>
+                                                                            <item>
+                                                                                <extractorInfo extractorType="query">
+                                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                        <query sub="true">//ethInfos/item\\[name = &quot;[n6_phy_name]&quot;]/base</query>
+                                                                                    </extractorProperties>
+                                                                                </extractorInfo>
+                                                                                <processorInfo ruleType="store">
+                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                                        <storageLocation>base_ip</storageLocation>
+                                                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                                                    </ruleProperties>
+                                                                                </processorInfo>
+                                                                            </item>
+                                                                        </analysisRules>
+                                                                        <storeResponseAt>test_servers_xml</storeResponseAt>
+                                                                    </postProcessing>
+                                                                    <applicationProperties type="com.fnfr.itest.platform2.shared.documents.ntaf.NtafTransferableDocumentObject" action="Custom" subharness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harnessName="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" rawResponse="true" rawResponse.inherit="false" url="testServers/[ts_id]" url.inherit="false"/>
+                                                                </item>
+                                                            </nestedSteps>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="ab8f83c1-9e0e-41cd-a16a-f9fbe72c9805" action="comment" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>Update the reservation by adding the needed port from N6 Node</body>
+                                                            </command>
+                                                            <nestedSteps>
+                                                                <item guid="13a951e0-45ef-457d-bb46-f117e8599b69" action="json" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;data&apos;, pathValue=&apos;{&quot;reservations/\\\\[0]/phySubnets/\\\\[[empty_reserved_phy_item_index]]/&quot;:{&quot;name&quot;:&quot;[n6_phy_name]&quot;,&quot;numIps&quot;:&quot;200&quot;,&quot;base&quot;:&quot;[base_ip]&quot;,&quot;mask&quot;:&quot;/16&quot;}}&apos;</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                                        <action inherit="false">addJsonNode</action>
+                                                                        <pathValue inherit="false" sub="true">{&quot;reservations/\\[0]/phySubnets/\\[[empty_reserved_phy_item_index]]/&quot;:{&quot;name&quot;:&quot;[n6_phy_name]&quot;,&quot;numIps&quot;:&quot;200&quot;,&quot;base&quot;:&quot;[base_ip]&quot;,&quot;mask&quot;:&quot;/16&quot;}}</pathValue>
+                                                                        <documentName inherit="false">data</documentName>
+                                                                    </applicationProperties>
+                                                                </item>
+                                                            </nestedSteps>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="c651930a-57cf-43ba-9e13-c6bf27712792" action="comment" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>Add Extra Phys</body>
+                                                            </command>
+                                                            <nestedSteps>
+                                                                <item guid="d8497bbb-f6fa-4afe-9fcd-eeb873bb2138" action="json" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;data&apos;, pathValue=&apos;{&quot;tsGroups/\\\\[0]/testCases/\\\\[2]/&quot;:{&quot;associatedPhys&quot;:\\\\[&quot;[n6_phy_name]&quot;]}}&apos;</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                                        <action inherit="false">addJsonNode</action>
+                                                                        <pathValue inherit="false" sub="true">{&quot;tsGroups/\\[0]/testCases/\\[2]/&quot;:{&quot;associatedPhys&quot;:\\[&quot;[n6_phy_name]&quot;]}}</pathValue>
+                                                                        <documentName inherit="false">data</documentName>
+                                                                    </applicationProperties>
+                                                                </item>
+                                                                <item guid="ad840478-d26e-42c2-86b9-7c3e3bee9c74" action="json" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;data&apos;, pathValue=&apos;{&quot;tsGroups/\\\\[0]/testCases/\\\\[1]/&quot;:{&quot;associatedPhys&quot;:\\\\[&quot;[n6_phy_name]&quot;]}}&apos;</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                                        <action inherit="false">addJsonNode</action>
+                                                                        <pathValue inherit="false" sub="true">{&quot;tsGroups/\\[0]/testCases/\\[1]/&quot;:{&quot;associatedPhys&quot;:\\[&quot;[n6_phy_name]&quot;]}}</pathValue>
+                                                                        <documentName inherit="false">data</documentName>
+                                                                    </applicationProperties>
+                                                                </item>
+                                                            </nestedSteps>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
                                             </nestedSteps>
