@@ -207,7 +207,7 @@
                 </item>
                 <item guid="bfe4f210-f095-4e76-b5d1-d06a5e16a057" action="if" useFieldsInCommand="false">
                     <command>
-                        <body>instance_number == 1 and not info(&apos;exists&apos;, &apos;param&apos;, &apos;TC_parameters/TS_Percentage&apos;):</body>
+                        <body>int(instance_number) == 1 and not info(&apos;exists&apos;, &apos;param&apos;, &apos;TC_parameters/TS_Percentage&apos;):</body>
                     </command>
                     <nestedSteps>
                         <item guid="6ddfdcd5-ccc3-49ef-bbbe-c829fc98ff6f" action="eval" useFieldsInCommand="false">
@@ -550,10 +550,35 @@
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
-                                <item guid="8949b901-7b0d-44bc-af3f-15d030653e67" action="eval" useFieldsInCommand="false">
+                                <item guid="5e8053f2-a04e-4a44-bbeb-fdf474136c23" action="if" useFieldsInCommand="false">
                                     <command>
-                                        <body>percentage_each_remain_ts = int(remaining_percent/zero_count);print(percentage_each_remain_ts)</body>
+                                        <body>int(zero_count) == int(instance_number):</body>
                                     </command>
+                                    <nestedSteps>
+                                        <item guid="d2254e3d-ec01-430e-8e68-80ba6e0f8c20" action="comment" useFieldsInCommand="false">
+                                            <command>
+                                                <body>Do NOT cast the result to int, this will divide the load and rate to instances evenly</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="1fb90e2b-1757-4b3b-a213-aa1a9aaecb09" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>percentage_each_remain_ts = remaining_percent/zero_count;print(percentage_each_remain_ts)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="19b56037-2603-440e-bd0d-bd0e05eed1d1" action="else" useFieldsInCommand="false">
+                                    <nestedSteps>
+                                        <item guid="8949b901-7b0d-44bc-af3f-15d030653e67" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>percentage_each_remain_ts = int(remaining_percent/zero_count);print(percentage_each_remain_ts)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
                                 <item guid="6e9faaea-dc3d-4e96-8a7d-3d20daf54915" action="if" useFieldsInCommand="false">
@@ -599,39 +624,77 @@
                         <body>len(percentage_list) &gt; 1:</body>
                     </command>
                     <nestedSteps>
-                        <item guid="b36c20ef-5b23-4d2c-a035-3e33ccd48e0a" action="comment" useFieldsInCommand="false">
+                        <item guid="3dc89656-2825-4015-830e-65cc53b5b79a" action="if" useFieldsInCommand="false">
                             <command>
-                                <body>Add &quot;---&quot;</body>
+                                <body>info(&apos;exists&apos;, &apos;param&apos;, &apos;TC_parameters/TS_Percentage&apos;):</body>
                             </command>
                             <nestedSteps>
-                                <item guid="bc0788c1-b4e3-4893-9e69-7734585b3571" action="call" useFieldsInCommand="false">
+                                <item guid="caabd6ba-f9e2-4932-9e58-2a4b8c981c6d" action="comment" useFieldsInCommand="false">
                                     <command>
-                                        <body>insert_devider_string -length 55</body>
+                                        <body>Add &quot;---&quot;</body>
                                     </command>
+                                    <nestedSteps>
+                                        <item guid="705b116c-1ae7-4c2d-a208-3f3daff3a7cc" action="call" useFieldsInCommand="false">
+                                            <command>
+                                                <body>insert_devider_string -length 55</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="5b062c99-bf21-481b-b5c5-43b1380a8731" action="message" useFieldsInCommand="false">
+                                    <command>
+                                        <body>Information:TS_Percentage:</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                        <message inherit="false">TS_Percentage:</message>
+                                    </applicationProperties>
+                                </item>
+                                <item guid="25d675b8-e72d-4b4e-aa27-cc00bbe6b112" action="for" useFieldsInCommand="false">
+                                    <command>
+                                        <body>idx, percent in enumerate(percentage_list):</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="adc6d8c4-f83e-40ae-a6a3-9b5925c816a6" action="message" useFieldsInCommand="false">
+                                            <command>
+                                                <body>Information:   + Nodal Instance [idx]:  [percentage_list[idx]]%</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                <message inherit="false">   + Nodal Instance [idx]:  [percentage_list[idx]]%</message>
+                                            </applicationProperties>
+                                        </item>
+                                    </nestedSteps>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
                             </nestedSteps>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
-                        <item guid="5b062c99-bf21-481b-b5c5-43b1380a8731" action="message" useFieldsInCommand="false">
+                        <item guid="03b188d4-437b-4f29-87b3-31041aeda16a" action="elif" useFieldsInCommand="false">
                             <command>
-                                <body>Information:TS_Percentage:</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
-                                <message inherit="false">TS_Percentage:</message>
-                            </applicationProperties>
-                        </item>
-                        <item guid="25d675b8-e72d-4b4e-aa27-cc00bbe6b112" action="for" useFieldsInCommand="false">
-                            <command>
-                                <body>idx, percent in enumerate(percentage_list):</body>
+                                <body>str(show_msg_if_no_percent_specified) == &quot;true&quot;:</body>
                             </command>
                             <nestedSteps>
-                                <item guid="adc6d8c4-f83e-40ae-a6a3-9b5925c816a6" action="message" useFieldsInCommand="false">
+                                <item guid="e8268f98-a407-4b04-8eb9-4f1b0389d8ac" action="comment" useFieldsInCommand="false">
                                     <command>
-                                        <body>Information:   + Nodal Instance [idx]:  [percentage_list[idx]]%</body>
+                                        <body>Add &quot;---&quot;</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="fdf27557-ea62-4dfb-9fab-d385820aa684" action="call" useFieldsInCommand="false">
+                                            <command>
+                                                <body>insert_devider_string -length 55</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="ad5d769f-24a3-467f-a94d-cfcd3c0fff2c" action="message" useFieldsInCommand="false">
+                                    <command>
+                                        <body>Information:No TS percentages specified. The load and rate will be distributed equally between instances.</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
-                                        <message inherit="false">   + Nodal Instance [idx]:  [percentage_list[idx]]%</message>
+                                        <message inherit="false">No TS percentages specified. The load and rate will be distributed equally between instances.</message>
                                     </applicationProperties>
                                 </item>
                             </nestedSteps>
@@ -655,6 +718,10 @@
                 </item>
                 <item name="run_data_list"/>
                 <item name="ts_groups"/>
+                <item name="show_msg_if_no_percent_specified">
+                    <description>Only applies to tests supporting multi-nodal. If no TS_Percentages specified in parameter file, the message saying that &quot;No TS percentages specified. The load and rate will be distributed equally between instances.&quot; will be shown.</description>
+                    <defaultValue>true</defaultValue>
+                </item>
             </arguments>
         </item>
         <item name="compare_2_number" isPublic="true">
@@ -5354,6 +5421,34 @@ in which:
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
+                        <item guid="76b2e1f5-7697-438c-88ad-9a8410f0aeb0" action="message" useFieldsInCommand="false">
+                            <command>
+                                <body>Error:Cannot run the iteration with load = [session_capacity_threshold] and rate = [end_rate_threshold]. The load and rate must be larger than [min_number_for_threshold].</body>
+                            </command>
+                            <postProcessing>
+                                <analysisRules>
+                                    <item>
+                                        <extractorInfo extractorType="none">
+                                            <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                        </extractorInfo>
+                                        <processorInfo ruleType="assert">
+                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                <expression>False</expression>
+                                                <actionsWhenFalse>
+                                                    <item actionId="FailTest">
+                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                    </item>
+                                                </actionsWhenFalse>
+                                            </ruleProperties>
+                                        </processorInfo>
+                                    </item>
+                                </analysisRules>
+                            </postProcessing>
+                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                <severity inherit="false">Error</severity>
+                                <message inherit="false">Cannot run the iteration with load = [session_capacity_threshold] and rate = [end_rate_threshold]. The load and rate must be larger than [min_number_for_threshold].</message>
+                            </applicationProperties>
+                        </item>
                     </nestedSteps>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
@@ -5366,13 +5461,13 @@ in which:
                             <nestedSteps>
                                 <item guid="34b5005a-b902-4051-a5be-1b00cf3a557b" action="eval" useFieldsInCommand="false">
                                     <command>
-                                        <body>load_percent = int(session_capacity_threshold * int(percent) / 100);print(load_percent)</body>
+                                        <body>load_percent = int(session_capacity_threshold * percent / 100);print(load_percent)</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
                                 <item guid="6fff8137-3fa3-450f-95a3-463bec45e272" action="eval" useFieldsInCommand="false">
                                     <command>
-                                        <body>rate_percent = int(end_rate_threshold * int(percent) / 100);print(rate_percent)</body>
+                                        <body>rate_percent = int(end_rate_threshold * percent / 100);print(rate_percent)</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
