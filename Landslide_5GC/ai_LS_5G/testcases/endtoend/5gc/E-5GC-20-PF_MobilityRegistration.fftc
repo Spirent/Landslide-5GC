@@ -2447,7 +2447,7 @@
                                         </item>
                                         <item guid="26b004d0-4ce0-48e5-b3f5-6ea48f67c69a" action="call" useFieldsInCommand="false">
                                             <command>
-                                                <body>project://ai_LS_5G/utility_library/utils.fftc#validate_percentage_list(percentage_list=percentage_list, session_capacity=session_capacity, targeted_end_rate=targeted_end_rate, threshold_percent=100, min_number_for_threshold=0)</body>
+                                                <body>project://ai_LS_5G/utility_library/utils.fftc#validate_percentage_list(percentage_list=percentage_list, session_capacity=session_capacity, targeted_end_rate=targeted_end_rate, threshold_percent=100, min_number_for_threshold=&apos;0&apos;)</body>
                                             </command>
                                             <postProcessing>
                                                 <storeResponseAt>is_valid</storeResponseAt>
@@ -3263,19 +3263,9 @@
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
-                                <item guid="0fa9f83c-dd33-451d-90d8-388c73c6e779" action="call" useFieldsInCommand="false">
-                                    <command>
-                                        <body>project://ai_LS_5G/utility_library/utils.fftc#validate_percentage_list(percentage_list=percentage_list, session_capacity=session_capacity, targeted_end_rate=targeted_end_rate, threshold_percent=start_threshold_percent)</body>
-                                    </command>
-                                    <postProcessing>
-                                        <storeResponseAt>is_valid</storeResponseAt>
-                                        <storeResponseText>true</storeResponseText>
-                                    </postProcessing>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
                                 <item guid="3ad9d399-9fb5-4efc-a4b2-216e10b7c430" action="if" useFieldsInCommand="false">
                                     <command>
-                                        <body>int(targeted_mobility_rate) &gt; 1 and is_valid:</body>
+                                        <body>int(targeted_mobility_rate) &gt; int(instance_number):</body>
                                     </command>
                                     <nestedSteps>
                                         <item guid="6792989a-6603-4f38-8cd1-f88e85df8d48" action="comment" useFieldsInCommand="false">
@@ -3288,6 +3278,52 @@
                                                         <body>Re-run Nodal test</body>
                                                     </command>
                                                     <nestedSteps>
+                                                        <item guid="f9a8353e-adbb-434c-ab31-89a5edc61963" action="call" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>project://ai_LS_5G/utility_library/utils.fftc#validate_percentage_list(percentage_list=percentage_list, session_capacity=session_capacity, targeted_end_rate=targeted_end_rate, threshold_percent=start_threshold_percent, min_number_for_threshold=instance_number)</body>
+                                                            </command>
+                                                            <postProcessing>
+                                                                <storeResponseAt>check_valid</storeResponseAt>
+                                                                <storeResponseText>true</storeResponseText>
+                                                            </postProcessing>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="c86b2a03-aa7c-4588-b7b9-7762f25c0ab2" action="if" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>not check_valid:</body>
+                                                            </command>
+                                                            <nestedSteps>
+                                                                <item guid="a686b560-f4a0-45bf-b0cc-e71829ec8169" action="comment" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>Stop SUT</body>
+                                                                    </command>
+                                                                    <nestedSteps>
+                                                                        <item guid="da6d404c-00d6-4cc0-8269-e85d7bf4466d" action="if" useFieldsInCommand="false">
+                                                                            <command>
+                                                                                <body>is_b2b == &quot;true&quot; and running_node_id:</body>
+                                                                            </command>
+                                                                            <nestedSteps>
+                                                                                <item guid="6e628cc6-7e61-4348-9564-addea1b87912" action="stop_or_abort_test" session="s1" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>(running_id=running_node_id, clean_up=clean_up, timeout=timeout)</body>
+                                                                                    </command>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                            </nestedSteps>
+                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                        </item>
+                                                                    </nestedSteps>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                                <item guid="5bb9675d-8695-4c60-abdf-ee22f373f5b3" action="return">
+                                                                    <command>
+                                                                        <body>[response]</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                            </nestedSteps>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
                                                         <item guid="8448b9a3-c08d-46e0-9e68-6e9a569b448d" action="if" useFieldsInCommand="false">
                                                             <command>
                                                                 <body>start_threshold_percent != 80:</body>
@@ -4776,10 +4812,10 @@
                                         </item>
                                         <item guid="73e3f66b-1010-42c2-b03d-fd4a21c99bbe" action="message" useFieldsInCommand="false">
                                             <command>
-                                                <body>Information: Nodal Instance [idx] (Running ID: [running_id]): N2 Handover attempt = &quot;[t_load_ts]&quot; session(s) and N2 Handover Rate = &quot;[c_mobi_rate_ts]&quot; session(s)/sec</body>
+                                                <body>Information: Nodal Instance [idx] (Running ID: [running_id]): Mobility Registrations attempted = &quot;[t_load_ts]&quot; UE(s) and Mobility Registration attempts per second = &quot;[c_mobi_rate_ts]&quot; handover(s)/sec</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
-                                                <message inherit="false"> Nodal Instance [idx] (Running ID: [running_id]): N2 Handover attempt = &quot;[t_load_ts]&quot; session(s) and N2 Handover Rate = &quot;[c_mobi_rate_ts]&quot; session(s)/sec</message>
+                                                <message inherit="false"> Nodal Instance [idx] (Running ID: [running_id]): Mobility Registrations attempted = &quot;[t_load_ts]&quot; UE(s) and Mobility Registration attempts per second = &quot;[c_mobi_rate_ts]&quot; handover(s)/sec</message>
                                             </applicationProperties>
                                         </item>
                                     </nestedSteps>
@@ -7262,7 +7298,7 @@
                                         </item>
                                         <item guid="fad22cf1-13cc-49cd-9f02-dc7db876c23f" action="eval" useFieldsInCommand="false">
                                             <command>
-                                                <body>message = &apos;   + Apply SUPI: &quot;{0}&quot; &apos;.format(new_supi_value, &quot;&quot; if len(run_data_list) == 1 else &apos; for Nodal Instance &apos; + str(idx))</body>
+                                                <body>message = &apos;   + Apply SUPI: &quot;{0}&quot; {1}&apos;.format(new_supi_value, &quot;&quot;  if len(run_data_list) == 1 else &apos; for Nodal Instance &apos; + str(idx))</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
