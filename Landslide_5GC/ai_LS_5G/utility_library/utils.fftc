@@ -235,6 +235,84 @@
                                 <body>info(&apos;exists&apos;, &apos;local&apos;, &apos;run_data_list&apos;) and len(run_data_list) &gt; 0:</body>
                             </command>
                             <nestedSteps>
+                                <item guid="a76b6d9f-889d-44ce-b0e7-3db26eaf18d2" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>print(run_data_list)</body>
+                                    </command>
+                                    <postProcessing>
+                                        <analysisRules>
+                                            <item>
+                                                <extractorInfo extractorType="query">
+                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                                        <query>boolean(//item[contains(text(),&apos;reason&apos;)])</query>
+                                                    </extractorProperties>
+                                                </extractorInfo>
+                                                <processorInfo ruleType="assert">
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                        <expression>str(value) == &apos;true&apos;</expression>
+                                                        <actionsWhenTrue>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>error = True</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                        </actionsWhenTrue>
+                                                        <actionsWhenFalse>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>error = False</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                            <item actionId="SkipRemainingRules">
+                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                            </item>
+                                                        </actionsWhenFalse>
+                                                    </ruleProperties>
+                                                </processorInfo>
+                                            </item>
+                                            <item>
+                                                <extractorInfo extractorType="query">
+                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                                        <query>//item[contains(text(),&apos;reason&apos;)][1]</query>
+                                                    </extractorProperties>
+                                                </extractorInfo>
+                                                <processorInfo ruleType="store">
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                        <storageLocation>reason</storageLocation>
+                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                    </ruleProperties>
+                                                </processorInfo>
+                                            </item>
+                                        </analysisRules>
+                                    </postProcessing>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="082814e6-fa9e-4892-876b-19d24b01385c" action="if" useFieldsInCommand="false">
+                                    <command>
+                                        <body>error:</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="22ec1a83-1547-4a8f-b03a-10da886e706b" action="json" useFieldsInCommand="false">
+                                            <command>
+                                                <body>action=&apos;createJson&apos;, documentName=&apos;percentage_list&apos;, fromFile=false, jsonString=&apos;[reason]&apos;</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                <action inherit="false">createJson</action>
+                                                <jsonString inherit="false" sub="true">[reason]</jsonString>
+                                                <documentName inherit="false">percentage_list</documentName>
+                                            </applicationProperties>
+                                        </item>
+                                        <item guid="fb4a52b8-373c-4483-ae76-bd1d2640c009" action="return">
+                                            <command>
+                                                <body>[percentage_list]</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
                                 <item guid="c6152a7c-7c97-447a-9f5a-7d6a57b98e02" action="eval" useFieldsInCommand="false">
                                     <command>
                                         <body>print(ts_groups)</body>
@@ -5386,7 +5464,7 @@ in which:
                 </item>
                 <item guid="72901ded-f12a-46e3-9418-bbdb87eb3bc3" action="if" useFieldsInCommand="false">
                     <command>
-                        <body>not min_number_for_threshold:</body>
+                        <body>not str(min_number_for_threshold):</body>
                     </command>
                     <nestedSteps>
                         <item guid="76ac19d5-d32d-4c34-bcbe-1b984328696c" action="eval" useFieldsInCommand="false">
