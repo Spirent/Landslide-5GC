@@ -177,6 +177,12 @@
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
+                                        <item guid="c2726593-9666-4718-9867-1794b1fa3e8e" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>params += &quot;;TC_parameters/AMF_SUT_Wait_Time:(0):false&quot;</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
                                         <item guid="96541c74-b12f-4043-b70a-78b6392388b4" action="call" useFieldsInCommand="false">
                                             <command>
                                                 <body>project://ai_LS_5G/utility_library/utils.fftc#validate_params(params=params)</body>
@@ -1021,7 +1027,7 @@
                             <nestedSteps>
                                 <item guid="1ab4fd01-8560-412e-80ad-8b02c6b2f804" action="eval" useFieldsInCommand="false">
                                     <command>
-                                        <body>automation_steps = &quot;-4:-4::-1:-1::0;0:1:Init:-1:-1::0;0:1:Start:-1:-1::0;0:0:Init:-1:-1::0;0:0:Start:-1:-1::0;0:0:Stop:-1:-1::10;0:1:Stop:0:0:STOPPED:0&quot;</body>
+                                        <body>automation_steps = &quot;0:1:Init:-1:-1::0;0:1:Start:-1:-1::0;-4:-4::-1:-1::0;0:0:Init:-1:-1::0;0:0:Start:-1:-1::0;0:0:Stop:-1:-1::10;0:1:Stop:0:0:STOPPED:0&quot;</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
@@ -2183,7 +2189,7 @@
                     <nestedSteps>
                         <item guid="15fcb2f7-530c-4a79-8785-51cda61d4215" action="waiting_for_test_get_expected_state" session="s1" useFieldsInCommand="false">
                             <command>
-                                <body>(unexpected_states=&apos;ERROR;COMPLETE_ERROR&apos;, time_out=&apos;180&apos;, running_test_id=running_id, expected_state=&apos;1_Waiting&apos;)</body>
+                                <body>(unexpected_states=&apos;ERROR;COMPLETE_ERROR&apos;, time_out=&apos;180&apos;, running_test_id=running_id, expected_state=&apos;3_Waiting&apos;)</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
@@ -2223,9 +2229,15 @@
                         <body>Continue Nodal Test</body>
                     </command>
                     <nestedSteps>
+                        <item guid="dbc4e8ee-b1ce-430c-aec7-82477cec8b31" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>sut_wait_time = int(float(param(&apos;TC_parameters/AMF_SUT_Wait_Time&apos;, 60)));print(sut_wait_time)</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
                         <item guid="1dea657b-90ad-458f-bb5b-70618120ec8b" action="perform_next_action" session="s1" useFieldsInCommand="false">
                             <command>
-                                <body>(running_test_id=running_id, delay=&apos;10&apos;, time_out=&apos;180&apos;, expected_state=&apos;1_Waiting&apos;, next_action=&apos;continue&apos;)</body>
+                                <body>(running_test_id=running_id, delay=sut_wait_time, time_out=&apos;180&apos;, expected_state=&apos;3_Waiting&apos;, next_action=&apos;continue&apos;)</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
@@ -3152,6 +3164,12 @@
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
+                        <item guid="525be318-0b79-4fc1-9874-544da63b5af6" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>RegRejectCauseCode =param(&apos;TC_parameters/Expected_5GMMCauseCode_for_RegistrationReject/RegRejectCauseCode&apos;, &apos;100&apos;)</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
                         <item guid="4f88961e-740b-40b1-be7a-010edca60dc1" action="for" useFieldsInCommand="false">
                             <command>
                                 <body>i in range(0, len(nodal_pcaps)):</body>
@@ -3265,9 +3283,55 @@
                                                                     </command>
                                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                 </item>
+                                                                <item guid="8487a374-9fbf-4f00-a6b0-08313d98d811" action="isIPv4" session="s1" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>(ip=emulated_ue_ip)</body>
+                                                                    </command>
+                                                                    <postProcessing>
+                                                                        <analysisRules>
+                                                                            <item>
+                                                                                <extractorInfo extractorType="query">
+                                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                        <query>responseLine()</query>
+                                                                                    </extractorProperties>
+                                                                                </extractorInfo>
+                                                                                <processorInfo ruleType="assert">
+                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                        <expression>str(value).lower() == &quot;true&quot;</expression>
+                                                                                        <actionsWhenTrue>
+                                                                                            <item actionId="Eval">
+                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                                    <statement>ip_src=&quot;ip.src&quot;</statement>
+                                                                                                </actionProperties>
+                                                                                            </item>
+                                                                                            <item actionId="Eval">
+                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                                    <statement>ip_dst=&quot;ip.dst&quot;</statement>
+                                                                                                </actionProperties>
+                                                                                            </item>
+                                                                                        </actionsWhenTrue>
+                                                                                        <actionsWhenFalse>
+                                                                                            <item actionId="Eval">
+                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                                    <statement>ip_src=&quot;ipv6.src&quot;</statement>
+                                                                                                </actionProperties>
+                                                                                            </item>
+                                                                                            <item actionId="Eval">
+                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                                    <statement>ip_dst=&quot;ipv6.dst&quot;</statement>
+                                                                                                </actionProperties>
+                                                                                            </item>
+                                                                                        </actionsWhenFalse>
+                                                                                    </ruleProperties>
+                                                                                </processorInfo>
+                                                                            </item>
+                                                                        </analysisRules>
+                                                                    </postProcessing>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
                                                                 <item guid="aa393299-8a6f-4b93-8900-676205868e6b" action="command" session="s4">
                                                                     <command>
-                                                                        <body>query filter set &quot;nas_5gs.mm.message_type == 0x41 and ngap.procedureCode == 15 and ip.src == [emulated_ue_ip]&quot;</body>
+                                                                        <body>query filter set &quot;nas_5gs.mm.message_type == 0x41 and ngap.procedureCode == 15 and [ip_src] == [emulated_ue_ip]&quot;</body>
                                                                     </command>
                                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                 </item>
@@ -3542,7 +3606,7 @@
                                                         </item>
                                                         <item guid="b48cf5f1-6bcd-43b1-8f9c-bc44cb0f5a67" action="command" session="s4">
                                                             <command>
-                                                                <body>query filter set &quot;nas_5gs.mm.message_type == 0x44 and ngap.procedureCode == 4 and ip.dst == [emulated_ue_ip]&quot;</body>
+                                                                <body>query filter set &quot;nas_5gs.mm.message_type == 0x44 and ngap.procedureCode == 4 and [ip_dst] == [emulated_ue_ip]&quot;</body>
                                                             </command>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
@@ -3581,11 +3645,96 @@
                                                                             </ruleProperties>
                                                                         </processorInfo>
                                                                     </item>
+                                                                    <item>
+                                                                        <extractorInfo extractorType="query">
+                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                                                                <query>messages/item/id</query>
+                                                                            </extractorProperties>
+                                                                        </extractorInfo>
+                                                                        <processorInfo ruleType="store">
+                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                                <storageLocation>registration_reject_id</storageLocation>
+                                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                                            </ruleProperties>
+                                                                        </processorInfo>
+                                                                    </item>
                                                                 </analysisRules>
                                                             </postProcessing>
                                                             <eventHandlers>
                                                                 <item name="OnWiresharkCommandFailed"/>
                                                             </eventHandlers>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="b2007d32-1684-48bb-b146-aab18aeca49f" action="command" session="s4">
+                                                            <command>
+                                                                <body>query details [registration_reject_id] pdml</body>
+                                                            </command>
+                                                            <postProcessing>
+                                                                <analysisRules>
+                                                                    <item>
+                                                                        <extractorInfo extractorType="query">
+                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                                                                <query>boolean(//proto[@name=&quot;ngap&quot;]//field[@name=&quot;nas_5gs.mm.5gmm_cause&quot;]/@show)</query>
+                                                                            </extractorProperties>
+                                                                        </extractorInfo>
+                                                                        <processorInfo ruleType="assert">
+                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                <expression>str(value).lower() == &quot;true&quot;</expression>
+                                                                                <actionsWhenFalse>
+                                                                                    <item actionId="DeclareExecutionIssue">
+                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
+                                                                                            <message>Cannot find Registration Reject Cause Code in packet no.[registration_reject_id]</message>
+                                                                                        </actionProperties>
+                                                                                    </item>
+                                                                                    <item actionId="FailTest">
+                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                    </item>
+                                                                                    <item actionId="ExitProcedure">
+                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
+                                                                                    </item>
+                                                                                    <item actionId="SkipRemainingRules">
+                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                    </item>
+                                                                                </actionsWhenFalse>
+                                                                            </ruleProperties>
+                                                                        </processorInfo>
+                                                                    </item>
+                                                                    <item>
+                                                                        <extractorInfo extractorType="query">
+                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                                                                <query>//proto[@name=&quot;ngap&quot;]//field[@name=&quot;nas_5gs.mm.5gmm_cause&quot;]/@show</query>
+                                                                            </extractorProperties>
+                                                                        </extractorInfo>
+                                                                        <processorInfo ruleType="assert">
+                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                <expression>int(value) == int(RegRejectCauseCode)</expression>
+                                                                                <actionsWhenTrue>
+                                                                                    <item actionId="DeclareExecutionIssue">
+                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="OK">
+                                                                                            <message>Registration Reject Cause Code expected: &quot;[RegRejectCauseCode]&quot;, actual: &quot;[value]&quot;</message>
+                                                                                        </actionProperties>
+                                                                                    </item>
+                                                                                </actionsWhenTrue>
+                                                                                <actionsWhenFalse>
+                                                                                    <item actionId="DeclareExecutionIssue">
+                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Warning">
+                                                                                            <message>Registration Reject Cause Code expected: &quot;[RegRejectCauseCode]&quot;, actual: &quot;[value]&quot;</message>
+                                                                                        </actionProperties>
+                                                                                    </item>
+                                                                                    <item actionId="FailTest">
+                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                    </item>
+                                                                                    <item actionId="SkipRemainingRules">
+                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                    </item>
+                                                                                </actionsWhenFalse>
+                                                                            </ruleProperties>
+                                                                        </processorInfo>
+                                                                    </item>
+                                                                </analysisRules>
+                                                            </postProcessing>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
                                                     </nestedSteps>
