@@ -4040,18 +4040,46 @@
                                                     </postProcessing>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
-                                                <item guid="2cc2641d-94df-4a80-941e-fe740ca7128b" action="command" session="s4">
+                                                <item guid="1df7142a-53bd-4111-80b8-9e6b0ba2cc94" action="command" session="s4">
                                                     <command>
-                                                        <body>query filter set &quot;tcp.ack_raw == [request_ack_raw]&quot;</body>
+                                                        <body>query filter set &quot;http2 and json and tcp.ack_raw == [request_ack_raw] and frame.number &gt;= [id_1]&quot;</body>
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
-                                                <item guid="c726deb5-85cd-4cdf-885b-dbfaf2ded9c9" action="command" session="s4">
+                                                <item guid="61e37e59-1462-4f05-be55-98628ef00347" action="command" session="s4">
                                                     <command>
                                                         <body>query packets</body>
                                                     </command>
                                                     <postProcessing>
                                                         <analysisRules>
+                                                            <item>
+                                                                <extractorInfo extractorType="query">
+                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                        <query>success()</query>
+                                                                    </extractorProperties>
+                                                                </extractorInfo>
+                                                                <processorInfo ruleType="assert">
+                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                        <expression>value == &quot;true&quot;</expression>
+                                                                        <actionsWhenFalse>
+                                                                            <item actionId="FailTest">
+                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                            </item>
+                                                                            <item actionId="DeclareExecutionIssue">
+                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
+                                                                                    <message>&quot;[tag_key]&quot; does not exist in pcap file</message>
+                                                                                </actionProperties>
+                                                                            </item>
+                                                                            <item actionId="ExitProcedure">
+                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
+                                                                            </item>
+                                                                            <item actionId="SkipRemainingRules">
+                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                            </item>
+                                                                        </actionsWhenFalse>
+                                                                    </ruleProperties>
+                                                                </processorInfo>
+                                                            </item>
                                                             <item>
                                                                 <extractorInfo extractorType="query">
                                                                     <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
@@ -4061,20 +4089,34 @@
                                                                 <processorInfo ruleType="assert">
                                                                     <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
                                                                         <expression>int(value) == 1</expression>
-                                                                        <actionsWhenTrue>
-                                                                            <item actionId="Eval">
-                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                                    <statement>fraged = False</statement>
+                                                                        <actionsWhenFalse>
+                                                                            <item actionId="FailTest">
+                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                            </item>
+                                                                            <item actionId="DeclareExecutionIssue">
+                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
+                                                                                    <message>&quot;[tag_key]&quot; found &quot;{value}&quot; in pcap file. Expected: 1</message>
                                                                                 </actionProperties>
                                                                             </item>
-                                                                        </actionsWhenTrue>
-                                                                        <actionsWhenFalse>
-                                                                            <item actionId="Eval">
-                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                                    <statement>fraged = True</statement>
-                                                                                </actionProperties>
+                                                                            <item actionId="ExitProcedure">
+                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
                                                                             </item>
                                                                         </actionsWhenFalse>
+                                                                    </ruleProperties>
+                                                                </processorInfo>
+                                                            </item>
+                                                            <item>
+                                                                <extractorInfo extractorType="query">
+                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                        <query>messages/item/id</query>
+                                                                    </extractorProperties>
+                                                                </extractorInfo>
+                                                                <processorInfo ruleType="store">
+                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                        <storageLocation>id_1</storageLocation>
+                                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
                                                                     </ruleProperties>
                                                                 </processorInfo>
                                                             </item>
@@ -4091,250 +4133,74 @@
                                                     </eventHandlers>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
-                                                <item guid="6504953a-b069-44a2-b813-3242335a5dff" action="if" useFieldsInCommand="false">
+                                                <item guid="2ab98aab-53c9-41d2-8f46-6227c5ad443e" action="command" session="s4">
                                                     <command>
-                                                        <body>fraged:</body>
+                                                        <body>query details [id_1] pdml</body>
                                                     </command>
-                                                    <nestedSteps>
-                                                        <item guid="90d25b64-0ea4-4065-95a8-5654415efbcc" action="command" session="s4">
-                                                            <command>
-                                                                <body>query filter set &quot;http2 and json and tcp.ack_raw == [request_ack_raw]&quot;</body>
-                                                            </command>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                        <item guid="42064e05-0cf4-46f5-920d-930947491dcc" action="command" session="s4">
-                                                            <command>
-                                                                <body>query packets</body>
-                                                            </command>
-                                                            <postProcessing>
-                                                                <analysisRules>
-                                                                    <item>
-                                                                        <extractorInfo extractorType="query">
-                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                <query>success()</query>
-                                                                            </extractorProperties>
-                                                                        </extractorInfo>
-                                                                        <processorInfo ruleType="assert">
-                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                                <expression>value == &quot;true&quot;</expression>
-                                                                                <actionsWhenFalse>
-                                                                                    <item actionId="FailTest">
-                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                    </item>
-                                                                                    <item actionId="DeclareExecutionIssue">
-                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                                                            <message>&quot;[tag_key]&quot; does not exist in pcap file</message>
-                                                                                        </actionProperties>
-                                                                                    </item>
-                                                                                    <item actionId="ExitProcedure">
-                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
-                                                                                    </item>
-                                                                                    <item actionId="SkipRemainingRules">
-                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                    </item>
-                                                                                </actionsWhenFalse>
-                                                                            </ruleProperties>
-                                                                        </processorInfo>
-                                                                    </item>
-                                                                    <item>
-                                                                        <extractorInfo extractorType="query">
-                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                <query>rowCount()</query>
-                                                                            </extractorProperties>
-                                                                        </extractorInfo>
-                                                                        <processorInfo ruleType="assert">
-                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                                <expression>int(value) == 1</expression>
-                                                                                <actionsWhenFalse>
-                                                                                    <item actionId="FailTest">
-                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                    </item>
-                                                                                    <item actionId="DeclareExecutionIssue">
-                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                                                            <message>&quot;[tag_key]&quot; found &quot;{value}&quot; in pcap file. Expected: 1</message>
-                                                                                        </actionProperties>
-                                                                                    </item>
-                                                                                    <item actionId="ExitProcedure">
-                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
-                                                                                    </item>
-                                                                                </actionsWhenFalse>
-                                                                            </ruleProperties>
-                                                                        </processorInfo>
-                                                                    </item>
-                                                                    <item>
-                                                                        <extractorInfo extractorType="query">
-                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                <query>messages/item/id</query>
-                                                                            </extractorProperties>
-                                                                        </extractorInfo>
-                                                                        <processorInfo ruleType="store">
-                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
-                                                                                <storageLocation>id_1</storageLocation>
-                                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
-                                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
-                                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
-                                                                            </ruleProperties>
-                                                                        </processorInfo>
-                                                                    </item>
-                                                                </analysisRules>
-                                                            </postProcessing>
-                                                            <eventHandlers>
-                                                                <item name="OnWiresharkCommandFailed">
-                                                                    <item actionId="Eval">
-                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                            <statement>id = &quot;&quot;</statement>
-                                                                        </actionProperties>
-                                                                    </item>
-                                                                </item>
-                                                            </eventHandlers>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                        <item guid="c64a6dde-f5d2-48c8-9d6d-9d5d6e1a646a" action="command" session="s4">
-                                                            <command>
-                                                                <body>query details [id_1] pdml</body>
-                                                            </command>
-                                                            <postProcessing>
-                                                                <analysisRules>
-                                                                    <item>
-                                                                        <extractorInfo extractorType="query">
-                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                <query>//proto[@name = &apos;frame&apos;]/field[@name = &apos;frame.time_epoch&apos;]/@show</query>
-                                                                            </extractorProperties>
-                                                                        </extractorInfo>
-                                                                        <processorInfo ruleType="assert">
-                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                                <expression>float(value) &gt; float(epoch_time_eth2) </expression>
-                                                                                <actionsWhenFalse>
-                                                                                    <item actionId="DeclareExecutionIssue">
-                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Warning">
-                                                                                            <message> N1 and N12 interface messages are out of order</message>
-                                                                                        </actionProperties>
-                                                                                    </item>
-                                                                                    <item actionId="FailTest">
-                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                    </item>
-                                                                                    <item actionId="ExitProcedure">
-                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
-                                                                                    </item>
-                                                                                </actionsWhenFalse>
-                                                                            </ruleProperties>
-                                                                        </processorInfo>
-                                                                    </item>
-                                                                    <item>
-                                                                        <extractorInfo extractorType="query">
-                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                <query>//proto[@name=&quot;json&quot;]//field[@name=&quot;json.member&quot;][contains(@showname,&quot;resStar&quot;)]/field[@name=&quot;json.value.null&quot;]/@showname</query>
-                                                                            </extractorProperties>
-                                                                        </extractorInfo>
-                                                                        <processorInfo ruleType="assert">
-                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                                <expression>str(value) == &quot;Null value&quot;</expression>
-                                                                                <actionsWhenTrue>
-                                                                                    <item actionId="PassTestIfNotAlreadyFailed">
-                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                    </item>
-                                                                                    <item actionId="DeclareExecutionIssue">
-                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="OK">
-                                                                                            <message>resStar value in the Nausf_UEAuthentication_Authenticate Request message from the AMF to the AUSF is NULL</message>
-                                                                                        </actionProperties>
-                                                                                    </item>
-                                                                                </actionsWhenTrue>
-                                                                                <actionsWhenFalse>
-                                                                                    <item actionId="FailTest">
-                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                    </item>
-                                                                                    <item actionId="DeclareExecutionIssue">
-                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Warning">
-                                                                                            <message>resStar value in the Nausf_UEAuthentication_Authenticate Request message from the AMF to the AUSF is NOT NULL</message>
-                                                                                        </actionProperties>
-                                                                                    </item>
-                                                                                    <item actionId="ExitProcedure">
-                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
-                                                                                    </item>
-                                                                                </actionsWhenFalse>
-                                                                            </ruleProperties>
-                                                                        </processorInfo>
-                                                                    </item>
-                                                                </analysisRules>
-                                                            </postProcessing>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                    </nestedSteps>
-                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                </item>
-                                                <item guid="8c5825f3-9ad3-4264-9857-95893eaa68b7" action="else" useFieldsInCommand="false">
-                                                    <nestedSteps>
-                                                        <item guid="44e2918a-893c-4840-9154-0f65225b2167" action="command" session="s4">
-                                                            <command>
-                                                                <body>query details [id_1] pdml</body>
-                                                            </command>
-                                                            <postProcessing>
-                                                                <analysisRules>
-                                                                    <item>
-                                                                        <extractorInfo extractorType="query">
-                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                <query>//proto[@name = &apos;frame&apos;]/field[@name = &apos;frame.time_epoch&apos;]/@show</query>
-                                                                            </extractorProperties>
-                                                                        </extractorInfo>
-                                                                        <processorInfo ruleType="assert">
-                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                                <expression>float(value) &gt; float(epoch_time_eth2) </expression>
-                                                                                <actionsWhenFalse>
-                                                                                    <item actionId="DeclareExecutionIssue">
-                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Warning">
-                                                                                            <message> N1 and N12 interface messages are out of order</message>
-                                                                                        </actionProperties>
-                                                                                    </item>
-                                                                                    <item actionId="FailTest">
-                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                    </item>
-                                                                                    <item actionId="ExitProcedure">
-                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
-                                                                                    </item>
-                                                                                </actionsWhenFalse>
-                                                                            </ruleProperties>
-                                                                        </processorInfo>
-                                                                    </item>
-                                                                    <item>
-                                                                        <extractorInfo extractorType="query">
-                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                <query>//proto[@name=&quot;json&quot;]//field[@name=&quot;json.member&quot;][contains(@showname,&quot;resStar&quot;)]/field[@name=&quot;json.value.null&quot;]/@showname</query>
-                                                                            </extractorProperties>
-                                                                        </extractorInfo>
-                                                                        <processorInfo ruleType="assert">
-                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                                <expression>str(value) == &quot;Null value&quot;</expression>
-                                                                                <actionsWhenTrue>
-                                                                                    <item actionId="PassTestIfNotAlreadyFailed">
-                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                    </item>
-                                                                                    <item actionId="DeclareExecutionIssue">
-                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="OK">
-                                                                                            <message>resStar value in the Nausf_UEAuthentication_Authenticate Request message from the AMF to the AUSF is NULL</message>
-                                                                                        </actionProperties>
-                                                                                    </item>
-                                                                                </actionsWhenTrue>
-                                                                                <actionsWhenFalse>
-                                                                                    <item actionId="FailTest">
-                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                    </item>
-                                                                                    <item actionId="DeclareExecutionIssue">
-                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Warning">
-                                                                                            <message>resStar value in the Nausf_UEAuthentication_Authenticate Request message from the AMF to the AUSF is NOT NULL</message>
-                                                                                        </actionProperties>
-                                                                                    </item>
-                                                                                    <item actionId="ExitProcedure">
-                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
-                                                                                    </item>
-                                                                                </actionsWhenFalse>
-                                                                            </ruleProperties>
-                                                                        </processorInfo>
-                                                                    </item>
-                                                                </analysisRules>
-                                                            </postProcessing>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                    </nestedSteps>
+                                                    <postProcessing>
+                                                        <analysisRules>
+                                                            <item>
+                                                                <extractorInfo extractorType="query">
+                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                        <query>//proto[@name = &apos;frame&apos;]/field[@name = &apos;frame.time_epoch&apos;]/@show</query>
+                                                                    </extractorProperties>
+                                                                </extractorInfo>
+                                                                <processorInfo ruleType="assert">
+                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                        <expression>float(value) &gt; float(epoch_time_eth2) </expression>
+                                                                        <actionsWhenFalse>
+                                                                            <item actionId="DeclareExecutionIssue">
+                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Warning">
+                                                                                    <message> N1 and N12 interface messages are out of order</message>
+                                                                                </actionProperties>
+                                                                            </item>
+                                                                            <item actionId="FailTest">
+                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                            </item>
+                                                                            <item actionId="ExitProcedure">
+                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
+                                                                            </item>
+                                                                        </actionsWhenFalse>
+                                                                    </ruleProperties>
+                                                                </processorInfo>
+                                                            </item>
+                                                            <item>
+                                                                <extractorInfo extractorType="query">
+                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                        <query>//proto[@name=&quot;json&quot;]//field[@name=&quot;json.member&quot;][contains(@showname,&quot;resStar&quot;)]/field[@name=&quot;json.value.null&quot;]/@showname</query>
+                                                                    </extractorProperties>
+                                                                </extractorInfo>
+                                                                <processorInfo ruleType="assert">
+                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                        <expression>str(value) == &quot;Null value&quot;</expression>
+                                                                        <actionsWhenTrue>
+                                                                            <item actionId="PassTestIfNotAlreadyFailed">
+                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                            </item>
+                                                                            <item actionId="DeclareExecutionIssue">
+                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="OK">
+                                                                                    <message>resStar value in the Nausf_UEAuthentication_Authenticate Request message from the AMF to the AUSF is NULL</message>
+                                                                                </actionProperties>
+                                                                            </item>
+                                                                        </actionsWhenTrue>
+                                                                        <actionsWhenFalse>
+                                                                            <item actionId="FailTest">
+                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                            </item>
+                                                                            <item actionId="DeclareExecutionIssue">
+                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Warning">
+                                                                                    <message>resStar value in the Nausf_UEAuthentication_Authenticate Request message from the AMF to the AUSF is NOT NULL</message>
+                                                                                </actionProperties>
+                                                                            </item>
+                                                                            <item actionId="ExitProcedure">
+                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
+                                                                            </item>
+                                                                        </actionsWhenFalse>
+                                                                    </ruleProperties>
+                                                                </processorInfo>
+                                                            </item>
+                                                        </analysisRules>
+                                                    </postProcessing>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
                                             </nestedSteps>
@@ -4356,7 +4222,7 @@
                                         </item>
                                         <item guid="96c1b103-8329-4004-ab05-08d118851006" action="command" session="s4">
                                             <command>
-                                                <body>query filter set &quot;http2 &amp;&amp; tcp.seq_raw == [request_ack_raw] &quot;</body>
+                                                <body>query filter set &quot;http2 &amp;&amp; json &amp;&amp; tcp.seq_raw == [request_ack_raw] &amp;&amp; frame.number &gt; [id_1] &amp;&amp; json.key == &quot;authResult&quot;&quot;</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>

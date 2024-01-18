@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="9.2.0.202211170131">
+<testCase version="9.4.0.202309060843">
     <general>
         <documentation>I-BSF-2-PF: PCF Registers Binding Info For Subscriber Session - Performance Testing </documentation>
         <tags>I-BSF-2-PF</tags>
@@ -827,7 +827,7 @@
                                 </item>
                                 <item guid="b2d7ebfc-69df-4765-9262-a9a5999b6b37" action="call" useFieldsInCommand="false">
                                     <command>
-                                        <body>add_leading_zero_to_supi_if_needed(supi=supi)</body>
+                                        <body>project://ai_LS_5G/utility_library/utils.fftc#add_leading_zero_to_supi_if_needed(supi=supi)</body>
                                     </command>
                                     <postProcessing>
                                         <storeResponseAt>supi</storeResponseAt>
@@ -1406,7 +1406,7 @@
                             <nestedSteps>
                                 <item guid="2d040a5d-cc5d-4973-9ad7-b3a84b7675f9" action="eval" useFieldsInCommand="false">
                                     <command>
-                                        <body>params = &apos;0:0:Sessions:1;0:0:String:SbiTransRate:1&apos;</body>
+                                        <body>params = &apos;0:0:Sessions:1;0:0:String:SbiTransRate:1;0:0:StartingSupi:{0};0:0:StartingGpsi:{1};&apos;.format(supi,gpsi)</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
@@ -5358,27 +5358,19 @@
                     </nestedSteps>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
-                <item guid="8cf4ebb2-9961-49d0-8fa5-99eaefa51b17" action="comment" useFieldsInCommand="false">
+                <item guid="b7d4bdc9-b196-44e5-9e79-638254d8567e" action="comment" useFieldsInCommand="false">
                     <command>
                         <body>Configure for multiple instances</body>
                     </command>
                     <nestedSteps>
-                        <item guid="a125c957-f927-4493-b78d-3257e89d4fe9" action="if" useFieldsInCommand="false">
+                        <item guid="0c97d6c4-fb03-4f0e-9059-13159577b51b" action="call" useFieldsInCommand="false">
                             <command>
-                                <body>info(&apos;exists&apos;, &apos;param&apos;, &apos;TC_parameters/Starting_SUPI&apos;) and info(&apos;exists&apos;, &apos;param&apos;, &apos;TC_parameters/Starting_GPSI&apos;):</body>
+                                <body>project://ai_LS_5G/utility_library/utils.fftc#auto_increment_5g_identifiers_for_multi_instances(run_data_list=run_data_list, t_load_ts_list=t_load_ts_list)</body>
                             </command>
-                            <nestedSteps>
-                                <item guid="eefeeac1-7bb2-4ac1-8bf5-a2ae6c7afbce" action="call" useFieldsInCommand="false">
-                                    <command>
-                                        <body>reconfigure_parameters_for_multiple_instances(run_data_list=run_data_list, t_load_ts_list=t_load_ts_list)</body>
-                                    </command>
-                                    <postProcessing>
-                                        <storeResponseAt>running_id_list</storeResponseAt>
-                                        <storeResponseText>true</storeResponseText>
-                                    </postProcessing>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                            </nestedSteps>
+                            <postProcessing>
+                                <storeResponseAt>run_data_list</storeResponseAt>
+                                <storeResponseText>true</storeResponseText>
+                            </postProcessing>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
                     </nestedSteps>
@@ -9426,407 +9418,6 @@
                 <item name="session_capacity"/>
             </arguments>
             <response>{}</response>
-        </item>
-        <item name="reconfigure_parameters_for_multiple_instances" isPublic="true">
-            <steps>
-                <item guid="31fd0796-6c8b-4c04-98ee-25ff068f785e" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>increment = 0</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="ff3828a0-7873-48dc-8799-a0fded02f9f4" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>supi = gget(&quot;supi&quot;)</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="29c9d61f-1380-4977-a11e-ecd4d22be702" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>gpsi = gget(&quot;gpsi&quot;)</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="9bec7cac-5bd5-4931-85b2-b2006a23ba7d" action="for" useFieldsInCommand="false">
-                    <command>
-                        <body>idx, data in enumerate(run_data_list):</body>
-                    </command>
-                    <nestedSteps>
-                        <item guid="1ec37268-fe5f-43ab-81a2-484397b1cf9c" action="eval" useFieldsInCommand="false">
-                            <command>
-                                <body>print(data)</body>
-                            </command>
-                            <postProcessing>
-                                <analysisRules>
-                                    <item>
-                                        <extractorInfo extractorType="query">
-                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                <query>count(mapped/Json/tsGroups/item)</query>
-                                            </extractorProperties>
-                                        </extractorInfo>
-                                        <processorInfo ruleType="store">
-                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
-                                                <storageLocation>tsgroup_count</storageLocation>
-                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
-                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
-                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
-                                            </ruleProperties>
-                                        </processorInfo>
-                                    </item>
-                                </analysisRules>
-                                <storeResponseAt>data_xml</storeResponseAt>
-                            </postProcessing>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="b1f6cf52-4a30-4375-9261-805fac083b39" action="comment" useFieldsInCommand="false">
-                            <command>
-                                <body>Configure Gpsi/Supi/Node IP</body>
-                            </command>
-                            <nestedSteps>
-                                <item guid="ed9baf16-67ee-4545-90a3-aa07311052fe" action="if" useFieldsInCommand="false">
-                                    <command>
-                                        <body>idx &gt; 0:</body>
-                                    </command>
-                                    <nestedSteps>
-                                        <item guid="6b8cf89a-13d8-43c2-b385-dd7aa0d5c1f3" action="eval" useFieldsInCommand="false">
-                                            <command>
-                                                <body>increment += t_load_ts_list[idx - 1];print(increment)</body>
-                                            </command>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                    </nestedSteps>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                                <item guid="160217df-14ee-45fb-bf04-5cff9c3eb6bf" action="for" useFieldsInCommand="false">
-                                    <command>
-                                        <body>tsgroup_i in range(0, int(tsgroup_count)):</body>
-                                    </command>
-                                    <nestedSteps>
-                                        <item guid="21117870-f991-427d-86ba-3c985ee26e78" action="json" useFieldsInCommand="false">
-                                            <command>
-                                                <body>action=&apos;getJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;data&apos;, pathValue=&apos;{&quot;tsGroups/\\\\[[tsgroup_i]]/testCases&quot;}&apos;</body>
-                                            </command>
-                                            <postProcessing>
-                                                <analysisRules>
-                                                    <item>
-                                                        <extractorInfo extractorType="query">
-                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                <query>count(mapped/Json/testCases/item)</query>
-                                                            </extractorProperties>
-                                                        </extractorInfo>
-                                                        <processorInfo ruleType="store">
-                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
-                                                                <storageLocation>tc_count</storageLocation>
-                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
-                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
-                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
-                                                            </ruleProperties>
-                                                        </processorInfo>
-                                                    </item>
-                                                </analysisRules>
-                                                <storeResponseAt>testcases</storeResponseAt>
-                                                <storeResponseText>true</storeResponseText>
-                                            </postProcessing>
-                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
-                                                <action inherit="false">getJsonNode</action>
-                                                <pathValue inherit="false" sub="true">{&quot;tsGroups/\\[[tsgroup_i]]/testCases&quot;}</pathValue>
-                                                <documentName inherit="false">data</documentName>
-                                            </applicationProperties>
-                                        </item>
-                                        <item guid="8b24245c-115e-4639-b4c8-078610dc1f51" action="for" useFieldsInCommand="false">
-                                            <command>
-                                                <body>tc_i in range(0, int(tc_count)):</body>
-                                            </command>
-                                            <nestedSteps>
-                                                <item guid="3f87028d-38dc-4056-97d0-ddafd68352f8" action="json" useFieldsInCommand="false">
-                                                    <command>
-                                                        <body>action=&apos;getJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;testcases&apos;, pathValue=&apos;{&quot;testCases/\\\\[[tc_i]]/parameters&quot;}&apos;</body>
-                                                    </command>
-                                                    <postProcessing>
-                                                        <analysisRules>
-                                                            <item>
-                                                                <extractorInfo extractorType="query">
-                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                        <query>boolean(mapped/Json/parameters/StartingGpsi)</query>
-                                                                    </extractorProperties>
-                                                                </extractorInfo>
-                                                                <processorInfo ruleType="assert">
-                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                        <expression>value == &quot;true&quot;</expression>
-                                                                        <actionsWhenTrue>
-                                                                            <item actionId="Eval">
-                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                                    <statement>gpsi_exists = True</statement>
-                                                                                </actionProperties>
-                                                                            </item>
-                                                                        </actionsWhenTrue>
-                                                                        <actionsWhenFalse>
-                                                                            <item actionId="Eval">
-                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                                    <statement>gpsi_exists = False</statement>
-                                                                                </actionProperties>
-                                                                            </item>
-                                                                        </actionsWhenFalse>
-                                                                    </ruleProperties>
-                                                                </processorInfo>
-                                                            </item>
-                                                            <item>
-                                                                <extractorInfo extractorType="query">
-                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                        <query>boolean(mapped/Json/parameters/StartingSupi)</query>
-                                                                    </extractorProperties>
-                                                                </extractorInfo>
-                                                                <processorInfo ruleType="assert">
-                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                        <expression>value == &quot;true&quot;</expression>
-                                                                        <actionsWhenTrue>
-                                                                            <item actionId="Eval">
-                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                                    <statement>supi_exists = True</statement>
-                                                                                </actionProperties>
-                                                                            </item>
-                                                                        </actionsWhenTrue>
-                                                                        <actionsWhenFalse>
-                                                                            <item actionId="Eval">
-                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                                    <statement>supi_exists = False</statement>
-                                                                                </actionProperties>
-                                                                            </item>
-                                                                        </actionsWhenFalse>
-                                                                    </ruleProperties>
-                                                                </processorInfo>
-                                                            </item>
-                                                            <item>
-                                                                <extractorInfo extractorType="query">
-                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                        <query>count(mapped/Json/parameters/*/ip)</query>
-                                                                    </extractorProperties>
-                                                                </extractorInfo>
-                                                                <processorInfo ruleType="store">
-                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
-                                                                        <storageLocation>node_count</storageLocation>
-                                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
-                                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
-                                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
-                                                                    </ruleProperties>
-                                                                </processorInfo>
-                                                            </item>
-                                                        </analysisRules>
-                                                        <storeResponseAt>parameters</storeResponseAt>
-                                                    </postProcessing>
-                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
-                                                        <action inherit="false">getJsonNode</action>
-                                                        <pathValue inherit="false" sub="true">{&quot;testCases/\\[[tc_i]]/parameters&quot;}</pathValue>
-                                                        <documentName inherit="false">testcases</documentName>
-                                                    </applicationProperties>
-                                                </item>
-                                                <item guid="50ca78b6-e805-46d7-9098-f58d48dc43d2" action="comment" useFieldsInCommand="false">
-                                                    <command>
-                                                        <body>Configure Number of Gpsi</body>
-                                                    </command>
-                                                    <nestedSteps>
-                                                        <item guid="526477d2-9827-4439-ad37-3399b79c175c" action="eval" useFieldsInCommand="false">
-                                                            <command>
-                                                                <body>new_value = int(gpsi) + increment</body>
-                                                            </command>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                        <item guid="224599b2-35e1-4708-b0f5-1a9122c91b02" action="eval" useFieldsInCommand="false">
-                                                            <command>
-                                                                <body>new_value = str(new_value).zfill(len(gpsi))</body>
-                                                            </command>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                        <item guid="ce5a1ab1-33f9-47df-aa6e-cfbb965e6bd2" action="if" useFieldsInCommand="false">
-                                                            <command>
-                                                                <body>gpsi_exists:</body>
-                                                            </command>
-                                                            <nestedSteps>
-                                                                <item guid="47c253de-c52a-47d3-967a-7177bf45f535" action="json" useFieldsInCommand="false">
-                                                                    <command>
-                                                                        <body>action=&apos;setJsonValue&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;data&apos;, pathValue=&apos;{&quot;tsGroups/\\\\[[tsgroup_i]]/testCases/\\\\[[tc_i]]/parameters/StartingGpsi&quot;:&quot;[new_value]&quot;}&apos;</body>
-                                                                    </command>
-                                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
-                                                                        <action inherit="false">setJsonValue</action>
-                                                                        <pathValue inherit="false" sub="true">{&quot;tsGroups/\\[[tsgroup_i]]/testCases/\\[[tc_i]]/parameters/StartingGpsi&quot;:&quot;[new_value]&quot;}</pathValue>
-                                                                        <documentName inherit="false">data</documentName>
-                                                                    </applicationProperties>
-                                                                </item>
-                                                            </nestedSteps>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                        <item guid="c1e4b64d-ca48-48bd-98ff-d5b6b6332778" action="else" useFieldsInCommand="false">
-                                                            <nestedSteps>
-                                                                <item guid="535942ba-27c0-40ca-94e6-e4f2ccbc668c" action="eval" useFieldsInCommand="false">
-                                                                    <command>
-                                                                        <body>param = &apos;{0}:{1}:StartingGpsi:{2}&apos;.format(tsgroup_i, tc_i, new_value)</body>
-                                                                    </command>
-                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                </item>
-                                                                <item guid="d9b59ca5-3daa-4d93-9409-0742b07e80eb" action="add_additional_parameters" session="s1" useFieldsInCommand="false">
-                                                                    <command>
-                                                                        <body>(run_data=data, params=param)</body>
-                                                                    </command>
-                                                                    <postProcessing>
-                                                                        <storeResponseAt>data</storeResponseAt>
-                                                                        <storeResponseText>true</storeResponseText>
-                                                                    </postProcessing>
-                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                </item>
-                                                            </nestedSteps>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                        <item guid="85c7081f-0af3-4d62-a786-d46603b1d23f" action="eval" useFieldsInCommand="false">
-                                                            <command>
-                                                                <body>new_gpsi_value = new_value</body>
-                                                            </command>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                    </nestedSteps>
-                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                </item>
-                                                <item guid="a98660b9-c9d3-44db-bee9-dac08dc71733" action="comment" useFieldsInCommand="false">
-                                                    <command>
-                                                        <body>Configure Number of Supi</body>
-                                                    </command>
-                                                    <nestedSteps>
-                                                        <item guid="b7097cc7-5702-407b-9fec-2f753615d8c6" action="eval" useFieldsInCommand="false">
-                                                            <command>
-                                                                <body>new_value = int(supi) + increment</body>
-                                                            </command>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                        <item guid="d915cc0b-3912-417b-bf10-7b3bbe4e0bff" action="call" useFieldsInCommand="false">
-                                                            <command>
-                                                                <body>add_leading_zero_to_supi_if_needed(supi=new_value)</body>
-                                                            </command>
-                                                            <postProcessing>
-                                                                <storeResponseAt>new_value</storeResponseAt>
-                                                                <storeResponseText>true</storeResponseText>
-                                                            </postProcessing>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                        <item guid="4889c3bd-cec1-4610-bd8e-52e2e0a5e4f0" action="if" useFieldsInCommand="false">
-                                                            <command>
-                                                                <body>supi_exists:</body>
-                                                            </command>
-                                                            <nestedSteps>
-                                                                <item guid="bbcecab9-3b1d-4a1f-99d4-8168e69b74d5" action="json" useFieldsInCommand="false">
-                                                                    <command>
-                                                                        <body>action=&apos;setJsonValue&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;data&apos;, pathValue=&apos;{&quot;tsGroups/\\\\[[tsgroup_i]]/testCases/\\\\[[tc_i]]/parameters/StartingSupi&quot;:&quot;[new_value]&quot;}&apos;</body>
-                                                                    </command>
-                                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
-                                                                        <action inherit="false">setJsonValue</action>
-                                                                        <pathValue inherit="false" sub="true">{&quot;tsGroups/\\[[tsgroup_i]]/testCases/\\[[tc_i]]/parameters/StartingSupi&quot;:&quot;[new_value]&quot;}</pathValue>
-                                                                        <documentName inherit="false">data</documentName>
-                                                                    </applicationProperties>
-                                                                </item>
-                                                            </nestedSteps>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                        <item guid="06b61cf1-94ad-40ee-aaac-05905b8a1243" action="else" useFieldsInCommand="false">
-                                                            <nestedSteps>
-                                                                <item guid="21f06fd7-5076-4ecf-86d7-c81af08aaca2" action="eval" useFieldsInCommand="false">
-                                                                    <command>
-                                                                        <body>param = &apos;{0}:{1}:StartingSupi:{2}&apos;.format(tsgroup_i, tc_i, new_value)</body>
-                                                                    </command>
-                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                </item>
-                                                                <item guid="a4de6c97-417f-42a6-92c6-e4fa9de4ca2b" action="add_additional_parameters" session="s1" useFieldsInCommand="false">
-                                                                    <command>
-                                                                        <body>(run_data=data, params=param)</body>
-                                                                    </command>
-                                                                    <postProcessing>
-                                                                        <storeResponseAt>data</storeResponseAt>
-                                                                        <storeResponseText>true</storeResponseText>
-                                                                    </postProcessing>
-                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                </item>
-                                                            </nestedSteps>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                        <item guid="7b3985e5-4b5b-435d-927a-196a4f92bd3c" action="eval" useFieldsInCommand="false">
-                                                            <command>
-                                                                <body>new_supi_value = new_value</body>
-                                                            </command>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                    </nestedSteps>
-                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                </item>
-                                            </nestedSteps>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                        <item guid="83cf945f-e3da-44a3-a3df-7adff87befdc" action="eval" useFieldsInCommand="false">
-                                            <command>
-                                                <body>message = &apos;   + Apply SUPI: &quot;{0}&quot; and GPSI: &quot;{1}&quot;{2}&apos;.format(new_supi_value, new_gpsi_value, &quot;&quot; if len(run_data_list) == 1 else &apos; for Nodal Instance &apos; + str(idx))</body>
-                                            </command>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                        <item guid="98e501d5-0847-439b-bd5e-3d899f5d6b13" action="message" useFieldsInCommand="false">
-                                            <command>
-                                                <body>Information:[message]</body>
-                                            </command>
-                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
-                                                <message inherit="false">[message]</message>
-                                            </applicationProperties>
-                                        </item>
-                                    </nestedSteps>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                            </nestedSteps>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="4c40a714-b604-4e7b-a4c0-d8ee24da6043" action="eval" useFieldsInCommand="false">
-                            <command>
-                                <body>run_data_list[idx] = data</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                    </nestedSteps>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="16a44a1f-ebd8-441b-b833-c70020362c56" action="return">
-                    <command>
-                        <body>[run_data_list]</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-            </steps>
-            <arguments>
-                <item name="run_data_list">
-                    <isMandatory>true</isMandatory>
-                </item>
-                <item name="t_load_ts_list">
-                    <isMandatory>true</isMandatory>
-                </item>
-                <item name="c_rate_ts_list"/>
-            </arguments>
-        </item>
-        <item name="add_leading_zero_to_supi_if_needed" isPublic="true">
-            <steps>
-                <item guid="967982a7-8cf8-4a0f-98a0-65932eddfde1" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>supi_range = (14, 15)</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="bbd0c699-64cf-4a7b-b2bb-beea6a069ecd" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>new_value = &apos;0&apos; * ((15 if len(str(gget(&quot;supi&quot;))) == 15 else 14) - len(str(supi))) + str(supi)</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="72242f01-3d37-47b8-88dc-64afe6553d2c" action="return">
-                    <command>
-                        <body>[new_value]</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-            </steps>
-            <arguments>
-                <item name="supi"/>
-            </arguments>
         </item>
     </procedures>
 </testCase>
