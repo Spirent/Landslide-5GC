@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="9.4.0.202309060843">
+<testCase version="9.4.0.202309061644">
     <general>
         <documentation>S-AMF-13-SA: GUTI Allocation by AMF on Mobility Registration Update - Security Testing</documentation>
         <tags>S-AMF-13-SA</tags>
@@ -4641,6 +4641,60 @@
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
+                        <item guid="c9db9ce0-883b-4820-9dac-4463ae403bcb" action="comment" useFieldsInCommand="false">
+                            <command>
+                                <body>Check if the MobGnbControlAddr from nodal is using IPV6, and update all the filter to use ipv6 as we only support ipv6 to ipv6</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="94ded6e9-aaca-4055-9d8b-e3305ea0853c" action="isIPv4" session="s1" useFieldsInCommand="false">
+                                    <command>
+                                        <body>(ip=UE_ip)</body>
+                                    </command>
+                                    <postProcessing>
+                                        <analysisRules>
+                                            <item>
+                                                <extractorInfo extractorType="query">
+                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                        <query>responseLine()</query>
+                                                    </extractorProperties>
+                                                </extractorInfo>
+                                                <processorInfo ruleType="assert">
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                        <expression>str(value).lower() == &quot;true&quot;</expression>
+                                                        <actionsWhenTrue>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>ip_src=&quot;ip.src&quot;</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>ip_dst=&quot;ip.dst&quot;</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                        </actionsWhenTrue>
+                                                        <actionsWhenFalse>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>ip_src=&quot;ipv6.src&quot;</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>ip_dst=&quot;ipv6.dst&quot;</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                        </actionsWhenFalse>
+                                                    </ruleProperties>
+                                                </processorInfo>
+                                            </item>
+                                        </analysisRules>
+                                    </postProcessing>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
                         <item guid="2f24f3a3-44dc-4b91-8f46-143e55690f14" action="eval" useFieldsInCommand="false">
                             <command>
                                 <body>is_order = True</body>
@@ -4792,7 +4846,7 @@
                                                 </item>
                                                 <item guid="ae46b347-0b5b-4706-9825-04e2b590ed3f" action="command" session="s4">
                                                     <command>
-                                                        <body>query filter set &quot;nas_5gs.mm.5gs_reg_type == 2 &amp;&amp; nas_5gs.mm.message_type == 0x41 &amp;&amp; ip.src == [UE_ip] &amp;&amp; ip.dst == [AMF_SUT_ip]&quot;</body>
+                                                        <body>query filter set &quot;nas_5gs.mm.5gs_reg_type == 2 &amp;&amp; nas_5gs.mm.message_type == 0x41 &amp;&amp; [ip_src] == [UE_ip] &amp;&amp; [ip_dst] == [AMF_SUT_ip]&quot;</body>
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
@@ -4975,7 +5029,7 @@
                                                 </item>
                                                 <item guid="8dbe255d-4ab4-4d2e-b0a3-253308115e1c" action="command" session="s4">
                                                     <command>
-                                                        <body>query filter set &quot;nas_5gs.mm.message_type == 0x42 &amp;&amp; ip.src == [AMF_SUT_ip] &amp;&amp; ip.dst == [UE_ip]&quot;</body>
+                                                        <body>query filter set &quot;nas_5gs.mm.message_type == 0x42 &amp;&amp; [ip_src] == [AMF_SUT_ip] &amp;&amp; [ip_dst] == [UE_ip]&quot;</body>
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>

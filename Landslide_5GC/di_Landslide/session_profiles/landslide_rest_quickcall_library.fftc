@@ -4684,6 +4684,12 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                         <body>Get reservations and get reservations port number</body>
                     </command>
                     <nestedSteps>
+                        <item guid="7b718391-c3fc-4534-9c0a-7da8e6d9cebe" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>nodal_port_capture_list=[]</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
                         <item guid="7848b349-6324-4eec-95e6-44c919dcbaa6" action="eval" useFieldsInCommand="false">
                             <command>
                                 <body>print(run_data)</body>
@@ -4759,6 +4765,22 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                         <processorInfo ruleType="store">
                                             <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
                                                 <storageLocation>reservation_count</storageLocation>
+                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                            </ruleProperties>
+                                        </processorInfo>
+                                    </item>
+                                    <item>
+                                        <extractorInfo extractorType="query">
+                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                <query>mapped/Json/portCapture/item/port</query>
+                                            </extractorProperties>
+                                        </extractorInfo>
+                                        <processorInfo ruleType="store">
+                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                <storageLocation>nodal_port_capture_list</storageLocation>
+                                                <storeInAList>true</storeInAList>
                                                 <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
                                                 <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
                                                 <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
@@ -5624,6 +5646,7 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                                                         <processorInfo ruleType="store">
                                                                             <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
                                                                                 <storageLocation>eth_list</storageLocation>
+                                                                                <storeInAList>true</storeInAList>
                                                                                 <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
                                                                                 <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
                                                                                 <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
@@ -5635,58 +5658,16 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                                             </postProcessing>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
-                                                        <item guid="109f3a55-d7e5-4bb3-9240-de1dfaa61995" action="for" useFieldsInCommand="false">
+                                                        <item guid="4f26b87f-2e35-454a-8e77-e33943e7f8d1" action="eval" useFieldsInCommand="false">
                                                             <command>
-                                                                <body>new_phy_i in range(1, int(new_eth_count) + 1):</body>
+                                                                <body>eth_list_new=list(dict.fromkeys([eth.replace(&quot;v6&quot;, &quot;&quot;) for eth in eth_list]))</body>
                                                             </command>
-                                                            <nestedSteps>
-                                                                <item guid="c0b458e8-10b6-4e15-adc5-8f9fa1bb2739" action="eval" useFieldsInCommand="false">
-                                                                    <command>
-                                                                        <body>query_path = &apos;mapped/Json/item[{0}]/name&apos;.format(new_phy_i)</body>
-                                                                    </command>
-                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                </item>
-                                                                <item guid="7aa8f735-a2c4-47c3-9cc7-fb19d720e749" action="eval" useFieldsInCommand="false">
-                                                                    <command>
-                                                                        <body>new_name = query(&apos;new_phy_xml&apos;,query_path).replace(&apos;v6&apos;,&apos;&apos;);print(new_name)</body>
-                                                                    </command>
-                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                </item>
-                                                                <item guid="b94c62e4-ce17-4de5-b305-5300457182c4" action="if" useFieldsInCommand="false">
-                                                                    <command>
-                                                                        <body>new_name:</body>
-                                                                    </command>
-                                                                    <nestedSteps>
-                                                                        <item guid="4f0cc080-0754-40f7-8b00-f4fda0078724" action="eval" useFieldsInCommand="false">
-                                                                            <command>
-                                                                                <body>query_path = &apos;mapped/Json/reservations/item[{0}]/phySubnets/item[{1}]/name&apos;.format(int(reservations_index) + 1, new_phy_i)</body>
-                                                                            </command>
-                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                        </item>
-                                                                        <item guid="687649bd-b864-4866-9ae0-1cf6bd26bee8" action="eval" useFieldsInCommand="false">
-                                                                            <command>
-                                                                                <body>current_name = query(&apos;current_data_xml&apos;,query_path).replace(&apos;v6&apos;,&apos;&apos;);print(current_name)</body>
-                                                                            </command>
-                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                        </item>
-                                                                        <item guid="807787a1-bdf8-4746-970d-a0c0ac5ac947" action="if" useFieldsInCommand="false">
-                                                                            <command>
-                                                                                <body>current_name and current_name != new_name:</body>
-                                                                            </command>
-                                                                            <nestedSteps>
-                                                                                <item guid="cc31d5ea-e27c-440f-92e3-3824c0b99ade" action="eval" useFieldsInCommand="false">
-                                                                                    <command>
-                                                                                        <body>eth_mapping[current_name] = new_name</body>
-                                                                                    </command>
-                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                </item>
-                                                                            </nestedSteps>
-                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                        </item>
-                                                                    </nestedSteps>
-                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                </item>
-                                                            </nestedSteps>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="eb5c2656-85dc-46c7-82b6-af8843357559" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>eth_mapping = {key: value for key, value in zip(nodal_port_capture_list, eth_list_new) if key != value};print(eth_mapping)</body>
+                                                            </command>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
                                                     </nestedSteps>
@@ -5697,20 +5678,6 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                                         <body>Update port capture</body>
                                                     </command>
                                                     <nestedSteps>
-                                                        <item guid="1c0ea93c-9b1e-401a-8b81-453f4821d060" action="if" useFieldsInCommand="false">
-                                                            <command>
-                                                                <body>isinstance(eth_list, str):</body>
-                                                            </command>
-                                                            <nestedSteps>
-                                                                <item guid="d3b6b4b2-c850-49fd-b534-ef0dfd3a9d3a" action="eval" useFieldsInCommand="false">
-                                                                    <command>
-                                                                        <body>eth_list = [eth_list]</body>
-                                                                    </command>
-                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                </item>
-                                                            </nestedSteps>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
                                                         <item guid="5dcef62f-60c5-48d4-8874-010e76c3f550" action="for" useFieldsInCommand="false">
                                                             <command>
                                                                 <body>capture_i in range(0, int(port_capture_count)):</body>
