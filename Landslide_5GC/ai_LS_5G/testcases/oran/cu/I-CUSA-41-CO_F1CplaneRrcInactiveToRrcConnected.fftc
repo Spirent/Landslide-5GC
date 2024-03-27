@@ -2938,21 +2938,6 @@
                                     <item>
                                         <extractorInfo extractorType="query">
                                             <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
-                                                <query>mapped/Json/is_packet_sent_increase</query>
-                                            </extractorProperties>
-                                        </extractorInfo>
-                                        <processorInfo ruleType="store">
-                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
-                                                <storageLocation>is_packet_sent_increase</storageLocation>
-                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
-                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
-                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
-                                            </ruleProperties>
-                                        </processorInfo>
-                                    </item>
-                                    <item>
-                                        <extractorInfo extractorType="query">
-                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
                                                 <query>List_of_packet_sent()</query>
                                             </extractorProperties>
                                         </extractorInfo>
@@ -3880,10 +3865,10 @@
                                 </item>
                                 <item guid="dc38b350-582c-4d8f-ba1b-34d538b25e75" action="if" useFieldsInCommand="false">
                                     <command>
-                                        <body>list_of_packet_sent != &quot;0&quot; and list_of_packet_sent != 0:</body>
+                                        <body>list_of_packet_sent != &quot;0&quot; and list_of_packet_sent != 0 and len(set(list_of_packet_sent))&gt;=2:</body>
                                     </command>
                                     <nestedSteps>
-                                        <item guid="e8499754-18da-4efd-a797-a2dceb5d6a60" action="eval" useFieldsInCommand="false">
+                                        <item guid="a4f73a42-f20a-479c-9195-dddc138cbf20" action="eval" useFieldsInCommand="false">
                                             <command>
                                                 <body>list_of_packet_sent = [int(value) for value in list_of_packet_sent[1:-1].split(&apos;,&apos;)]</body>
                                             </command>
@@ -3891,7 +3876,7 @@
                                         </item>
                                         <item guid="3c41e8c3-955d-411e-a558-92989cdfe9e8" action="if" useFieldsInCommand="false">
                                             <command>
-                                                <body>len(list_of_packet_sent)&gt;=2 and all(x&lt;y for x, y in zip(list_of_packet_sent, list_of_packet_sent[1:])):</body>
+                                                <body>all(x&lt;=y for x, y in zip(list_of_packet_sent, list_of_packet_sent[1:])):</body>
                                             </command>
                                             <nestedSteps>
                                                 <item guid="57f5a462-77f6-4fbc-b014-59f518f6b480" action="eval" useFieldsInCommand="false">
@@ -3913,11 +3898,11 @@
                                     <nestedSteps>
                                         <item guid="7c565099-68b1-4614-8e5d-e8e6a67c28c2" action="message" useFieldsInCommand="false">
                                             <command>
-                                                <body>OK:The L3 Client::Total Packets Sent count increases per interval: [list_of_packet_sent]</body>
+                                                <body>OK:The L3 Client::Total Packets Sent count increases per interval: &quot;[list_of_packet_sent]&quot;</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
                                                 <severity inherit="false">OK</severity>
-                                                <message inherit="false">The L3 Client::Total Packets Sent count increases per interval: [list_of_packet_sent]</message>
+                                                <message inherit="false">The L3 Client::Total Packets Sent count increases per interval: &quot;[list_of_packet_sent]&quot;</message>
                                             </applicationProperties>
                                         </item>
                                     </nestedSteps>
@@ -3927,11 +3912,11 @@
                                     <nestedSteps>
                                         <item guid="c0ea4cda-44c1-4f39-8eee-4bd67cb56ca4" action="message" useFieldsInCommand="false">
                                             <command>
-                                                <body>Warning:The L3 Client::Total Packets Sent count NOT increases per interval: [list_of_packet_sent]</body>
+                                                <body>Warning:The L3 Client::Total Packets Sent count does NOT increases per interval: &quot;[list_of_packet_sent]&quot;</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
                                                 <severity inherit="false">Warning</severity>
-                                                <message inherit="false">The L3 Client::Total Packets Sent count NOT increases per interval: [list_of_packet_sent]</message>
+                                                <message inherit="false">The L3 Client::Total Packets Sent count does NOT increases per interval: &quot;[list_of_packet_sent]&quot;</message>
                                             </applicationProperties>
                                         </item>
                                         <item guid="6d0888c3-cd21-497e-9d99-6ba0821ae55e" action="json" useFieldsInCommand="false">
@@ -4112,12 +4097,6 @@
                         <documentName inherit="false">response</documentName>
                     </applicationProperties>
                 </item>
-                <item guid="c6f4ee01-3292-4b8a-8721-7f05b78025b7" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>is_packet_sent_increase = True</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
                 <item guid="e5799119-9022-4cf1-876e-2d5c5e7c4eb7" action="eval" useFieldsInCommand="false">
                     <command>
                         <body>total_packets_sent_list = 0</body>
@@ -4144,13 +4123,18 @@
                                     <item>
                                         <extractorInfo extractorType="query">
                                             <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
-                                                <query>boolean(mapped/Json/Tables/Favorites/item[string(number(L3_Client__Total_Packets_Sent)) != &apos;NaN&apos; and Interval != &quot;Current&quot; and L3_Client__Total_Packets_Sent &gt; 0]/L3_Client__Total_Packets_Sent)</query>
+                                                <query>boolean(//Test_Summary/item[string(number(Attempted_Session_Disconnects)) != &quot;NaN&quot; and number(Attempted_Session_Disconnects) &gt; 0 and Interval != &quot;Current&quot; ][1]/Interval)</query>
                                             </extractorProperties>
                                         </extractorInfo>
                                         <processorInfo ruleType="assert">
                                             <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
                                                 <expression>str(value).lower() == &quot;true&quot;</expression>
                                                 <actionsWhenFalse>
+                                                    <item actionId="Eval">
+                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                            <statement>stopped_interval=1</statement>
+                                                        </actionProperties>
+                                                    </item>
                                                     <item actionId="Eval">
                                                         <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
                                                             <statement>is_packet_sent_increase = False</statement>
@@ -4166,7 +4150,39 @@
                                     <item>
                                         <extractorInfo extractorType="query">
                                             <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
-                                                <query>mapped/Json/Tables/Favorites/item[string(number(L3_Client__Total_Packets_Sent)) != &apos;NaN&apos; and Interval != &quot;Current&quot; and L3_Client__Total_Packets_Sent &gt; 0]/L3_Client__Total_Packets_Sent</query>
+                                                <query>//Test_Summary/item[string(number(Attempted_Session_Disconnects)) != &quot;NaN&quot;and number(Attempted_Session_Disconnects) &gt; 0 and Interval != &quot;Current&quot; ][1]/Interval</query>
+                                            </extractorProperties>
+                                        </extractorInfo>
+                                        <processorInfo ruleType="store">
+                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                <storageLocation>stopped_interval</storageLocation>
+                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                            </ruleProperties>
+                                        </processorInfo>
+                                    </item>
+                                    <item>
+                                        <extractorInfo extractorType="query">
+                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                                <query sub="true">boolean(mapped/Json/Tables/Favorites/item\\[string(number(L3_Client__Total_Packets_Sent)) != &apos;NaN&apos; and Interval != &quot;Current&quot; and L3_Client__Total_Packets_Sent &gt; 0 and Interval &lt;= [stopped_interval] ]/L3_Client__Total_Packets_Sent)</query>
+                                            </extractorProperties>
+                                        </extractorInfo>
+                                        <processorInfo ruleType="assert">
+                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                <expression>str(value).lower() == &quot;true&quot;</expression>
+                                                <actionsWhenFalse>
+                                                    <item actionId="SkipRemainingRules">
+                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                    </item>
+                                                </actionsWhenFalse>
+                                            </ruleProperties>
+                                        </processorInfo>
+                                    </item>
+                                    <item>
+                                        <extractorInfo extractorType="query">
+                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                                <query sub="true">mapped/Json/Tables/Favorites/item\\[string(number(L3_Client__Total_Packets_Sent)) != &apos;NaN&apos; and Interval != &quot;Current&quot; and L3_Client__Total_Packets_Sent &gt; 0 and Interval &lt;= [stopped_interval]]/L3_Client__Total_Packets_Sent</query>
                                             </extractorProperties>
                                         </extractorInfo>
                                         <processorInfo ruleType="store">
@@ -4185,6 +4201,7 @@
                                 <TableName>
                                     <Name inherit="false" parameter="Name">
                                         <item inherit="false">Favorites</item>
+                                        <item inherit="false">Test_Summary</item>
                                     </Name>
                                 </TableName>
                             </applicationProperties>
@@ -4256,46 +4273,6 @@
                                 <body>key - value</body>
                             </command>
                             <nestedSteps>
-                                <item guid="8c4c8d48-0879-48a8-bcf2-1eda60878856" action="comment" useFieldsInCommand="false">
-                                    <command>
-                                        <body>Is packet sent increase</body>
-                                    </command>
-                                    <nestedSteps>
-                                        <item guid="b0d58167-a712-4024-a16c-3f83276a8845" action="eval" useFieldsInCommand="false">
-                                            <command>
-                                                <body>name = &quot;is packet sent increase&quot;</body>
-                                            </command>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                        <item guid="346c169c-06ed-491f-8317-17a7a842a701" action="eval" useFieldsInCommand="false">
-                                            <command>
-                                                <body>value = is_packet_sent_increase</body>
-                                            </command>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                        <item guid="7bf70e2c-1e5a-4f01-88ad-4fdd212d920b" action="comment" useFieldsInCommand="false">
-                                            <command>
-                                                <body>Add to list - Do not change</body>
-                                            </command>
-                                            <nestedSteps>
-                                                <item guid="2a41f81a-22c4-4deb-8338-f023af0dda93" action="eval" useFieldsInCommand="false">
-                                                    <command>
-                                                        <body>names.append(name)</body>
-                                                    </command>
-                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                </item>
-                                                <item guid="dc60f68e-be2e-4646-a54a-352b7445cdbb" action="eval" useFieldsInCommand="false">
-                                                    <command>
-                                                        <body>values.append(value)</body>
-                                                    </command>
-                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                </item>
-                                            </nestedSteps>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                    </nestedSteps>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
                                 <item guid="79240483-34ef-408e-94f4-0151d2738ceb" action="comment" useFieldsInCommand="false">
                                     <command>
                                         <body>List of packet sent</body>
@@ -4309,7 +4286,7 @@
                                         </item>
                                         <item guid="c4e25378-e661-4d00-97cb-d11f8f670ff5" action="eval" useFieldsInCommand="false">
                                             <command>
-                                                <body>value = total_packets_sent_list[:-1] if isinstance(total_packets_sent_list,list) else 0</body>
+                                                <body>value = total_packets_sent_list if isinstance(total_packets_sent_list,list) else 0</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
