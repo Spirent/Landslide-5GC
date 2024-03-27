@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="9.4.0.202309060843" entryPoint="add_topology_artifactLink">
+<testCase version="9.4.0.202309061644" entryPoint="add_topology_artifactLink">
     <general>
         <isProcedureLibrary>true</isProcedureLibrary>
         <language>Python</language>
@@ -997,6 +997,71 @@
 \t\t}
 \t]
 }</description>
+                </item>
+            </arguments>
+        </item>
+        <item name="calculate_cu_du" isPublic="true">
+            <steps>
+                <item guid="8c7c6e58-2258-4dac-8dfd-32b865abdd61" action="if" useFieldsInCommand="false">
+                    <command>
+                        <body>option==2:</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="b5fe01dc-0520-4134-86ef-4c2cb5af7af7" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>cu_num=int(float(cu_num))</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="56ec833c-78f3-4d70-a3ce-fa90c031fbe3" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>e2_nodes=int(float(e2_nodes))</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="00a8e4bd-1232-446f-bd13-3d0eecd315fa" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>du_per_cu = int((e2_nodes-cu_num)/cu_num)</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="53bf20cc-09b4-4932-aafc-4500d595215a" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>e2_nodes = int((du_per_cu*cu_num)+cu_num) if du_per_cu &gt; 0 else e2_nodes</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="56850c3f-d3f2-4309-937a-1eb90bc7d4e9" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>cu_du_dict = {&quot;e2_nodes&quot;: e2_nodes, &quot;cu&quot;: cu_num, &quot;du_per_cu&quot;: du_per_cu}</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="25b0b5c3-b25e-4feb-8f77-a0b2b53e4fbc" action="return">
+                    <command>
+                        <body>[cu_du_dict]</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+            </steps>
+            <arguments>
+                <item name="du_per_cu">
+                    <isMandatory>true</isMandatory>
+                </item>
+                <item name="e2_nodes">
+                    <isMandatory>true</isMandatory>
+                </item>
+                <item name="cu_num">
+                    <isMandatory>true</isMandatory>
+                </item>
+                <item name="option">
+                    <description>cu_du_calculation_method: 
+#2: increase t_load and Du per cu, keep Cu the same</description>
+                    <defaultValue>2</defaultValue>
+                    <isMandatory>true</isMandatory>
                 </item>
             </arguments>
         </item>
@@ -3714,6 +3779,38 @@ Default value: Instance</description>
                                             <command>
                                                 <body>kpi = f&apos;{kpi_name}&apos;</body>
                                             </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="946edf90-6ce2-47dc-8be6-b967b2650490" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>import re</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="a542a3aa-3ffd-436f-902c-1d5fcae1d8a8" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>kpi_var = &apos;Expected_&apos; + re.sub(&quot;[^A-Za-z0-9- ]&quot;,&quot;&quot;,kpi).strip().replace(&apos; &apos;,&apos;_&apos;) ;print(kpi_var)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="dfddf8fd-7e14-4a17-8b6c-29c1517a79e4" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>expected_value_from_param = param(f&apos;TC_parameters/{kpi_var}&apos;, &apos;&apos;) ;print(expected_value_from_param)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="2fd3167f-42b8-418b-88c7-28ec3682f9f0" action="if" useFieldsInCommand="false">
+                                            <command>
+                                                <body>expected_value_from_param != &apos;&apos;:</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="03417e07-561d-4a64-8e19-f71f20343bcf" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>kpi_expected = expected_value_from_param</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
                                         <item guid="b016bee1-a29d-49a8-b938-c7db40377bf4" action="eval" useFieldsInCommand="false">
@@ -6591,6 +6688,186 @@ in which:
                 </item>
             </arguments>
             <response>{}</response>
+        </item>
+        <item name="validate_type_ip" isPublic="true">
+            <steps>
+                <item guid="f93fb5a8-4a7a-4da2-bc8f-3ba217ddf0d2" action="eval" useFieldsInCommand="false">
+                    <command>
+                        <body>print(node_ip_data)</body>
+                    </command>
+                    <postProcessing>
+                        <analysisRules>
+                            <item>
+                                <extractorInfo extractorType="query">
+                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                        <query>count(mapped/Json/item)</query>
+                                    </extractorProperties>
+                                </extractorInfo>
+                                <processorInfo ruleType="store">
+                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                        <storageLocation>item_count</storageLocation>
+                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                    </ruleProperties>
+                                </processorInfo>
+                            </item>
+                        </analysisRules>
+                    </postProcessing>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="cfe23e48-aad4-4bbd-9623-620d8760e338" action="for" useFieldsInCommand="false">
+                    <command>
+                        <body>i in range(1, int(item_count)+1):</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="93bea77b-b04c-4a8e-ba62-c8f6c0e04b98" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>print(node_ip_data)</body>
+                            </command>
+                            <postProcessing>
+                                <analysisRules>
+                                    <item>
+                                        <extractorInfo extractorType="query">
+                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                                <query sub="true">mapped/Json/item[[i]]/node_ip_1</query>
+                                            </extractorProperties>
+                                        </extractorInfo>
+                                        <processorInfo ruleType="store">
+                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                <storageLocation>ip1_path</storageLocation>
+                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                            </ruleProperties>
+                                        </processorInfo>
+                                    </item>
+                                    <item>
+                                        <extractorInfo extractorType="query">
+                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                                <query sub="true">mapped/Json/item[[i]]/node_ip_2</query>
+                                            </extractorProperties>
+                                        </extractorInfo>
+                                        <processorInfo ruleType="store">
+                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                <storageLocation>ip2_path</storageLocation>
+                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                            </ruleProperties>
+                                        </processorInfo>
+                                    </item>
+                                    <item>
+                                        <extractorInfo extractorType="query">
+                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                                <query sub="true">boolean(mapped/Json/item[[i]]/is_b2b_only)</query>
+                                            </extractorProperties>
+                                        </extractorInfo>
+                                        <processorInfo ruleType="assert">
+                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                <expression>value == &apos;true&apos;</expression>
+                                                <actionsWhenFalse>
+                                                    <item actionId="Eval">
+                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                            <statement>is_b2b_only = &apos;false&apos;</statement>
+                                                        </actionProperties>
+                                                    </item>
+                                                    <item actionId="SkipRemainingRules">
+                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                    </item>
+                                                </actionsWhenFalse>
+                                            </ruleProperties>
+                                        </processorInfo>
+                                    </item>
+                                    <item>
+                                        <extractorInfo extractorType="query">
+                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                                <query sub="true">mapped/Json/item[[i]]/is_b2b_only</query>
+                                            </extractorProperties>
+                                        </extractorInfo>
+                                        <processorInfo ruleType="store">
+                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                <storageLocation>is_b2b_only</storageLocation>
+                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                            </ruleProperties>
+                                        </processorInfo>
+                                    </item>
+                                </analysisRules>
+                            </postProcessing>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="c8c0050a-c8ac-4348-a114-179de1f32911" action="if" useFieldsInCommand="false">
+                            <command>
+                                <body>(is_b2b_only == &apos;false&apos; or is_b2b==&apos;true&apos;) and (&quot;:&quot; in param(ip1_path)) !=(&quot;:&quot; in param(ip2_path)):</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="0c75dfae-bc06-4dd5-892c-85df181ba981" action="message" useFieldsInCommand="false">
+                                    <command>
+                                        <body>Warning:&quot;[ip1_path]&quot; and &quot;[ip2_path]&quot; are not same type of ip</body>
+                                    </command>
+                                    <postProcessing>
+                                        <analysisRules>
+                                            <item>
+                                                <extractorInfo extractorType="none">
+                                                    <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                                </extractorInfo>
+                                                <processorInfo ruleType="assert">
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                        <expression>False</expression>
+                                                        <actionsWhenFalse>
+                                                            <item actionId="FailTest">
+                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                            </item>
+                                                        </actionsWhenFalse>
+                                                    </ruleProperties>
+                                                </processorInfo>
+                                            </item>
+                                        </analysisRules>
+                                    </postProcessing>
+                                    <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                        <severity inherit="false">Warning</severity>
+                                        <message inherit="false">&quot;[ip1_path]&quot; and &quot;[ip2_path]&quot; are not same type of ip</message>
+                                    </applicationProperties>
+                                </item>
+                                <item guid="ab0891a5-f2d7-4a61-b69f-ac55ee28e105" action="exit" useFieldsInCommand="false">
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+            </steps>
+            <arguments>
+                <item name="node_ip_data">
+                    <description>The input as a json format with format as sample below:
+
+[
+  {
+    &quot;node_ip_1&quot;: &quot;SUT/nodal_ts0_tc0/AmfSut/name&quot;,
+    &quot;node_ip_2&quot;: &quot;LS_Nodal_favorite_params/TS1/ts0/tc0/GnbControlAddr/ip&quot;
+  },
+  {
+    &quot;node_ip_1&quot;: &quot;LS_Emulated_SUT_favorite_params/ts0/tc0/AmfSbiNodeSrvAddr/ip&quot;,
+    &quot;node_ip_2&quot;: &quot;LS_Nodal_favorite_params/TS1/ts0/tc1/AusfSbiNodeSrvAddr/ip&quot;,
+    &quot;is_b2b_only&quot;: &quot;true&quot;
+  }
+]
+With:
++ node_ip_1/node_ip_2: path of param ip node need to validate the type
++ is_b2b_only:
+\t- true: only validate node_ip_1 &amp; node_ip_2 in case of is_b2b=true
+\t- false: validate both e2e and b2b</description>
+                    <isMandatory>true</isMandatory>
+                </item>
+                <item name="is_b2b">
+                    <description>Run b2b or not</description>
+                    <isMandatory>true</isMandatory>
+                </item>
+            </arguments>
         </item>
         <item name="expected_ts_count" isPublic="true">
             <steps>
