@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="9.4.0.202309061644">
+<testCase version="9.5.0.202402062035">
     <general>
         <documentation>I-RIC-1-CP: E2 Setup - Capacity Testing</documentation>
         <tags>I-RIC-1-CP</tags>
@@ -1180,6 +1180,46 @@
                                         <storeResponseAt>run_data_list</storeResponseAt>
                                         <storeResponseText>true</storeResponseText>
                                     </postProcessing>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="df48454e-8262-4cc1-9d2f-7016750c1422" action="comment" useFieldsInCommand="false">
+                            <command>
+                                <body>Validate and Apply the Calculated du_ip</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="e614edf7-c1d7-4a50-8ea9-4fd895199254" action="for" useFieldsInCommand="false">
+                                    <command>
+                                        <body>idx, data in enumerate(run_data_list):</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="785bee00-d2a8-44fc-9f1a-30f8ae4d19bc" action="comment" useFieldsInCommand="false">
+                                            <command>
+                                                <body>Validate and Apply the Calculated du_ip</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="df3333cd-b421-47d7-bd31-3ca4443351fc" action="call" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>validate_and_apply_du_ip(data=data,cu_num=cu_num)</body>
+                                                    </command>
+                                                    <postProcessing>
+                                                        <storeResponseAt>data</storeResponseAt>
+                                                        <storeResponseText>true</storeResponseText>
+                                                    </postProcessing>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="87f29360-c5fc-44b4-9af0-43cdbd731c37" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>run_data_list[idx]=data;print(run_data_list)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
                             </nestedSteps>
@@ -2426,7 +2466,7 @@
                     <nestedSteps>
                         <item guid="e69f74e1-d755-47f8-8c0c-686d33392db8" action="json" useFieldsInCommand="false">
                             <command>
-                                <body>action=&apos;createJson&apos;, documentName=&apos;response&apos;, fromFile=&apos;false&apos;, jsonString=&apos;[]&apos;</body>
+                                <body>action=&apos;createJson&apos;, documentName=&apos;response&apos;, fromFile=false, jsonString=&apos;[]&apos;</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
                                 <action inherit="false">createJson</action>
@@ -4709,7 +4749,13 @@
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
-                                        <item guid="5c19fa87-5a5d-47e1-9bcc-fbcb179a5fe5" action="comment" useFieldsInCommand="false">
+                                        <item guid="152fba40-02a7-452d-9d07-f3e0c190a70e" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>t_rate_ts = t_rate_ts_list[idx]</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="34fb1ff0-7a70-443f-bafb-91a491ad500d" action="comment" useFieldsInCommand="false">
                                             <command>
                                                 <body>Configure CU number of nodes</body>
                                             </command>
@@ -4725,12 +4771,6 @@
                                                     </applicationProperties>
                                                 </item>
                                             </nestedSteps>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                        <item guid="152fba40-02a7-452d-9d07-f3e0c190a70e" action="eval" useFieldsInCommand="false">
-                                            <command>
-                                                <body>t_rate_ts = t_rate_ts_list[idx]</body>
-                                            </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
                                         <item guid="7dffdff7-7d88-4768-8959-a53a75be9230" action="eval" useFieldsInCommand="false">
@@ -7367,6 +7407,336 @@
                 <item name="session_capacity"/>
             </arguments>
             <response>{}</response>
+        </item>
+        <item name="validate_and_apply_du_ip" isPublic="true">
+            <steps>
+                <item guid="6de60a86-e956-475f-8b76-46898041021a" action="eval" useFieldsInCommand="false">
+                    <command>
+                        <body>print(data)</body>
+                    </command>
+                    <postProcessing>
+                        <analysisRules>
+                            <item>
+                                <extractorInfo extractorType="query">
+                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                        <query>boolean(//GnbCuE2NodeAddr/ip)</query>
+                                    </extractorProperties>
+                                </extractorInfo>
+                                <processorInfo ruleType="assert">
+                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                        <expression>value == &quot;true&quot;</expression>
+                                        <actionsWhenFalse>
+                                            <item actionId="DeclareExecutionIssue">
+                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
+                                                    <message>GnbCuE2NodeAddr IP Address does not exist. Please recheck the Reservation and Parameter configuration.</message>
+                                                </actionProperties>
+                                            </item>
+                                            <item actionId="FailTest">
+                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                            </item>
+                                            <item actionId="ExitExecution">
+                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                            </item>
+                                            <item actionId="SkipRemainingRules">
+                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                            </item>
+                                        </actionsWhenFalse>
+                                    </ruleProperties>
+                                </processorInfo>
+                            </item>
+                            <item>
+                                <extractorInfo extractorType="query">
+                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                        <query>//GnbCuE2NodeAddr/ip</query>
+                                    </extractorProperties>
+                                </extractorInfo>
+                                <processorInfo ruleType="store">
+                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                        <storageLocation>cu_ip</storageLocation>
+                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                    </ruleProperties>
+                                </processorInfo>
+                            </item>
+                            <item>
+                                <extractorInfo extractorType="query">
+                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                        <query>boolean(mapped/Json/reservations/item/phySubnets/item/base)</query>
+                                    </extractorProperties>
+                                </extractorInfo>
+                                <processorInfo ruleType="assert">
+                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                        <expression>value == &quot;true&quot;</expression>
+                                        <actionsWhenFalse>
+                                            <item actionId="DeclareExecutionIssue">
+                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
+                                                    <message>Reservation Starting IP Address does not exist. Please recheck the Reservation and Parameter configuration.</message>
+                                                </actionProperties>
+                                            </item>
+                                            <item actionId="FailTest">
+                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                            </item>
+                                            <item actionId="ExitExecution">
+                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                            </item>
+                                            <item actionId="SkipRemainingRules">
+                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                            </item>
+                                        </actionsWhenFalse>
+                                    </ruleProperties>
+                                </processorInfo>
+                            </item>
+                            <item>
+                                <extractorInfo extractorType="query">
+                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                        <query>mapped/Json/reservations/item/phySubnets/item/base</query>
+                                    </extractorProperties>
+                                </extractorInfo>
+                                <processorInfo ruleType="store">
+                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                        <storageLocation>reservation_starting_ip</storageLocation>
+                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                    </ruleProperties>
+                                </processorInfo>
+                            </item>
+                            <item>
+                                <extractorInfo extractorType="query">
+                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                        <query>number(mapped/Json/reservations/item/phySubnets/item/numIps)&gt;0</query>
+                                    </extractorProperties>
+                                </extractorInfo>
+                                <processorInfo ruleType="assert">
+                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                        <expression>value == &quot;true&quot;</expression>
+                                        <actionsWhenFalse>
+                                            <item actionId="DeclareExecutionIssue">
+                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
+                                                    <message>Reservation Number of nodes is invalid. Please recheck the Reservation and Parameter configuration.</message>
+                                                </actionProperties>
+                                            </item>
+                                            <item actionId="FailTest">
+                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                            </item>
+                                            <item actionId="ExitExecution">
+                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                            </item>
+                                            <item actionId="SkipRemainingRules">
+                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                            </item>
+                                        </actionsWhenFalse>
+                                    </ruleProperties>
+                                </processorInfo>
+                            </item>
+                            <item>
+                                <extractorInfo extractorType="query">
+                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                        <query>mapped/Json/reservations/item/phySubnets/item/numIps</query>
+                                    </extractorProperties>
+                                </extractorInfo>
+                                <processorInfo ruleType="store">
+                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                        <storageLocation>reservation_numb_node</storageLocation>
+                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                    </ruleProperties>
+                                </processorInfo>
+                            </item>
+                        </analysisRules>
+                        <storeResponseAt>ts_groups_xml</storeResponseAt>
+                    </postProcessing>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="8fbbcd8e-f065-4b07-9c92-c6911702e5ff" action="comment" useFieldsInCommand="false">
+                    <command>
+                        <body>Convert string ip to ipaddress class: &quot;1.1.1.1&quot; =&gt; IPv4Address(&apos;1.1.1.1&apos;). To do the calculation</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="8516fd4d-d331-4044-90ef-e3c6e180da26" action="call" useFieldsInCommand="false">
+                    <command>
+                        <body>convert_to_ip_object(string_ip=reservation_starting_ip)</body>
+                    </command>
+                    <postProcessing>
+                        <storeResponseAt>reservation_starting_ip_object</storeResponseAt>
+                        <storeResponseText>true</storeResponseText>
+                    </postProcessing>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="d9784b55-3529-4a6e-8114-eaed1dcb34e7" action="call" useFieldsInCommand="false">
+                    <command>
+                        <body>convert_to_ip_object(string_ip=cu_ip)</body>
+                    </command>
+                    <postProcessing>
+                        <storeResponseAt>cu_ip_object</storeResponseAt>
+                        <storeResponseText>true</storeResponseText>
+                    </postProcessing>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="27ed6f9d-c397-4b53-a688-8e411b1a1ba4" action="comment" useFieldsInCommand="false">
+                    <command>
+                        <body>Calculate Ending IP range suport of the reservation base on the number of nodes, minus 1 since we need to count the starting ip it self</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="bab4872b-3c01-453d-b627-b606413e243f" action="eval" useFieldsInCommand="false">
+                    <command>
+                        <body>end_ip_object=reservation_starting_ip_object + int(float(reservation_numb_node)) -1;print(end_ip_object)</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="9f641435-e884-48dd-8608-3efb83b05a42" action="comment" useFieldsInCommand="false">
+                    <command>
+                        <body>Calculate DU IP </body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="e2f2ca1f-e9f0-41fa-b9f2-b6e53a379a9b" action="eval" useFieldsInCommand="false">
+                    <command>
+                        <body>du_ip_object=cu_ip_object + int(float(cu_num));print(du_ip_object)</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="b6510b0d-4805-4b22-9d39-87bdd2abed93" action="if" useFieldsInCommand="false">
+                    <command>
+                        <body>du_ip_object &gt; end_ip_object:</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="36ed3641-64ff-480e-8dad-623770220a55" action="message" useFieldsInCommand="false">
+                            <command>
+                                <body>Error:gNB-DU E2 Node IP is outside the subnet range: Last IP in subnet: &quot;[str(end_ip_object)]&quot;, actual IP &quot;[str(du_ip_object)]&quot;. Please check the configuration for TS 1/port 1 in the parameter.</body>
+                            </command>
+                            <postProcessing>
+                                <analysisRules>
+                                    <item>
+                                        <extractorInfo extractorType="none">
+                                            <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                        </extractorInfo>
+                                        <processorInfo ruleType="assert">
+                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                <expression>False</expression>
+                                                <actionsWhenFalse>
+                                                    <item actionId="FailTest">
+                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                    </item>
+                                                    <item actionId="ExitExecution">
+                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                    </item>
+                                                </actionsWhenFalse>
+                                            </ruleProperties>
+                                        </processorInfo>
+                                    </item>
+                                </analysisRules>
+                            </postProcessing>
+                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                <severity inherit="false">Error</severity>
+                                <message inherit="false">gNB-DU E2 Node IP is outside the subnet range: Last IP in subnet: &quot;[str(end_ip_object)]&quot;, actual IP &quot;[str(du_ip_object)]&quot;. Please check the configuration for TS 1/port 1 in the parameter.</message>
+                            </applicationProperties>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="23cf2dab-d6d0-4c69-b0b1-f4daf1e4bae8" action="else" useFieldsInCommand="false">
+                    <nestedSteps>
+                        <item guid="17738688-acef-47d2-96a9-a38468fad3fa" action="message" useFieldsInCommand="false">
+                            <command>
+                                <body>Information:Apply Test Node &quot;GnbDuE2NodeAddr&quot;: {&quot;ip&quot;:&quot;[str(du_ip_object)]&quot;}</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                <message inherit="false">Apply Test Node &quot;GnbDuE2NodeAddr&quot;: {&quot;ip&quot;:&quot;[str(du_ip_object)]&quot;}</message>
+                            </applicationProperties>
+                        </item>
+                        <item guid="60b77647-7df5-4bf0-a756-a90d9ca95f96" action="json" useFieldsInCommand="false">
+                            <command>
+                                <body>action=&apos;setJsonValue&apos;, editResponseStructure=false, documentName=&apos;data&apos;, pathValue=&apos;{&quot;tsGroups/\\\\[0]/testCases/\\\\[0]/parameters/GnbDuE2NodeAddr/ip&quot;:&quot;[str(du_ip_object)]&quot;}&apos;</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                <action inherit="false">setJsonValue</action>
+                                <pathValue inherit="false" sub="true">{&quot;tsGroups/\\[0]/testCases/\\[0]/parameters/GnbDuE2NodeAddr/ip&quot;:&quot;[str(du_ip_object)]&quot;}</pathValue>
+                                <documentName inherit="false">data</documentName>
+                            </applicationProperties>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="ab758921-0e1b-46e2-8481-71cf94467804" action="return">
+                    <command>
+                        <body>[data]</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+            </steps>
+            <arguments>
+                <item name="data">
+                    <description>Run Data of Nodal</description>
+                    <isMandatory>true</isMandatory>
+                </item>
+                <item name="cu_num">
+                    <description>CU number of node</description>
+                </item>
+            </arguments>
+        </item>
+        <item name="convert_to_ip_object" isPublic="true">
+            <steps>
+                <item guid="f374f47f-66e1-4521-b348-405157ad7c71" action="comment" useFieldsInCommand="false">
+                    <command>
+                        <body>Convert the string ip to ip class object</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="270b740f-b237-4159-b7e1-1499a9da4353" action="eval" useFieldsInCommand="false">
+                    <command>
+                        <body>import ipaddress</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="49c9e2bd-5939-4868-bf4a-e8f5d3b395f4" action="eval" useFieldsInCommand="false">
+                    <command>
+                        <body>ip_object=&quot;&quot;</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="32377059-a1c7-4b48-8901-cf308f42d7c3" action="if" useFieldsInCommand="false">
+                    <command>
+                        <body>&quot;:&quot; not in string_ip:</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="f6181639-663b-4680-984c-623312735d18" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>ip_object=ipaddress.IPv4Address(string_ip)</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="4bd0b0ee-203d-449f-ba63-d1c91f2bdf63" action="else" useFieldsInCommand="false">
+                    <nestedSteps>
+                        <item guid="5bb661d5-9627-49bd-b67a-c83fdd6c9dc1" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>ip_object=ipaddress.IPv6Address(string_ip)</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="10ccd249-3f79-4fcd-b18a-378142651bb4" action="return">
+                    <command>
+                        <body>[ip_object]</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+            </steps>
+            <arguments>
+                <item name="string_ip">
+                    <description>Input the string ip value</description>
+                    <isMandatory>true</isMandatory>
+                </item>
+            </arguments>
         </item>
     </procedures>
 </testCase>
