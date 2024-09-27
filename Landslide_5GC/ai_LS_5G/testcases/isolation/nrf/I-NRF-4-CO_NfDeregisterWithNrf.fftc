@@ -183,6 +183,42 @@
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
+                                        <item guid="c95144c9-5f04-4fd8-98f2-b9b06f05d851" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>automation_control_delay_time = param(&apos;TC_parameters/Test_Duration&apos;,15)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="566b5490-673d-498d-b690-59682f92efc3" action="call" useFieldsInCommand="false">
+                                            <command>
+                                                <body>project://ai_LS_5G/utility_library/utils.fftc#is_number(input_str=automation_control_delay_time)</body>
+                                            </command>
+                                            <postProcessing>
+                                                <storeResponseAt>is_number</storeResponseAt>
+                                                <storeResponseText>true</storeResponseText>
+                                            </postProcessing>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="7f682bf4-30c5-47b6-91da-d2e8e37c2b9a" action="if" useFieldsInCommand="false">
+                                            <command>
+                                                <body>not is_number:</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="3c154a99-620b-49dc-a5ff-0f1ad1335422" action="message" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>Error:The param Test_Duration must be a number.</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                        <severity inherit="false">Error</severity>
+                                                        <message inherit="false">The param Test_Duration must be a number.</message>
+                                                    </applicationProperties>
+                                                </item>
+                                                <item guid="d5461e8b-83bc-40e0-af30-5a5c75645c56" action="exit" useFieldsInCommand="false">
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
                                     </nestedSteps>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
@@ -1029,9 +1065,38 @@
                                 <body>Update automation control</body>
                             </command>
                             <nestedSteps>
+                                <item guid="958b75aa-c16e-48dc-92a1-f2da4d7a8f03" action="if" useFieldsInCommand="false">
+                                    <command>
+                                        <body>float(automation_control_delay_time) &lt; 15:</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="77611a38-0c65-4409-bd0a-fdc3429297ce" action="message" useFieldsInCommand="false">
+                                            <command>
+                                                <body>Warning:The Test_Duration is below the minimum value and has been set to the default of 15 seconds.</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                <severity inherit="false">Warning</severity>
+                                                <message inherit="false">The Test_Duration is below the minimum value and has been set to the default of 15 seconds.</message>
+                                            </applicationProperties>
+                                        </item>
+                                        <item guid="b6411ca0-3617-4f6e-ac42-c5b002fc78f6" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>automation_control_delay_time = 15</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="d0efa265-1e9c-4719-831f-aa3b5ed2635b" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>gset(&apos;automation_control_delay_time&apos;,automation_control_delay_time)</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
                                 <item guid="5728d68d-2ad7-40a1-82af-2b64845e8867" action="eval" useFieldsInCommand="false">
                                     <command>
-                                        <body>automation_steps = &quot;0:0:Start:-1:-1::0;0:0:Stop:0:0:RUNNING:15;0:0:Cleanup:0:0:STOPPED:0&quot;</body>
+                                        <body>automation_steps = &quot;0:0:Start:-1:-1::0;0:0:Stop:0:0:RUNNING:{0};0:0:Cleanup:0:0:STOPPED:0&quot;.format(automation_control_delay_time)</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
@@ -2161,14 +2226,20 @@
                     </nestedSteps>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
+                <item guid="a52e63ab-0aba-4e54-8e2d-88444f2d12d5" action="eval" useFieldsInCommand="false">
+                    <command>
+                        <body>automation_control_delay_time = gget(&apos;automation_control_delay_time&apos;)</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
                 <item guid="e988a8fd-7908-422b-81a7-94d4eac875af" action="comment" useFieldsInCommand="false" skippReporting="false">
                     <command>
-                        <body>Sleep 15 seconds</body>
+                        <body>Sleep base on automation_control_delay_time</body>
                     </command>
                     <nestedSteps>
                         <item guid="b5d72894-cc80-43cf-9caa-a4577208f6be" action="sleep">
                             <command>
-                                <body>15</body>
+                                <body>[int(automation_control_delay_time)]</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
@@ -3874,6 +3945,9 @@
                                                                                             <item actionId="ExitProcedure">
                                                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
                                                                                             </item>
+                                                                                            <item actionId="SkipRemainingRules">
+                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                            </item>
                                                                                         </actionsWhenFalse>
                                                                                     </ruleProperties>
                                                                                 </processorInfo>
@@ -3997,6 +4071,9 @@
                                                                                                     <item actionId="ExitProcedure">
                                                                                                         <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
                                                                                                     </item>
+                                                                                                    <item actionId="SkipRemainingRules">
+                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                    </item>
                                                                                                 </actionsWhenFalse>
                                                                                             </ruleProperties>
                                                                                         </processorInfo>
@@ -4022,6 +4099,9 @@
                                                                                                     <item actionId="ExitProcedure">
                                                                                                         <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
                                                                                                     </item>
+                                                                                                    <item actionId="SkipRemainingRules">
+                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                    </item>
                                                                                                 </actionsWhenFalse>
                                                                                             </ruleProperties>
                                                                                         </processorInfo>
@@ -4046,6 +4126,9 @@
                                                                                                     </item>
                                                                                                     <item actionId="ExitProcedure">
                                                                                                         <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
+                                                                                                    </item>
+                                                                                                    <item actionId="SkipRemainingRules">
+                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                                                     </item>
                                                                                                 </actionsWhenFalse>
                                                                                             </ruleProperties>
@@ -4108,6 +4191,9 @@
                                                                                                             <item actionId="ExitProcedure">
                                                                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
                                                                                                             </item>
+                                                                                                            <item actionId="SkipRemainingRules">
+                                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                            </item>
                                                                                                         </actionsWhenFalse>
                                                                                                     </ruleProperties>
                                                                                                 </processorInfo>
@@ -4115,16 +4201,221 @@
                                                                                             <item>
                                                                                                 <extractorInfo extractorType="query">
                                                                                                     <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                                        <query>details/item[field = &quot;http2.headers.status&quot;]/value</query>
+                                                                                                        <query>//item[field=&quot;tcp.ack_raw&quot;]/value</query>
+                                                                                                    </extractorProperties>
+                                                                                                </extractorInfo>
+                                                                                                <processorInfo ruleType="store">
+                                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                                                        <storageLocation>ack_reponse</storageLocation>
+                                                                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                                                                    </ruleProperties>
+                                                                                                </processorInfo>
+                                                                                            </item>
+                                                                                        </analysisRules>
+                                                                                    </postProcessing>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                                <item guid="01ae9ff6-f871-498f-9054-ddf92668770f" action="command" session="s4">
+                                                                                    <command>
+                                                                                        <body>query filter set &quot;tcp.ack_raw == [ack_reponse]&quot;</body>
+                                                                                    </command>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                                <item guid="ea62359e-9674-400a-b1fe-dfa8b462e735" action="command" session="s4">
+                                                                                    <command>
+                                                                                        <body>query packets</body>
+                                                                                    </command>
+                                                                                    <postProcessing>
+                                                                                        <analysisRules>
+                                                                                            <item>
+                                                                                                <extractorInfo extractorType="query">
+                                                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                        <query>rowCount()</query>
                                                                                                     </extractorProperties>
                                                                                                 </extractorInfo>
                                                                                                 <processorInfo ruleType="assert">
                                                                                                     <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                                                        <expression>int(value) == 400</expression>
+                                                                                                        <expression>int(value) == 1</expression>
+                                                                                                        <actionsWhenTrue>
+                                                                                                            <item actionId="Eval">
+                                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                                                    <statement>is_multi_packet_response = False</statement>
+                                                                                                                </actionProperties>
+                                                                                                            </item>
+                                                                                                        </actionsWhenTrue>
+                                                                                                        <actionsWhenFalse>
+                                                                                                            <item actionId="Eval">
+                                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                                                    <statement>is_multi_packet_response = True</statement>
+                                                                                                                </actionProperties>
+                                                                                                            </item>
+                                                                                                        </actionsWhenFalse>
+                                                                                                    </ruleProperties>
+                                                                                                </processorInfo>
+                                                                                            </item>
+                                                                                        </analysisRules>
+                                                                                    </postProcessing>
+                                                                                    <eventHandlers>
+                                                                                        <item name="OnWiresharkCommandFailed">
+                                                                                            <item actionId="Eval">
+                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                                    <statement>id = &quot;&quot;</statement>
+                                                                                                </actionProperties>
+                                                                                            </item>
+                                                                                        </item>
+                                                                                    </eventHandlers>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                                <item guid="3ba51465-5a0a-428a-b9ca-967fa30e440e" action="if" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>is_multi_packet_response:</body>
+                                                                                    </command>
+                                                                                    <nestedSteps>
+                                                                                        <item guid="d0374a20-ff21-4153-be09-2223efb66586" action="command" session="s4">
+                                                                                            <command>
+                                                                                                <body>query filter set &quot;http2 and tcp.ack_raw == [ack_reponse]&quot;</body>
+                                                                                            </command>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                        <item guid="769f6a87-fbee-499d-b285-f5de771306f1" action="command" session="s4">
+                                                                                            <command>
+                                                                                                <body>query packets</body>
+                                                                                            </command>
+                                                                                            <postProcessing>
+                                                                                                <analysisRules>
+                                                                                                    <item>
+                                                                                                        <extractorInfo extractorType="query">
+                                                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                                <query>success()</query>
+                                                                                                            </extractorProperties>
+                                                                                                        </extractorInfo>
+                                                                                                        <processorInfo ruleType="assert">
+                                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                                                <expression>value == &quot;true&quot;</expression>
+                                                                                                                <actionsWhenFalse>
+                                                                                                                    <item actionId="FailTest">
+                                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                                    </item>
+                                                                                                                    <item actionId="DeclareExecutionIssue">
+                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
+                                                                                                                            <message>&quot;[tag_key]&quot; does not exist in pcap file</message>
+                                                                                                                        </actionProperties>
+                                                                                                                    </item>
+                                                                                                                    <item actionId="ExitProcedure">
+                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
+                                                                                                                    </item>
+                                                                                                                    <item actionId="SkipRemainingRules">
+                                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                                    </item>
+                                                                                                                </actionsWhenFalse>
+                                                                                                            </ruleProperties>
+                                                                                                        </processorInfo>
+                                                                                                    </item>
+                                                                                                    <item>
+                                                                                                        <extractorInfo extractorType="query">
+                                                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                                <query>rowCount()</query>
+                                                                                                            </extractorProperties>
+                                                                                                        </extractorInfo>
+                                                                                                        <processorInfo ruleType="assert">
+                                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                                                <expression>int(value) == 1</expression>
+                                                                                                                <actionsWhenFalse>
+                                                                                                                    <item actionId="FailTest">
+                                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                                    </item>
+                                                                                                                    <item actionId="DeclareExecutionIssue">
+                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
+                                                                                                                            <message>&quot;[tag_key]&quot; found &quot;{value}&quot; in pcap file. Expected: 1</message>
+                                                                                                                        </actionProperties>
+                                                                                                                    </item>
+                                                                                                                    <item actionId="ExitProcedure">
+                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
+                                                                                                                    </item>
+                                                                                                                    <item actionId="SkipRemainingRules">
+                                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                                    </item>
+                                                                                                                </actionsWhenFalse>
+                                                                                                            </ruleProperties>
+                                                                                                        </processorInfo>
+                                                                                                    </item>
+                                                                                                    <item>
+                                                                                                        <extractorInfo extractorType="query">
+                                                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                                <query>messages/item/id</query>
+                                                                                                            </extractorProperties>
+                                                                                                        </extractorInfo>
+                                                                                                        <processorInfo ruleType="store">
+                                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                                                                <storageLocation>response_id</storageLocation>
+                                                                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                                                                            </ruleProperties>
+                                                                                                        </processorInfo>
+                                                                                                    </item>
+                                                                                                </analysisRules>
+                                                                                            </postProcessing>
+                                                                                            <eventHandlers>
+                                                                                                <item name="OnWiresharkCommandFailed">
+                                                                                                    <item actionId="Eval">
+                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                                            <statement>id = &quot;&quot;</statement>
+                                                                                                        </actionProperties>
+                                                                                                    </item>
+                                                                                                </item>
+                                                                                            </eventHandlers>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                    </nestedSteps>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                                <item guid="bd487f56-4274-4919-8af6-b9a4fbeed08b" action="command" session="s4">
+                                                                                    <command>
+                                                                                        <body>query details [response_id]</body>
+                                                                                    </command>
+                                                                                    <postProcessing>
+                                                                                        <analysisRules>
+                                                                                            <item>
+                                                                                                <extractorInfo extractorType="query">
+                                                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                        <query>success()</query>
+                                                                                                    </extractorProperties>
+                                                                                                </extractorInfo>
+                                                                                                <processorInfo ruleType="assert">
+                                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                                        <expression>value == &quot;true&quot;</expression>
+                                                                                                        <actionsWhenFalse>
+                                                                                                            <item actionId="DeclareExecutionIssue">
+                                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
+                                                                                                                    <message>Cannot query packet [id_1]</message>
+                                                                                                                </actionProperties>
+                                                                                                            </item>
+                                                                                                            <item actionId="ExitProcedure">
+                                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
+                                                                                                            </item>
+                                                                                                            <item actionId="SkipRemainingRules">
+                                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                            </item>
+                                                                                                        </actionsWhenFalse>
+                                                                                                    </ruleProperties>
+                                                                                                </processorInfo>
+                                                                                            </item>
+                                                                                            <item>
+                                                                                                <extractorInfo extractorType="query">
+                                                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                        <query>number(details/item[field = &quot;http2.headers.status&quot;]/value) = 400</query>
+                                                                                                    </extractorProperties>
+                                                                                                </extractorInfo>
+                                                                                                <processorInfo ruleType="assert">
+                                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                                        <expression>str(value).lower() == &quot;true&quot;</expression>
                                                                                                         <actionsWhenTrue>
                                                                                                             <item actionId="DeclareExecutionIssue">
                                                                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                                                                                    <message>    &lt;---- [response_id]. {value} Bad Request</message>
+                                                                                                                    <message>    &lt;---- [response_id]. 400 Bad Request</message>
                                                                                                                 </actionProperties>
                                                                                                             </item>
                                                                                                             <item actionId="FailTest">
@@ -4133,6 +4424,9 @@
                                                                                                             <item actionId="ExitProcedure">
                                                                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
                                                                                                             </item>
+                                                                                                            <item actionId="SkipRemainingRules">
+                                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                            </item>
                                                                                                         </actionsWhenTrue>
                                                                                                     </ruleProperties>
                                                                                                 </processorInfo>
@@ -4140,16 +4434,16 @@
                                                                                             <item>
                                                                                                 <extractorInfo extractorType="query">
                                                                                                     <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                                        <query>details/item[field = &quot;http2.headers.status&quot;]/value</query>
+                                                                                                        <query>number(details/item[field = &quot;http2.headers.status&quot;]/value) = 500</query>
                                                                                                     </extractorProperties>
                                                                                                 </extractorInfo>
                                                                                                 <processorInfo ruleType="assert">
                                                                                                     <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                                                        <expression>int(value) == 500</expression>
+                                                                                                        <expression>str(value).lower() == &quot;true&quot;</expression>
                                                                                                         <actionsWhenTrue>
                                                                                                             <item actionId="DeclareExecutionIssue">
                                                                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                                                                                    <message>    &lt;---- [response_id]. {value} Internal Server Error</message>
+                                                                                                                    <message>    &lt;---- [response_id]. 500 Internal Server Error</message>
                                                                                                                 </actionProperties>
                                                                                                             </item>
                                                                                                             <item actionId="FailTest">
@@ -4158,6 +4452,9 @@
                                                                                                             <item actionId="ExitProcedure">
                                                                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
                                                                                                             </item>
+                                                                                                            <item actionId="SkipRemainingRules">
+                                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                            </item>
                                                                                                         </actionsWhenTrue>
                                                                                                     </ruleProperties>
                                                                                                 </processorInfo>
@@ -4165,35 +4462,53 @@
                                                                                             <item>
                                                                                                 <extractorInfo extractorType="query">
                                                                                                     <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                                        <query>details/item[field = &quot;http2.headers.status&quot;]/value</query>
+                                                                                                        <query>number(details/item[field = &quot;http2.headers.status&quot;]/value) = 204</query>
                                                                                                     </extractorProperties>
                                                                                                 </extractorInfo>
                                                                                                 <processorInfo ruleType="assert">
                                                                                                     <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                                                        <expression>int(value) == 204</expression>
+                                                                                                        <expression>str(value).lower() == &quot;true&quot;</expression>
                                                                                                         <actionsWhenTrue>
                                                                                                             <item actionId="PassTestIfNotAlreadyFailed">
                                                                                                                 <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                                                             </item>
                                                                                                             <item actionId="DeclareExecutionIssue">
                                                                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="OK">
-                                                                                                                    <message>    &lt;---- [response_id]. {value} No Content</message>
+                                                                                                                    <message>    &lt;---- [response_id]. 204 No Content</message>
                                                                                                                 </actionProperties>
                                                                                                             </item>
-                                                                                                        </actionsWhenTrue>
-                                                                                                        <actionsWhenFalse>
-                                                                                                            <item actionId="FailTest">
+                                                                                                            <item actionId="SkipRemainingRules">
                                                                                                                 <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                                                             </item>
+                                                                                                        </actionsWhenTrue>
+                                                                                                    </ruleProperties>
+                                                                                                </processorInfo>
+                                                                                            </item>
+                                                                                            <item>
+                                                                                                <extractorInfo extractorType="query">
+                                                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                        <query>details/item[field = &quot;http2.headers.status&quot;]/value</query>
+                                                                                                    </extractorProperties>
+                                                                                                </extractorInfo>
+                                                                                                <processorInfo ruleType="assert">
+                                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                                        <expression>True</expression>
+                                                                                                        <actionsWhenTrue>
                                                                                                             <item actionId="DeclareExecutionIssue">
                                                                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                                                                                    <message>    &lt;---- [response_id]. {value} Unknow error</message>
+                                                                                                                    <message>    &lt;---- [response_id]. {value} Unknow Error code response</message>
                                                                                                                 </actionProperties>
+                                                                                                            </item>
+                                                                                                            <item actionId="FailTest">
+                                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                                                             </item>
                                                                                                             <item actionId="ExitProcedure">
                                                                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
                                                                                                             </item>
-                                                                                                        </actionsWhenFalse>
+                                                                                                            <item actionId="SkipRemainingRules">
+                                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                            </item>
+                                                                                                        </actionsWhenTrue>
                                                                                                     </ruleProperties>
                                                                                                 </processorInfo>
                                                                                             </item>
@@ -4252,6 +4567,9 @@
                                                                                             </item>
                                                                                             <item actionId="ExitProcedure">
                                                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
+                                                                                            </item>
+                                                                                            <item actionId="SkipRemainingRules">
+                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                                             </item>
                                                                                         </actionsWhenFalse>
                                                                                     </ruleProperties>
@@ -4376,6 +4694,9 @@
                                                                                                     <item actionId="ExitProcedure">
                                                                                                         <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
                                                                                                     </item>
+                                                                                                    <item actionId="SkipRemainingRules">
+                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                    </item>
                                                                                                 </actionsWhenFalse>
                                                                                             </ruleProperties>
                                                                                         </processorInfo>
@@ -4401,6 +4722,9 @@
                                                                                                     <item actionId="ExitProcedure">
                                                                                                         <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
                                                                                                     </item>
+                                                                                                    <item actionId="SkipRemainingRules">
+                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                    </item>
                                                                                                 </actionsWhenFalse>
                                                                                             </ruleProperties>
                                                                                         </processorInfo>
@@ -4425,6 +4749,9 @@
                                                                                                     </item>
                                                                                                     <item actionId="ExitProcedure">
                                                                                                         <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
+                                                                                                    </item>
+                                                                                                    <item actionId="SkipRemainingRules">
+                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                                                     </item>
                                                                                                 </actionsWhenFalse>
                                                                                             </ruleProperties>
@@ -4487,6 +4814,9 @@
                                                                                                             <item actionId="ExitProcedure">
                                                                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
                                                                                                             </item>
+                                                                                                            <item actionId="SkipRemainingRules">
+                                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                            </item>
                                                                                                         </actionsWhenFalse>
                                                                                                     </ruleProperties>
                                                                                                 </processorInfo>
@@ -4494,16 +4824,227 @@
                                                                                             <item>
                                                                                                 <extractorInfo extractorType="query">
                                                                                                     <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                                        <query>details/item[field = &quot;http2.headers.status&quot;]/value</query>
+                                                                                                        <query>//item[field=&quot;tcp.ack_raw&quot;]/value</query>
+                                                                                                    </extractorProperties>
+                                                                                                </extractorInfo>
+                                                                                                <processorInfo ruleType="store">
+                                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                                                        <storageLocation>ack_reponse</storageLocation>
+                                                                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                                                                    </ruleProperties>
+                                                                                                </processorInfo>
+                                                                                            </item>
+                                                                                        </analysisRules>
+                                                                                    </postProcessing>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                                <item guid="6f93f363-6943-473d-9443-ae5515666f43" action="command" session="s4">
+                                                                                    <command>
+                                                                                        <body>query filter set &quot;tcp.ack_raw == [ack_reponse]&quot;</body>
+                                                                                    </command>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                                <item guid="cff90b9b-1d23-4511-9057-9a5cd5cafd41" action="command" session="s4">
+                                                                                    <command>
+                                                                                        <body>query packets</body>
+                                                                                    </command>
+                                                                                    <postProcessing>
+                                                                                        <analysisRules>
+                                                                                            <item>
+                                                                                                <extractorInfo extractorType="query">
+                                                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                        <query>rowCount()</query>
                                                                                                     </extractorProperties>
                                                                                                 </extractorInfo>
                                                                                                 <processorInfo ruleType="assert">
                                                                                                     <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                                                        <expression>int(value) == 400</expression>
+                                                                                                        <expression>int(value) == 1</expression>
+                                                                                                        <actionsWhenTrue>
+                                                                                                            <item actionId="Eval">
+                                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                                                    <statement>is_multi_packet_response = False</statement>
+                                                                                                                </actionProperties>
+                                                                                                            </item>
+                                                                                                        </actionsWhenTrue>
+                                                                                                        <actionsWhenFalse>
+                                                                                                            <item actionId="Eval">
+                                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                                                    <statement>is_multi_packet_response = True</statement>
+                                                                                                                </actionProperties>
+                                                                                                            </item>
+                                                                                                        </actionsWhenFalse>
+                                                                                                    </ruleProperties>
+                                                                                                </processorInfo>
+                                                                                            </item>
+                                                                                        </analysisRules>
+                                                                                    </postProcessing>
+                                                                                    <eventHandlers>
+                                                                                        <item name="OnWiresharkCommandFailed">
+                                                                                            <item actionId="Eval">
+                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                                    <statement>id = &quot;&quot;</statement>
+                                                                                                </actionProperties>
+                                                                                            </item>
+                                                                                        </item>
+                                                                                    </eventHandlers>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                                <item guid="88ff8239-a1c2-42c9-bfdd-e2bd741dd09d" action="if" useFieldsInCommand="false">
+                                                                                    <command>
+                                                                                        <body>is_multi_packet_response:</body>
+                                                                                    </command>
+                                                                                    <nestedSteps>
+                                                                                        <item guid="05c13758-d159-4d1c-802e-916f71584356" action="comment" useFieldsInCommand="false">
+                                                                                            <command>
+                                                                                                <body>exclude the http2.type == 8  (window update), http2.type == 4 (Setting)</body>
+                                                                                            </command>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                        <item guid="d0374a20-ff21-4153-be09-2223efb66586" action="command" session="s4">
+                                                                                            <command>
+                                                                                                <body>query filter set &quot;http2 and tcp.ack_raw == [ack_reponse] and not http2.type == 8 and not http2.type == 4&quot;</body>
+                                                                                            </command>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                        <item guid="769f6a87-fbee-499d-b285-f5de771306f1" action="command" session="s4">
+                                                                                            <command>
+                                                                                                <body>query packets</body>
+                                                                                            </command>
+                                                                                            <postProcessing>
+                                                                                                <analysisRules>
+                                                                                                    <item>
+                                                                                                        <extractorInfo extractorType="query">
+                                                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                                <query>success()</query>
+                                                                                                            </extractorProperties>
+                                                                                                        </extractorInfo>
+                                                                                                        <processorInfo ruleType="assert">
+                                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                                                <expression>value == &quot;true&quot;</expression>
+                                                                                                                <actionsWhenFalse>
+                                                                                                                    <item actionId="FailTest">
+                                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                                    </item>
+                                                                                                                    <item actionId="DeclareExecutionIssue">
+                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
+                                                                                                                            <message>&quot;[tag_key]&quot; does not exist in pcap file</message>
+                                                                                                                        </actionProperties>
+                                                                                                                    </item>
+                                                                                                                    <item actionId="ExitProcedure">
+                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
+                                                                                                                    </item>
+                                                                                                                    <item actionId="SkipRemainingRules">
+                                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                                    </item>
+                                                                                                                </actionsWhenFalse>
+                                                                                                            </ruleProperties>
+                                                                                                        </processorInfo>
+                                                                                                    </item>
+                                                                                                    <item>
+                                                                                                        <extractorInfo extractorType="query">
+                                                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                                <query>rowCount()</query>
+                                                                                                            </extractorProperties>
+                                                                                                        </extractorInfo>
+                                                                                                        <processorInfo ruleType="assert">
+                                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                                                <expression>int(value) == 1</expression>
+                                                                                                                <actionsWhenFalse>
+                                                                                                                    <item actionId="FailTest">
+                                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                                    </item>
+                                                                                                                    <item actionId="DeclareExecutionIssue">
+                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
+                                                                                                                            <message>&quot;[tag_key]&quot; found &quot;{value}&quot; in pcap file. Expected: 1</message>
+                                                                                                                        </actionProperties>
+                                                                                                                    </item>
+                                                                                                                    <item actionId="ExitProcedure">
+                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
+                                                                                                                    </item>
+                                                                                                                    <item actionId="SkipRemainingRules">
+                                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                                    </item>
+                                                                                                                </actionsWhenFalse>
+                                                                                                            </ruleProperties>
+                                                                                                        </processorInfo>
+                                                                                                    </item>
+                                                                                                    <item>
+                                                                                                        <extractorInfo extractorType="query">
+                                                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                                <query>messages/item/id</query>
+                                                                                                            </extractorProperties>
+                                                                                                        </extractorInfo>
+                                                                                                        <processorInfo ruleType="store">
+                                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                                                                <storageLocation>response_id</storageLocation>
+                                                                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                                                                            </ruleProperties>
+                                                                                                        </processorInfo>
+                                                                                                    </item>
+                                                                                                </analysisRules>
+                                                                                            </postProcessing>
+                                                                                            <eventHandlers>
+                                                                                                <item name="OnWiresharkCommandFailed">
+                                                                                                    <item actionId="Eval">
+                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                                            <statement>id = &quot;&quot;</statement>
+                                                                                                        </actionProperties>
+                                                                                                    </item>
+                                                                                                </item>
+                                                                                            </eventHandlers>
+                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                        </item>
+                                                                                    </nestedSteps>
+                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                </item>
+                                                                                <item guid="03943c43-8747-4881-b02f-68f9f31841d9" action="command" session="s4">
+                                                                                    <command>
+                                                                                        <body>query details [response_id]</body>
+                                                                                    </command>
+                                                                                    <postProcessing>
+                                                                                        <analysisRules>
+                                                                                            <item>
+                                                                                                <extractorInfo extractorType="query">
+                                                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                        <query>success()</query>
+                                                                                                    </extractorProperties>
+                                                                                                </extractorInfo>
+                                                                                                <processorInfo ruleType="assert">
+                                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                                        <expression>value == &quot;true&quot;</expression>
+                                                                                                        <actionsWhenFalse>
+                                                                                                            <item actionId="DeclareExecutionIssue">
+                                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
+                                                                                                                    <message>Cannot query packet [id_1]</message>
+                                                                                                                </actionProperties>
+                                                                                                            </item>
+                                                                                                            <item actionId="ExitProcedure">
+                                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
+                                                                                                            </item>
+                                                                                                            <item actionId="SkipRemainingRules">
+                                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                            </item>
+                                                                                                        </actionsWhenFalse>
+                                                                                                    </ruleProperties>
+                                                                                                </processorInfo>
+                                                                                            </item>
+                                                                                            <item>
+                                                                                                <extractorInfo extractorType="query">
+                                                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                        <query>number(details/item[field = &quot;http2.headers.status&quot;]/value) = 400</query>
+                                                                                                    </extractorProperties>
+                                                                                                </extractorInfo>
+                                                                                                <processorInfo ruleType="assert">
+                                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                                        <expression>str(value).lower() == &quot;true&quot;</expression>
                                                                                                         <actionsWhenTrue>
                                                                                                             <item actionId="DeclareExecutionIssue">
                                                                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                                                                                    <message>    &lt;---- [response_id]. {value} Bad Request</message>
+                                                                                                                    <message>    &lt;---- [response_id]. 400 Bad Request</message>
                                                                                                                 </actionProperties>
                                                                                                             </item>
                                                                                                             <item actionId="FailTest">
@@ -4512,6 +5053,9 @@
                                                                                                             <item actionId="ExitProcedure">
                                                                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
                                                                                                             </item>
+                                                                                                            <item actionId="SkipRemainingRules">
+                                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                            </item>
                                                                                                         </actionsWhenTrue>
                                                                                                     </ruleProperties>
                                                                                                 </processorInfo>
@@ -4519,16 +5063,16 @@
                                                                                             <item>
                                                                                                 <extractorInfo extractorType="query">
                                                                                                     <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                                        <query>details/item[field = &quot;http2.headers.status&quot;]/value</query>
+                                                                                                        <query>number(details/item[field = &quot;http2.headers.status&quot;]/value) = 500</query>
                                                                                                     </extractorProperties>
                                                                                                 </extractorInfo>
                                                                                                 <processorInfo ruleType="assert">
                                                                                                     <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                                                        <expression>int(value) == 500</expression>
+                                                                                                        <expression>str(value).lower() == &quot;true&quot;</expression>
                                                                                                         <actionsWhenTrue>
                                                                                                             <item actionId="DeclareExecutionIssue">
                                                                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                                                                                    <message>    &lt;---- [response_id]. {value} Internal Server Error</message>
+                                                                                                                    <message>    &lt;---- [response_id]. 500 Internal Server Error</message>
                                                                                                                 </actionProperties>
                                                                                                             </item>
                                                                                                             <item actionId="FailTest">
@@ -4537,6 +5081,9 @@
                                                                                                             <item actionId="ExitProcedure">
                                                                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
                                                                                                             </item>
+                                                                                                            <item actionId="SkipRemainingRules">
+                                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                            </item>
                                                                                                         </actionsWhenTrue>
                                                                                                     </ruleProperties>
                                                                                                 </processorInfo>
@@ -4544,35 +5091,53 @@
                                                                                             <item>
                                                                                                 <extractorInfo extractorType="query">
                                                                                                     <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                                        <query>details/item[field = &quot;http2.headers.status&quot;]/value</query>
+                                                                                                        <query>number(details/item[field = &quot;http2.headers.status&quot;]/value) = 204</query>
                                                                                                     </extractorProperties>
                                                                                                 </extractorInfo>
                                                                                                 <processorInfo ruleType="assert">
                                                                                                     <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                                                        <expression>int(value) == 204</expression>
+                                                                                                        <expression>str(value).lower() == &quot;true&quot;</expression>
                                                                                                         <actionsWhenTrue>
                                                                                                             <item actionId="PassTestIfNotAlreadyFailed">
                                                                                                                 <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                                                             </item>
                                                                                                             <item actionId="DeclareExecutionIssue">
                                                                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="OK">
-                                                                                                                    <message>    &lt;---- [response_id]. {value} No Content</message>
+                                                                                                                    <message>    &lt;---- [response_id]. 204 No Content</message>
                                                                                                                 </actionProperties>
                                                                                                             </item>
-                                                                                                        </actionsWhenTrue>
-                                                                                                        <actionsWhenFalse>
-                                                                                                            <item actionId="FailTest">
+                                                                                                            <item actionId="SkipRemainingRules">
                                                                                                                 <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                                                             </item>
+                                                                                                        </actionsWhenTrue>
+                                                                                                    </ruleProperties>
+                                                                                                </processorInfo>
+                                                                                            </item>
+                                                                                            <item>
+                                                                                                <extractorInfo extractorType="query">
+                                                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                                        <query>details/item[field = &quot;http2.headers.status&quot;]/value</query>
+                                                                                                    </extractorProperties>
+                                                                                                </extractorInfo>
+                                                                                                <processorInfo ruleType="assert">
+                                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                                        <expression>True</expression>
+                                                                                                        <actionsWhenTrue>
                                                                                                             <item actionId="DeclareExecutionIssue">
                                                                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                                                                                    <message>    &lt;---- [response_id]. {value} Unknow error</message>
+                                                                                                                    <message>    &lt;---- [response_id]. {value} Unknow Error code response</message>
                                                                                                                 </actionProperties>
+                                                                                                            </item>
+                                                                                                            <item actionId="FailTest">
+                                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                                                             </item>
                                                                                                             <item actionId="ExitProcedure">
                                                                                                                 <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
                                                                                                             </item>
-                                                                                                        </actionsWhenFalse>
+                                                                                                            <item actionId="SkipRemainingRules">
+                                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                                            </item>
+                                                                                                        </actionsWhenTrue>
                                                                                                     </ruleProperties>
                                                                                                 </processorInfo>
                                                                                             </item>

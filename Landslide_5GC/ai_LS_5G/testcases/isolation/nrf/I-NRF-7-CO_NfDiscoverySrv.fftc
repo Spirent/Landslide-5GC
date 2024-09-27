@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="9.2.0.202211031751">
+<testCase version="9.5.0.202401251837">
     <general>
         <documentation>I-NRF-7-CO: NF Discovery Service - Compliance Testing</documentation>
         <tags>I-NRF-7-CO</tags>
@@ -181,6 +181,42 @@
                                             <command>
                                                 <body>project://ai_LS_5G/utility_library/utils.fftc#validate_params(params=params)</body>
                                             </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="36505832-a5dd-4944-aedd-981f63bf4520" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>automation_control_delay_time = param(&apos;TC_parameters/Test_Duration&apos;,15)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="bdee9587-398f-41a4-b64e-6aa90e890d07" action="call" useFieldsInCommand="false">
+                                            <command>
+                                                <body>project://ai_LS_5G/utility_library/utils.fftc#is_number(input_str=automation_control_delay_time)</body>
+                                            </command>
+                                            <postProcessing>
+                                                <storeResponseAt>is_number</storeResponseAt>
+                                                <storeResponseText>true</storeResponseText>
+                                            </postProcessing>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="110844b0-1daf-4caa-a756-17dcf6bc3546" action="if" useFieldsInCommand="false">
+                                            <command>
+                                                <body>not is_number:</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="3c154a99-620b-49dc-a5ff-0f1ad1335422" action="message" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>Error:The param Test_Duration must be a number.</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                        <severity inherit="false">Error</severity>
+                                                        <message inherit="false">The param Test_Duration must be a number.</message>
+                                                    </applicationProperties>
+                                                </item>
+                                                <item guid="d5461e8b-83bc-40e0-af30-5a5c75645c56" action="exit" useFieldsInCommand="false">
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
                                     </nestedSteps>
@@ -1047,9 +1083,38 @@
                                 <body>Update automation control</body>
                             </command>
                             <nestedSteps>
+                                <item guid="958b75aa-c16e-48dc-92a1-f2da4d7a8f03" action="if" useFieldsInCommand="false">
+                                    <command>
+                                        <body>float(automation_control_delay_time) &lt; 15:</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="77611a38-0c65-4409-bd0a-fdc3429297ce" action="message" useFieldsInCommand="false">
+                                            <command>
+                                                <body>Warning:The Test_Duration is below the minimum value and has been set to the default of 15 seconds.</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
+                                                <severity inherit="false">Warning</severity>
+                                                <message inherit="false">The Test_Duration is below the minimum value and has been set to the default of 15 seconds.</message>
+                                            </applicationProperties>
+                                        </item>
+                                        <item guid="b6411ca0-3617-4f6e-ac42-c5b002fc78f6" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>automation_control_delay_time = 15</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="e790d82a-e620-4493-84e0-eba4a7c4b2b0" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>gset(&apos;automation_control_delay_time&apos;,automation_control_delay_time)</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
                                 <item guid="6e00c8b4-0efc-4bb4-ae8c-330f4563c05c" action="eval" useFieldsInCommand="false">
                                     <command>
-                                        <body>automation_steps = &quot;0:0:Start:-1:-1::0;0:0:Stop:0:0:RUNNING:15;0:0:Cleanup:0:0:STOPPED:0&quot;</body>
+                                        <body>automation_steps = &quot;0:0:Start:-1:-1::0;0:0:Stop:0:0:RUNNING:{0};0:0:Cleanup:0:0:STOPPED:0&quot;.format(automation_control_delay_time)</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
@@ -2260,14 +2325,20 @@
                     </nestedSteps>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
-                <item guid="9b41f205-bdfa-49fa-ac66-d19af951cf39" action="comment" useFieldsInCommand="false" skippReporting="false">
+                <item guid="6ab02dfe-74e7-4727-93be-a3e5ccd601fe" action="eval" useFieldsInCommand="false">
                     <command>
-                        <body>Sleep 15 seconds</body>
+                        <body>automation_control_delay_time = gget(&apos;automation_control_delay_time&apos;)</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="9b41f205-bdfa-49fa-ac66-d19af951cf39" action="comment" useFieldsInCommand="false">
+                    <command>
+                        <body>Sleep base on automation_control_delay_time</body>
                     </command>
                     <nestedSteps>
                         <item guid="adfd0d05-356c-411a-961a-a962db16365b" action="sleep">
                             <command>
-                                <body>15</body>
+                                <body>[int(automation_control_delay_time)]</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
@@ -3214,7 +3285,7 @@
                                                         </item>
                                                         <item guid="37923085-8a16-4ce5-a590-52d0e408a0d6" action="command" session="s4">
                                                             <command>
-                                                                <body>query filter set &quot;(http2.header.value == \\&quot;GET\\&quot;) &amp;&amp; (http2.header.value matches \\&quot;/nnrf-disc/v1/nf-instances?\\\\W+\\&quot;)&quot;</body>
+                                                                <body>query filter set &quot;(http2.header.value == \\&quot;GET\\&quot;) &amp;&amp; (http2.header.value contains \\&quot;/nnrf-disc/v1/nf-instances?target-nf-type=UDM&amp;requester-nf-type=AMF\\&quot;)&quot;</body>
                                                             </command>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
