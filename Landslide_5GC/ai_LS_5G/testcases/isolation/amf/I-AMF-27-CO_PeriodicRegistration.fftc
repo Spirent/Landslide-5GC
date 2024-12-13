@@ -709,7 +709,7 @@
                                     <nestedSteps>
                                         <item guid="bb31ad22-98e0-4bf0-b4eb-78eda3f8eac5" action="eval" useFieldsInCommand="false">
                                             <command>
-                                                <body>sut_automation_steps = &quot;0:0:Start:-1:-1::0&quot;</body>
+                                                <body>sut_automation_steps = &quot;0:0:Init:-1:-1::0;-4:-4::-1:-1::0;0:0:Start:-1:-1::0&quot;</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
@@ -724,7 +724,7 @@
                                 </item>
                                 <item guid="b178cac1-d127-4ac4-9933-76f30461d574" action="run_test_session" session="s1" useFieldsInCommand="false">
                                     <command>
-                                        <body>(test_session_name=node_test_session, library_id=library_id, ts_groups=ts_groups, ts_node_name=ts_node_name, return_run_data=&apos;false&apos;, check_exist=&apos;false&apos;, steps=sut_automation_steps, number_of_subscribers=&apos;1&apos;, activation_rate=&apos;1&apos;, additional_params=additional_params)</body>
+                                        <body>(test_session_name=node_test_session, library_id=library_id, ts_groups=ts_groups, ts_node_name=ts_node_name, return_run_data=&apos;false&apos;, check_exist=&apos;false&apos;, steps=sut_automation_steps, expected_state=&apos;2_Waiting&apos;, number_of_subscribers=&apos;1&apos;, activation_rate=&apos;1&apos;, additional_params=additional_params)</body>
                                     </command>
                                     <postProcessing>
                                         <analysisRules>
@@ -2044,7 +2044,7 @@
                     <nestedSteps>
                         <item guid="36fc6dc6-4a92-4618-9b1f-d3f14d8a64a8" action="call" useFieldsInCommand="false">
                             <command>
-                                <body>execute_nodal_tests(run_data_list=run_data_list, is_b2b=is_b2b, timeout=timeout)</body>
+                                <body>execute_nodal_tests(run_data_list=run_data_list, running_node_id=running_node_id, is_b2b=is_b2b, timeout=timeout)</body>
                             </command>
                             <postProcessing>
                                 <analysisRules>
@@ -2357,6 +2357,40 @@
                                                 <item guid="780ccf8a-e57a-4e03-a223-154a43040bef" action="eval" useFieldsInCommand="false">
                                                     <command>
                                                         <body>running_id_list.append(running_nodal_id)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="a31c5918-9889-46f2-a202-92e1fab8bdb3" action="comment" useFieldsInCommand="false">
+                                    <command>
+                                        <body>Continue SUT session if b2b</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="5d1e0f77-1471-4301-8926-5eb764d6a996" action="if" useFieldsInCommand="false">
+                                            <command>
+                                                <body>is_b2b == &quot;true&quot;:</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="227c71e8-b1bf-4baa-9e8c-b3d57fff1c5f" action="perform_next_action" session="s1" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>(running_test_id=running_node_id, expected_state=&apos;2_Waiting&apos;, next_action=&apos;continue&apos;, time_out=timeout)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="2545c825-01b9-47c9-b23f-772c907289d1" action="waiting_for_test_get_expected_state" session="s1" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>(expected_state=&apos;RUNNING&apos;, running_test_id=running_node_id, time_out=timeout)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="b75733d4-2051-4fa7-9b01-c61356acd8a5" action="sleep">
+                                                    <command>
+                                                        <body>5</body>
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
@@ -2708,6 +2742,9 @@
             </steps>
             <arguments>
                 <item name="run_data_list">
+                    <isMandatory>true</isMandatory>
+                </item>
+                <item name="running_node_id">
                     <isMandatory>true</isMandatory>
                 </item>
                 <item name="is_b2b">

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="8.5.0.202104211757" entryPoint="query_request_response">
+<testCase version="24.4.0.202410030646" entryPoint="query_request_response">
     <general>
         <isProcedureLibrary>true</isProcedureLibrary>
         <language>Python</language>
@@ -1636,6 +1636,79 @@
                 </item>
             </arguments>
             <response>{}</response>
+        </item>
+        <item name="get_tshark_version" isPublic="true">
+            <steps>
+                <item guid="be0e25fe-9142-4a4d-95dd-fd57e38f5128" action="command" session="[session]">
+                    <command>
+                        <body>query load project://ai_LS_5G/assets/sample.pcap</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                    <advancedProperties defaultSessionProfile="application:com.fnfr.svt.applications.wireshark"/>
+                </item>
+                <item guid="2d57bc40-9ff2-40f1-a089-1b59ec8030db" action="command" session="[session]">
+                    <command>
+                        <body>query details 1 pdml</body>
+                    </command>
+                    <postProcessing>
+                        <analysisRules>
+                            <item>
+                                <extractorInfo extractorType="query">
+                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                        <query>boolean(//pdml/@creator)</query>
+                                    </extractorProperties>
+                                </extractorInfo>
+                                <processorInfo ruleType="assert">
+                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                        <expression>value == &quot;true&quot;</expression>
+                                        <actionsWhenFalse>
+                                            <item actionId="Eval">
+                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                    <statement>version = &quot;Unknown&quot;</statement>
+                                                </actionProperties>
+                                            </item>
+                                            <item actionId="SkipRemainingRules">
+                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                            </item>
+                                        </actionsWhenFalse>
+                                    </ruleProperties>
+                                </processorInfo>
+                            </item>
+                            <item>
+                                <extractorInfo extractorType="query">
+                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                        <query>//pdml/@creator</query>
+                                    </extractorProperties>
+                                </extractorInfo>
+                                <processorInfo ruleType="assert">
+                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                        <expression>True</expression>
+                                        <actionsWhenTrue>
+                                            <item actionId="Eval">
+                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                    <statement>version = value.split(&quot;/&quot;)[-1]</statement>
+                                                </actionProperties>
+                                            </item>
+                                        </actionsWhenTrue>
+                                    </ruleProperties>
+                                </processorInfo>
+                            </item>
+                        </analysisRules>
+                    </postProcessing>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                    <advancedProperties defaultSessionProfile="application:com.fnfr.svt.applications.wireshark"/>
+                </item>
+                <item guid="6f322253-1691-4c14-8420-ab0c6395819a" action="return">
+                    <command>
+                        <body>[version]</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                    <advancedProperties defaultSessionProfile="application:com.fnfr.svt.applications.wireshark"/>
+                </item>
+            </steps>
+            <arguments>
+                <item name="session"/>
+            </arguments>
         </item>
     </procedures>
 </testCase>

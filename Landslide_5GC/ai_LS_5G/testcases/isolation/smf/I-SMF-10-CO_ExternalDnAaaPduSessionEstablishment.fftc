@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="9.5.0.202402062035">
+<testCase version="24.4.0.202410030646">
     <general>
         <documentation>I-SMF-10-CO: External DN-AAA PDU Session Establishment - Compliance Testing</documentation>
         <tags>I-SMF-10-CO</tags>
@@ -737,13 +737,13 @@
                                 </item>
                                 <item guid="02b1bc6f-2e99-40d5-aad0-6cb33483b089" action="eval" useFieldsInCommand="false">
                                     <command>
-                                        <body>automation_steps = &quot;0:0:Start:-1:-1::0&quot;</body>
+                                        <body>automation_steps = &quot;0:0:Init:-1:-1::0;-4:-4::-1:-1::0;0:0:Start:-1:-1::0&quot;</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
                                 <item guid="5da412a4-188a-4589-986f-ebae04c872bc" action="run_test_session" session="s1" useFieldsInCommand="false">
                                     <command>
-                                        <body>(test_session_name = node_test_session ,library_id = library_id ,ts_groups = ts_groups ,ts_node_name = ts_node_name ,return_run_data = &quot;false&quot; ,check_exist = &quot;false&quot; ,steps = automation_steps ,expected_state = &quot;RUNNING&quot;)</body>
+                                        <body>(test_session_name = node_test_session ,library_id = library_id ,ts_groups = ts_groups ,ts_node_name = ts_node_name ,return_run_data = &quot;false&quot; ,check_exist = &quot;false&quot; ,steps = automation_steps ,expected_state = &quot;2_Waiting&quot;)</body>
                                     </command>
                                     <postProcessing>
                                         <analysisRules>
@@ -1255,7 +1255,7 @@
                             <nestedSteps>
                                 <item guid="7fba7e9c-04ab-41f6-b2c7-61b8d2f707e4" action="eval" useFieldsInCommand="false">
                                     <command>
-                                        <body>automation_steps = &quot;-0:2:Start:-1:-1::0;0:1:Start:-1:-1::0;0:0:Start:-1:-1::0;0:0:Stop:0:0:RUNNING:40;0:1:Stop:0:0:STOPPED:0;0:2:Stop:0:1:STOPPED:0&quot;</body>
+                                        <body>automation_steps = &quot;0:2:Start:-1:-1::0;0:1:Start:0:2:RUNNING:0;-4:-4::-1:-1::0;0:0:Start:0:1:RUNNING:0;0:0:Stop:0:0:RUNNING:40;0:1:Stop:0:0:STOPPED:0;0:2:Stop:0:1:STOPPED:0&quot;</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
@@ -1973,6 +1973,35 @@
                                                         <sessionVersion type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                     </applicationProperties>
                                                 </item>
+                                                <item guid="f4559ede-d36c-45d9-ab55-0a9497cb4f11" action="call" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>project://ai_LS_5G/utility_library/pcap_utils.fftc#get_tshark_version(session=&apos;s4&apos;)</body>
+                                                    </command>
+                                                    <postProcessing>
+                                                        <analysisRules>
+                                                            <item>
+                                                                <extractorInfo extractorType="query">
+                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                        <query>responseLine()</query>
+                                                                    </extractorProperties>
+                                                                </extractorInfo>
+                                                                <processorInfo ruleType="assert">
+                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                        <expression>True</expression>
+                                                                        <actionsWhenTrue>
+                                                                            <item actionId="DeclareExecutionIssue">
+                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Information">
+                                                                                    <message>Wireshark/tshark version: [value]</message>
+                                                                                </actionProperties>
+                                                                            </item>
+                                                                        </actionsWhenTrue>
+                                                                    </ruleProperties>
+                                                                </processorInfo>
+                                                            </item>
+                                                        </analysisRules>
+                                                    </postProcessing>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
                                                 <item guid="3cf19db9-7dfd-413c-b4a5-e044013027a4" action="call" useFieldsInCommand="false">
                                                     <command>
                                                         <body>extract_pcap_kpis(nodal_pcaps=local_files, sut_pcaps=node_local_files, nodal_file_names=pcap_files, sut_file_names=sut_pcap_files)</body>
@@ -2522,6 +2551,54 @@
                     </nestedSteps>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
+                <item guid="386d324e-635e-40a3-87bc-83226d230a5c" action="comment" useFieldsInCommand="false">
+                    <command>
+                        <body>Continue SUT session if b2b</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="5d1e0f77-1471-4301-8926-5eb764d6a996" action="if" useFieldsInCommand="false">
+                            <command>
+                                <body>is_b2b == &quot;true&quot;:</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="227c71e8-b1bf-4baa-9e8c-b3d57fff1c5f" action="perform_next_action" session="s1" useFieldsInCommand="false">
+                                    <command>
+                                        <body>(running_test_id=running_node_id, expected_state=&apos;2_Waiting&apos;, next_action=&apos;continue&apos;, time_out=timeout)</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="2545c825-01b9-47c9-b23f-772c907289d1" action="waiting_for_test_get_expected_state" session="s1" useFieldsInCommand="false">
+                                    <command>
+                                        <body>(expected_state=&apos;RUNNING&apos;, running_test_id=running_node_id, time_out=timeout)</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="b75733d4-2051-4fa7-9b01-c61356acd8a5" action="sleep">
+                                    <command>
+                                        <body>5</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="2a19042f-bcdc-4184-81cc-413a876ca119" action="comment" useFieldsInCommand="false">
+                    <command>
+                        <body>Continue nodal session</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="f813f6f9-0237-439b-9476-30311370dbeb" action="perform_next_action" session="s1" useFieldsInCommand="false">
+                            <command>
+                                <body>(running_test_id=running_nodal_id, expected_state=&apos;3_Waiting&apos;, next_action=&apos;continue&apos;, time_out=timeout)</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
                 <item guid="7be39d34-32e0-487e-9dff-03c04120aa95" action="comment" useFieldsInCommand="false" skippReporting="false">
                     <command>
                         <body>Sleep 40 seconds</body>
@@ -2548,7 +2625,7 @@
                             <nestedSteps>
                                 <item guid="602c807e-df21-4220-807b-5d4d2571491f" action="eval" useFieldsInCommand="false">
                                     <command>
-                                        <body>testcase_expected_states = [&quot;4_DELAY&quot;, &quot;5&quot;, &quot;6&quot;, &quot;FINAL&quot;, &quot;STOPPING&quot;, &quot;CLEANUP&quot;, &quot;WAIT_FOR_TRANSFERS&quot;, &quot;COMPLETE&quot;]</body>
+                                        <body>testcase_expected_states = [&quot;5_DELAY&quot;, &quot;6&quot;, &quot;7&quot;, &quot;FINAL&quot;, &quot;STOPPING&quot;, &quot;CLEANUP&quot;, &quot;WAIT_FOR_TRANSFERS&quot;, &quot;COMPLETE&quot;]</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
@@ -2562,7 +2639,7 @@
                             <nestedSteps>
                                 <item guid="4d392291-e66b-4f00-b628-8cbcc2be082d" action="eval" useFieldsInCommand="false">
                                     <command>
-                                        <body>unexpected_states = [&quot;1&quot;, &quot;2&quot;,&quot;3&quot;, &quot;4&quot;]</body>
+                                        <body>unexpected_states = [&quot;1&quot;, &quot;2&quot;,&quot;3&quot;, &quot;4&quot;,&quot;5&quot;]</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
