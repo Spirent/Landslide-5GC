@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="9.3.0.202302120019">
+<testCase version="24.4.0.202410030646">
     <general>
         <documentation>S-5GC-1-VA: UP Data Replay Protection over N3 interface (UPF) - Security Testing</documentation>
         <tags>S-5GC-1-VA</tags>
@@ -3789,6 +3789,35 @@
                         <sessionVersion type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                     </applicationProperties>
                 </item>
+                <item guid="f4559ede-d36c-45d9-ab55-0a9497cb4f11" action="call" useFieldsInCommand="false">
+                    <command>
+                        <body>project://ai_LS_5G/utility_library/pcap_utils.fftc#get_tshark_version(session=&apos;s4&apos;)</body>
+                    </command>
+                    <postProcessing>
+                        <analysisRules>
+                            <item>
+                                <extractorInfo extractorType="query">
+                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                        <query>responseLine()</query>
+                                    </extractorProperties>
+                                </extractorInfo>
+                                <processorInfo ruleType="assert">
+                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                        <expression>True</expression>
+                                        <actionsWhenTrue>
+                                            <item actionId="DeclareExecutionIssue">
+                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Information">
+                                                    <message>Wireshark/tshark version: [value]</message>
+                                                </actionProperties>
+                                            </item>
+                                        </actionsWhenTrue>
+                                    </ruleProperties>
+                                </processorInfo>
+                            </item>
+                        </analysisRules>
+                    </postProcessing>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
                 <item guid="046747ab-834f-42aa-b325-0df614148861" action="comment" useFieldsInCommand="false">
                     <command>
                         <body>Valide Nodal pcaps</body>
@@ -3796,7 +3825,7 @@
                     <nestedSteps>
                         <item guid="5652b0a2-568c-4334-92a3-a1f9b357781d" action="eval" useFieldsInCommand="false">
                             <command>
-                                <body>gnb_phy = param(&apos;LS_Nodal_favorite_params/TS1/ts0/tc0/GnbUserAddr/phy&apos;, &apos;eth2&apos;); print(gnb_phy);</body>
+                                <body>nw_phy = param(&apos;LS_Nodal_favorite_params/TS1/ts0/tc2/NetworkHostAddrLocal/phy&apos;, &apos;eth2&apos;); print(nw_phy);</body>
                             </command>
                             <eventHandlers>
                                 <item name="OnInterpreterError">
@@ -3830,6 +3859,70 @@
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
+                        <item guid="33c69666-56d0-4d5d-bf92-c6d7bb5e9baa" action="comment" useFieldsInCommand="false">
+                            <command>
+                                <body>Check if the networkhost from nodal is using IPV6</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="94ded6e9-aaca-4055-9d8b-e3305ea0853c" action="isIPv4" session="s1" useFieldsInCommand="false">
+                                    <command>
+                                        <body>(ip=ip_net_host)</body>
+                                    </command>
+                                    <postProcessing>
+                                        <analysisRules>
+                                            <item>
+                                                <extractorInfo extractorType="query">
+                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                        <query>responseLine()</query>
+                                                    </extractorProperties>
+                                                </extractorInfo>
+                                                <processorInfo ruleType="assert">
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                        <expression>str(value).lower() == &quot;true&quot;</expression>
+                                                        <actionsWhenTrue>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>ip_src_filter=&quot;ip.src&quot;</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>ip_dst_filter=&quot;ip.dst&quot;</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>ip_filter = &quot;ip&quot;</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                        </actionsWhenTrue>
+                                                        <actionsWhenFalse>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>ip_src_filter=&quot;ipv6.src&quot;</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>ip_dst_filter=&quot;ipv6.dst&quot;</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>ip_filter = &quot;ipv6&quot;</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                        </actionsWhenFalse>
+                                                    </ruleProperties>
+                                                </processorInfo>
+                                            </item>
+                                        </analysisRules>
+                                    </postProcessing>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
                         <item guid="054fbf7a-cef3-438a-8219-10b03ab753cf" action="comment" useFieldsInCommand="false">
                             <command>
                                 <body>Verify pcap acceptance check</body>
@@ -3854,7 +3947,7 @@
                                         </item>
                                         <item guid="eb2f9606-0bde-462b-aa62-3eb932d03b61" action="if" useFieldsInCommand="false">
                                             <command>
-                                                <body>gnb_phy in pcap_name:</body>
+                                                <body>nw_phy in pcap_name:</body>
                                             </command>
                                             <nestedSteps>
                                                 <item guid="7e144fbf-0ff8-4523-a028-8cc42bf5186b" action="comment" useFieldsInCommand="false">
@@ -3977,95 +4070,6 @@
                                                                                     <command>
                                                                                         <body>tag_key = &quot;The packet with ESP sequence = {}&quot;.format(seq)</body>
                                                                                     </command>
-                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                </item>
-                                                                                <item guid="11536de2-81be-4d1b-aad6-495781c78e62" action="comment" useFieldsInCommand="false">
-                                                                                    <command>
-                                                                                        <body>check enough packets</body>
-                                                                                    </command>
-                                                                                    <nestedSteps>
-                                                                                        <item guid="d14f2351-dba3-4236-9abf-e69a279adb23" action="command" session="s4">
-                                                                                            <command>
-                                                                                                <body>query filter set &quot;esp.sequence == [seq]&quot;</body>
-                                                                                            </command>
-                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                        </item>
-                                                                                        <item guid="2f4f57b8-7c02-4b67-b096-41789ebef037" action="command" session="s4">
-                                                                                            <command>
-                                                                                                <body>query packets</body>
-                                                                                            </command>
-                                                                                            <postProcessing>
-                                                                                                <analysisRules>
-                                                                                                    <item>
-                                                                                                        <extractorInfo extractorType="query">
-                                                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                                                <query>success()</query>
-                                                                                                            </extractorProperties>
-                                                                                                        </extractorInfo>
-                                                                                                        <processorInfo ruleType="assert">
-                                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                                                                <expression>value == &quot;true&quot;</expression>
-                                                                                                                <actionsWhenFalse>
-                                                                                                                    <item actionId="FailTest">
-                                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                                                    </item>
-                                                                                                                    <item actionId="DeclareExecutionIssue">
-                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                                                                                            <message>&quot;[tag_key]&quot; does not exist in pcap file</message>
-                                                                                                                        </actionProperties>
-                                                                                                                    </item>
-                                                                                                                    <item actionId="ExitProcedure">
-                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
-                                                                                                                    </item>
-                                                                                                                    <item actionId="SkipRemainingRules">
-                                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                                                    </item>
-                                                                                                                </actionsWhenFalse>
-                                                                                                            </ruleProperties>
-                                                                                                        </processorInfo>
-                                                                                                    </item>
-                                                                                                    <item>
-                                                                                                        <extractorInfo extractorType="query">
-                                                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                                                <query>count(messages/item/id)</query>
-                                                                                                            </extractorProperties>
-                                                                                                        </extractorInfo>
-                                                                                                        <processorInfo ruleType="assert">
-                                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                                                                <expression>int(value) == 6</expression>
-                                                                                                                <actionsWhenFalse>
-                                                                                                                    <item actionId="DeclareExecutionIssue">
-                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                                                                                            <message>&quot;[tag_key]&quot;: Expected: 6, Found &quot;[value]&quot; in pcap file.</message>
-                                                                                                                        </actionProperties>
-                                                                                                                    </item>
-                                                                                                                    <item actionId="FailTest">
-                                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                                                    </item>
-                                                                                                                    <item actionId="ExitProcedure">
-                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
-                                                                                                                    </item>
-                                                                                                                    <item actionId="SkipRemainingRules">
-                                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                                                    </item>
-                                                                                                                </actionsWhenFalse>
-                                                                                                            </ruleProperties>
-                                                                                                        </processorInfo>
-                                                                                                    </item>
-                                                                                                </analysisRules>
-                                                                                            </postProcessing>
-                                                                                            <eventHandlers>
-                                                                                                <item name="OnWiresharkCommandFailed">
-                                                                                                    <item actionId="Eval">
-                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                                                            <statement>id = &quot;&quot;</statement>
-                                                                                                        </actionProperties>
-                                                                                                    </item>
-                                                                                                </item>
-                                                                                            </eventHandlers>
-                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                        </item>
-                                                                                    </nestedSteps>
                                                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                                 </item>
                                                                                 <item guid="a95e64fa-7317-4c0a-b0fe-8c8113a8d63d" action="command" session="s4">
@@ -4197,7 +4201,7 @@
                                                                                                     <item>
                                                                                                         <extractorInfo extractorType="query">
                                                                                                             <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                                                <query>//proto[@name=&quot;ip&quot;]//field[@name=&quot;ip.src&quot;]/@show</query>
+                                                                                                                <query sub="true">//proto\\[@name=&apos;[ip_filter]&apos;]//field\\[@name=&apos;[ip_src_filter]&apos;]/@show</query>
                                                                                                             </extractorProperties>
                                                                                                         </extractorInfo>
                                                                                                         <processorInfo ruleType="store">
@@ -4212,7 +4216,7 @@
                                                                                                     <item>
                                                                                                         <extractorInfo extractorType="query">
                                                                                                             <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                                                <query>//proto[@name=&quot;ip&quot;]//field[@name=&quot;ip.dst&quot;]/@show</query>
+                                                                                                                <query sub="true">//proto\\[@name=&apos;[ip_filter]&apos;]//field\\[@name=&apos;[ip_dst_filter]&apos;]/@show</query>
                                                                                                             </extractorProperties>
                                                                                                         </extractorInfo>
                                                                                                         <processorInfo ruleType="store">
@@ -4293,7 +4297,7 @@
                                                                                                                 <actionsWhenTrue>
                                                                                                                     <item actionId="DeclareExecutionIssue">
                                                                                                                         <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="OK">
-                                                                                                                            <message>The first packet of EPS Sequence = [seq] sent from UE receives a response from the Network Host</message>
+                                                                                                                            <message>The first packet of ESP Sequence = [seq] sent from UE receives a response from the Network Host</message>
                                                                                                                         </actionProperties>
                                                                                                                     </item>
                                                                                                                     <item actionId="DeclareExecutionIssue">
@@ -4305,7 +4309,7 @@
                                                                                                                 <actionsWhenFalse>
                                                                                                                     <item actionId="DeclareExecutionIssue">
                                                                                                                         <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Warning">
-                                                                                                                            <message>The First packet of EPS Sequence = [seq] sent from UE receives no response from the Network Host</message>
+                                                                                                                            <message>The First packet of ESP Sequence = [seq] sent from UE receives no response from the Network Host</message>
                                                                                                                         </actionProperties>
                                                                                                                     </item>
                                                                                                                     <item actionId="FailTest">
@@ -4331,7 +4335,7 @@
                                                                                                                 <actionsWhenTrue>
                                                                                                                     <item actionId="DeclareExecutionIssue">
                                                                                                                         <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="OK">
-                                                                                                                            <message>The second packet of EPS Sequence = [seq] sent from UE is duplicated immediately, and receives no response</message>
+                                                                                                                            <message>The second packet of ESP Sequence = [seq] sent from UE is duplicated immediately, and receives no response</message>
                                                                                                                         </actionProperties>
                                                                                                                     </item>
                                                                                                                     <item actionId="DeclareExecutionIssue">
@@ -4346,7 +4350,7 @@
                                                                                                                 <actionsWhenFalse>
                                                                                                                     <item actionId="DeclareExecutionIssue">
                                                                                                                         <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Warning">
-                                                                                                                            <message>The second packet of EPS Sequence = [seq] sent from UE is not duplicated immediately</message>
+                                                                                                                            <message>The second packet of ESP Sequence = [seq] sent from UE is not duplicated immediately</message>
                                                                                                                         </actionProperties>
                                                                                                                     </item>
                                                                                                                     <item actionId="FailTest">
@@ -4421,95 +4425,6 @@
                                                                                     <command>
                                                                                         <body>tag_key = &quot;The packet with ESP sequence = {}&quot;.format(seq)</body>
                                                                                     </command>
-                                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                </item>
-                                                                                <item guid="e98b603a-e578-4fcf-b84e-f85e8414b84f" action="comment" useFieldsInCommand="false">
-                                                                                    <command>
-                                                                                        <body>check enough packets</body>
-                                                                                    </command>
-                                                                                    <nestedSteps>
-                                                                                        <item guid="d51501da-b132-4f7d-8fc2-443acc3b04ce" action="command" session="s4">
-                                                                                            <command>
-                                                                                                <body>query filter set &quot;esp.sequence == [seq]&quot;</body>
-                                                                                            </command>
-                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                        </item>
-                                                                                        <item guid="12abd568-e550-4df5-8b5c-2f9b028851c9" action="command" session="s4">
-                                                                                            <command>
-                                                                                                <body>query packets</body>
-                                                                                            </command>
-                                                                                            <postProcessing>
-                                                                                                <analysisRules>
-                                                                                                    <item>
-                                                                                                        <extractorInfo extractorType="query">
-                                                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                                                <query>success()</query>
-                                                                                                            </extractorProperties>
-                                                                                                        </extractorInfo>
-                                                                                                        <processorInfo ruleType="assert">
-                                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                                                                <expression>value == &quot;true&quot;</expression>
-                                                                                                                <actionsWhenFalse>
-                                                                                                                    <item actionId="FailTest">
-                                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                                                    </item>
-                                                                                                                    <item actionId="DeclareExecutionIssue">
-                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                                                                                            <message>&quot;[tag_key]&quot; does not exist in pcap file</message>
-                                                                                                                        </actionProperties>
-                                                                                                                    </item>
-                                                                                                                    <item actionId="ExitProcedure">
-                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
-                                                                                                                    </item>
-                                                                                                                    <item actionId="SkipRemainingRules">
-                                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                                                    </item>
-                                                                                                                </actionsWhenFalse>
-                                                                                                            </ruleProperties>
-                                                                                                        </processorInfo>
-                                                                                                    </item>
-                                                                                                    <item>
-                                                                                                        <extractorInfo extractorType="query">
-                                                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                                                <query>count(messages/item/id)</query>
-                                                                                                            </extractorProperties>
-                                                                                                        </extractorInfo>
-                                                                                                        <processorInfo ruleType="assert">
-                                                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                                                                <expression>int(value) == 6</expression>
-                                                                                                                <actionsWhenFalse>
-                                                                                                                    <item actionId="DeclareExecutionIssue">
-                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                                                                                            <message>&quot;[tag_key]&quot;: Expected: 6, Found &quot;[value]&quot; in pcap file.</message>
-                                                                                                                        </actionProperties>
-                                                                                                                    </item>
-                                                                                                                    <item actionId="FailTest">
-                                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                                                    </item>
-                                                                                                                    <item actionId="ExitProcedure">
-                                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
-                                                                                                                    </item>
-                                                                                                                    <item actionId="SkipRemainingRules">
-                                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                                                    </item>
-                                                                                                                </actionsWhenFalse>
-                                                                                                            </ruleProperties>
-                                                                                                        </processorInfo>
-                                                                                                    </item>
-                                                                                                </analysisRules>
-                                                                                            </postProcessing>
-                                                                                            <eventHandlers>
-                                                                                                <item name="OnWiresharkCommandFailed">
-                                                                                                    <item actionId="Eval">
-                                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                                                            <statement>id = &quot;&quot;</statement>
-                                                                                                        </actionProperties>
-                                                                                                    </item>
-                                                                                                </item>
-                                                                                            </eventHandlers>
-                                                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                        </item>
-                                                                                    </nestedSteps>
                                                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                                 </item>
                                                                                 <item guid="df07f127-8dbc-4723-8ceb-af4931e296c3" action="command" session="s4">
@@ -4641,7 +4556,7 @@
                                                                                                     <item>
                                                                                                         <extractorInfo extractorType="query">
                                                                                                             <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                                                <query>//proto[@name=&quot;ip&quot;]//field[@name=&quot;ip.src&quot;]/@show</query>
+                                                                                                                <query sub="true">//proto\\[@name=&apos;[ip_filter]&apos;]//field\\[@name=&apos;[ip_src_filter]&apos;]/@show</query>
                                                                                                             </extractorProperties>
                                                                                                         </extractorInfo>
                                                                                                         <processorInfo ruleType="store">
@@ -4702,7 +4617,7 @@
                                                                                                                 <actionsWhenTrue>
                                                                                                                     <item actionId="DeclareExecutionIssue">
                                                                                                                         <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="OK">
-                                                                                                                            <message>The first packet of EPS Sequence = [seq] sent from UE receives a response from the Network Host</message>
+                                                                                                                            <message>The first packet of ESP Sequence = [seq] sent from UE receives a response from the Network Host</message>
                                                                                                                         </actionProperties>
                                                                                                                     </item>
                                                                                                                     <item actionId="DeclareExecutionIssue">
@@ -4714,7 +4629,7 @@
                                                                                                                 <actionsWhenFalse>
                                                                                                                     <item actionId="DeclareExecutionIssue">
                                                                                                                         <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Warning">
-                                                                                                                            <message>The First packet of EPS Sequence = [seq] sent from UE receives no response from the Network Host</message>
+                                                                                                                            <message>The First packet of ESP Sequence = [seq] sent from UE receives no response from the Network Host</message>
                                                                                                                         </actionProperties>
                                                                                                                     </item>
                                                                                                                     <item actionId="FailTest">
@@ -4740,7 +4655,7 @@
                                                                                                                 <actionsWhenTrue>
                                                                                                                     <item actionId="DeclareExecutionIssue">
                                                                                                                         <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="OK">
-                                                                                                                            <message>The second packet of EPS Sequence = [seq] sent from UE is duplicated after a 10 sec delay, and receives no response</message>
+                                                                                                                            <message>The second packet of ESP Sequence = [seq] sent from UE is duplicated after a 10 sec delay, and receives no response</message>
                                                                                                                         </actionProperties>
                                                                                                                     </item>
                                                                                                                     <item actionId="DeclareExecutionIssue">
@@ -4755,7 +4670,7 @@
                                                                                                                 <actionsWhenFalse>
                                                                                                                     <item actionId="DeclareExecutionIssue">
                                                                                                                         <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Warning">
-                                                                                                                            <message>The second packet of EPS Sequence = [seq] sent from UE is not duplicated after a 10 sec delay</message>
+                                                                                                                            <message>The second packet of ESP Sequence = [seq] sent from UE is not duplicated after a 10 sec delay</message>
                                                                                                                         </actionProperties>
                                                                                                                     </item>
                                                                                                                     <item actionId="FailTest">
@@ -4806,7 +4721,7 @@
                             <nestedSteps>
                                 <item guid="754ef747-eab3-41ca-8c8d-cb0aa1ccecd9" action="message" useFieldsInCommand="false">
                                     <command>
-                                        <body>Error:Pcap file for Gnb Interface not found</body>
+                                        <body>Error:Pcap file for [nw_phy] not found</body>
                                     </command>
                                     <postProcessing>
                                         <analysisRules>
@@ -4829,7 +4744,7 @@
                                     </postProcessing>
                                     <applicationProperties type="com.fnfr.svt.execution.builtin.exec.MessagePropertyGroup">
                                         <severity inherit="false">Error</severity>
-                                        <message inherit="false">Pcap file for Gnb Interface not found</message>
+                                        <message inherit="false">Pcap file for [nw_phy] not found</message>
                                     </applicationProperties>
                                 </item>
                             </nestedSteps>

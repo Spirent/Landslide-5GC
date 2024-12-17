@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="9.3.0.202303231235">
+<testCase version="24.4.0.202410030646">
     <general>
         <documentation>S-UPF-1-SA: UP Data Confidentiality over N3 interface (UPF) - Security Testing</documentation>
         <tags>S-UPF-1-SA</tags>
@@ -3696,6 +3696,94 @@
         </item>
         <item name="extract_pcap_kpis" isPublic="true">
             <steps>
+                <item guid="66ea2931-f620-44f1-9c15-eaf111d052e2" action="comment" useFieldsInCommand="false">
+                    <command>
+                        <body>IPV4 and IPV6 Classification</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="fe2ab5e6-4928-4543-8af2-fd467c902e4a" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>nwh_ip = param(&apos;LS_Nodal_favorite_params/TS1/ts0/tc0/NetworkHostAddrLocal/ip&apos;, &apos;10.202.1.100&apos;); print(nwh_ip);</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="3614a860-e3d3-4add-9fb9-eb36a9560c88" action="comment" useFieldsInCommand="false">
+                            <command>
+                                <body>Check if the NetworkHostAddrLocal from nodal is using IPV6 and set the ip_pool accordingly</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="94ded6e9-aaca-4055-9d8b-e3305ea0853c" action="isIPv4" session="s1" useFieldsInCommand="false">
+                                    <command>
+                                        <body>(ip=nwh_ip)</body>
+                                    </command>
+                                    <postProcessing>
+                                        <analysisRules>
+                                            <item>
+                                                <extractorInfo extractorType="query">
+                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                        <query>responseLine()</query>
+                                                    </extractorProperties>
+                                                </extractorInfo>
+                                                <processorInfo ruleType="assert">
+                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                        <expression>str(value).lower() == &quot;true&quot;</expression>
+                                                        <actionsWhenTrue>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>ip_src=&quot;ip.src&quot;</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>ip_dst=&quot;ip.dst&quot;</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>IPversion=&quot;IPv4&quot;</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>ipv6_required=&quot;false&quot;</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                        </actionsWhenTrue>
+                                                        <actionsWhenFalse>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>ip_src=&quot;ipv6.src&quot;</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>ip_dst=&quot;ipv6.dst&quot;</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>ipv6_required=&quot;true&quot;</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                            <item actionId="Eval">
+                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                    <statement>IPversion=&quot;IPv6&quot;</statement>
+                                                                </actionProperties>
+                                                            </item>
+                                                        </actionsWhenFalse>
+                                                    </ruleProperties>
+                                                </processorInfo>
+                                            </item>
+                                        </analysisRules>
+                                    </postProcessing>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
                 <item guid="364253b7-ddd5-4466-923f-d684e5ac5d73" action="comment" useFieldsInCommand="false">
                     <command>
                         <body>Query CSV info file</body>
@@ -3953,13 +4041,32 @@
                                                 </item>
                                                 <item guid="3a884f5f-0252-4fda-8c97-d98592c92846" action="comment" useFieldsInCommand="false">
                                                     <command>
-                                                        <body>Define pattern for er key entry, ipv4 pattern is a shared pattern</body>
+                                                        <body>Define pattern for er key entry, ip pattern is a shared pattern</body>
                                                     </command>
                                                     <nestedSteps>
-                                                        <item guid="2da2db41-f13a-4cdb-9c1f-d47f5082552e" action="eval" useFieldsInCommand="false">
+                                                        <item guid="44e4a53f-0e1e-4f8b-b4d7-9f4e7726135c" action="if" useFieldsInCommand="false">
                                                             <command>
-                                                                <body>ipv4_pattern = re.compile(r&quot;(SRC|DEST)\\s+(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})&quot;)</body>
+                                                                <body>ipv6_required==&quot;true&quot;:</body>
                                                             </command>
+                                                            <nestedSteps>
+                                                                <item guid="978bf7e7-1582-4cd4-9da7-15d1ae8d3674" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>ip_pattern= re.compile(r&quot;(SRC|DEST)\\s+([0-9a-fA-F:]{1,39})&quot;)</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                            </nestedSteps>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="9a168e1f-f856-4cc9-8ccb-7af91bc8f0a6" action="else" useFieldsInCommand="false">
+                                                            <nestedSteps>
+                                                                <item guid="ee7f7127-1c5c-4a37-9d38-6efe207ba786" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>ip_pattern = re.compile(r&quot;(SRC|DEST)\\s+(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})&quot;)</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                            </nestedSteps>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
                                                         <item guid="311dcec3-d0a7-40c4-8ef1-76ec2f2d7436" action="eval" useFieldsInCommand="false">
@@ -3984,7 +4091,7 @@
                                                     <nestedSteps>
                                                         <item guid="ce66c44f-9dac-48ec-98f6-90f4c9ad1515" action="eval" useFieldsInCommand="false">
                                                             <command>
-                                                                <body>ipv4_er = ipv4_pattern.findall(esp_er_keys)</body>
+                                                                <body>ip_er = ip_pattern.findall(esp_er_keys)</body>
                                                             </command>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
@@ -4002,13 +4109,13 @@
                                                         </item>
                                                         <item guid="931eb8e5-c9dc-4862-a6e6-9540b5e55f7b" action="eval" useFieldsInCommand="false">
                                                             <command>
-                                                                <body>src_er = next((match[1] for match in ipv4_er if match[0] == &quot;SRC&quot;), &quot;&quot;)</body>
+                                                                <body>src_er = next((match[1] for match in ip_er if match[0] == &quot;SRC&quot;), &quot;&quot;)</body>
                                                             </command>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
                                                         <item guid="2d3d5636-345a-49fd-b061-e7a2e64d2636" action="eval" useFieldsInCommand="false">
                                                             <command>
-                                                                <body>dest_er = next((match[1] for match in ipv4_er if match[0] == &quot;DEST&quot;), &quot;&quot;)</body>
+                                                                <body>dest_er = next((match[1] for match in ip_er if match[0] == &quot;DEST&quot;), &quot;&quot;)</body>
                                                             </command>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
@@ -4054,7 +4161,7 @@
                                                     <nestedSteps>
                                                         <item guid="9b005790-89d7-4b7e-8c00-e2ff555a1eda" action="eval" useFieldsInCommand="false">
                                                             <command>
-                                                                <body>ipv4_ei = ipv4_pattern.findall(esp_ei_keys)</body>
+                                                                <body>ip_ei = ip_pattern.findall(esp_ei_keys)</body>
                                                             </command>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
@@ -4072,13 +4179,13 @@
                                                         </item>
                                                         <item guid="bb4bd127-3f29-4ff7-87c6-a6e8eae6616e" action="eval" useFieldsInCommand="false">
                                                             <command>
-                                                                <body>src_ei = next((match[1] for match in ipv4_ei if match[0] == &quot;SRC&quot;), &quot;&quot;)</body>
+                                                                <body>src_ei = next((match[1] for match in ip_ei if match[0] == &quot;SRC&quot;), &quot;&quot;)</body>
                                                             </command>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
                                                         <item guid="6e33f3a0-3abb-477d-aa14-f2fce34eb806" action="eval" useFieldsInCommand="false">
                                                             <command>
-                                                                <body>dest_ei = next((match[1] for match in ipv4_ei if match[0] == &quot;DEST&quot;), &quot;&quot;)</body>
+                                                                <body>dest_ei = next((match[1] for match in ip_ei if match[0] == &quot;DEST&quot;), &quot;&quot;)</body>
                                                             </command>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
@@ -4202,6 +4309,21 @@
                             </eventHandlers>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
+                        <item guid="4c065f8a-b9cc-41a3-990c-14ac5f3f80f0" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>gnb_ip = param(&apos;LS_Nodal_favorite_params/TS1/ts0/tc0/GnbUserAddr/ip&apos;, &apos;10.203.1.1&apos;); print(gnb_ip);</body>
+                            </command>
+                            <eventHandlers>
+                                <item name="OnInterpreterError">
+                                    <item actionId="Eval">
+                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                            <statement>n20_phy = &quot;eth2&quot;</statement>
+                                        </actionProperties>
+                                    </item>
+                                </item>
+                            </eventHandlers>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
                         <item guid="b93a6f59-7da9-445b-bcfd-449563c0362d" action="eval" useFieldsInCommand="false">
                             <command>
                                 <body>pcap_exist = False</body>
@@ -4247,7 +4369,7 @@
                                                             <nestedSteps>
                                                                 <item guid="0e8d46f6-9961-4918-8337-6136f5f413d1" action="eval" useFieldsInCommand="false">
                                                                     <command>
-                                                                        <body>filter_command=&quot;frame.protocols == \\\\\\&quot;eth:ethertype:ip:udp:gtp:ip:esp:ip:udp:data\\\\\\&quot; and not udplite and esp and esp.contained_data and esp.icv and esp.iv and esp.decrypted_data&quot;</body>
+                                                                        <body>filter_command=&quot; not udplite and esp and esp.contained_data and esp.icv and esp.iv and esp.decrypted_data&quot;</body>
                                                                     </command>
                                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                 </item>
@@ -4321,7 +4443,7 @@
                                                                     <applicationProperties type="com.fnfr.svt.documents.OpenStepPropertyGroup">
                                                                         <stepProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                         <sessionProperties type="com.fnfr.svt.applications.wireshark.WiresharkSessionProperties">
-                                                                            <advancedDisplayOptions inherit="false">-o esp.enable_encryption_decode:TRUE -o &quot;uat:esp_sa:\\&quot;IPv4\\&quot;,\\&quot;[src_ei]\\&quot;,\\&quot;[dest_ei]\\&quot;,\\&quot;[spi_ei]\\&quot;,\\&quot;[encryption_ei]\\&quot;,\\&quot;[encryption_key_ei]\\&quot;,\\&quot;[authentication_ei]\\&quot;,\\&quot;\\&quot;&quot; -o &quot;uat:esp_sa:\\&quot;IPv4\\&quot;,\\&quot;[src_er]\\&quot;,\\&quot;[dest_er]\\&quot;,\\&quot;[spi_er]\\&quot;,\\&quot;[encryption_er]\\&quot;,\\&quot;[encryption_key_er]\\&quot;,\\&quot;[authentication_er]\\&quot;,\\&quot;\\&quot;&quot;</advancedDisplayOptions>
+                                                                            <advancedDisplayOptions inherit="false">-o esp.enable_encryption_decode:TRUE -o &quot;uat:esp_sa:\\&quot;[IPversion]\\&quot;,\\&quot;[src_ei]\\&quot;,\\&quot;[dest_ei]\\&quot;,\\&quot;[spi_ei]\\&quot;,\\&quot;[encryption_ei]\\&quot;,\\&quot;[encryption_key_ei]\\&quot;,\\&quot;[authentication_ei]\\&quot;,\\&quot;\\&quot;&quot; -o &quot;uat:esp_sa:\\&quot;[IPversion]\\&quot;,\\&quot;[src_er]\\&quot;,\\&quot;[dest_er]\\&quot;,\\&quot;[spi_er]\\&quot;,\\&quot;[encryption_er]\\&quot;,\\&quot;[encryption_key_er]\\&quot;,\\&quot;[authentication_er]\\&quot;,\\&quot;\\&quot;&quot;</advancedDisplayOptions>
                                                                             <sessionbuilderInitializeAction type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                         </sessionProperties>
                                                                         <sessionClass type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
@@ -4332,6 +4454,35 @@
                                                                     <command>
                                                                         <body>pcap_exist = True</body>
                                                                     </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                                <item guid="f4559ede-d36c-45d9-ab55-0a9497cb4f11" action="call" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>project://ai_LS_5G/utility_library/pcap_utils.fftc#get_tshark_version(session=&apos;s2&apos;)</body>
+                                                                    </command>
+                                                                    <postProcessing>
+                                                                        <analysisRules>
+                                                                            <item>
+                                                                                <extractorInfo extractorType="query">
+                                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                        <query>responseLine()</query>
+                                                                                    </extractorProperties>
+                                                                                </extractorInfo>
+                                                                                <processorInfo ruleType="assert">
+                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                        <expression>True</expression>
+                                                                                        <actionsWhenTrue>
+                                                                                            <item actionId="DeclareExecutionIssue">
+                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Information">
+                                                                                                    <message>Wireshark/tshark version: [value]</message>
+                                                                                                </actionProperties>
+                                                                                            </item>
+                                                                                        </actionsWhenTrue>
+                                                                                    </ruleProperties>
+                                                                                </processorInfo>
+                                                                            </item>
+                                                                        </analysisRules>
+                                                                    </postProcessing>
                                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                 </item>
                                                                 <item guid="0c8973f7-49c3-4e64-af1b-c34f6fa7782c" action="command" session="s2">
@@ -4390,7 +4541,7 @@
                                                                         </item>
                                                                         <item guid="b8297257-d062-47d6-904a-501e40ac4110" action="command" session="s2">
                                                                             <command>
-                                                                                <body>query filter set &quot;[filter_command] and ip.src==[src_er] and ip.dst==[dest_er]&quot;</body>
+                                                                                <body>query filter set &quot;[filter_command] and [ip_src]==[src_er] and [ip_dst]==[dest_er]&quot;</body>
                                                                             </command>
                                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                         </item>
@@ -4606,7 +4757,7 @@
                                                                         </item>
                                                                         <item guid="b9ce4cf4-f437-459f-8e5c-a6213907c16d" action="command" session="s2">
                                                                             <command>
-                                                                                <body>query filter set &quot;[filter_command] and ip.src==[src_ei] and ip.dst==[dest_ei]&quot;</body>
+                                                                                <body>query filter set &quot;[filter_command] and [ip_src]==[src_ei] and [ip_dst]==[dest_ei]&quot;</body>
                                                                             </command>
                                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                         </item>
@@ -4900,7 +5051,7 @@
                                                                         </item>
                                                                         <item guid="ff2dd53c-2648-4cd3-afee-5a0254d79aa0" action="command" session="s3">
                                                                             <command>
-                                                                                <body>query filter set &quot;[filter_command] and ip.src==[src_er] and ip.dst==[dest_er]&quot;</body>
+                                                                                <body>query filter set &quot;[filter_command] and [ip_src]==[src_er] and [ip_dst]==[dest_er]&quot;</body>
                                                                             </command>
                                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                         </item>
@@ -4973,7 +5124,7 @@
                                                                                 <body>id:</body>
                                                                             </command>
                                                                             <nestedSteps>
-                                                                                <item guid="0759f7b1-bc32-4d6b-9202-7b0f8c77d133" action="command" session="s2">
+                                                                                <item guid="0759f7b1-bc32-4d6b-9202-7b0f8c77d133" action="command" session="s3">
                                                                                     <command>
                                                                                         <body>query details [id] pdml</body>
                                                                                     </command>
@@ -5040,7 +5191,7 @@
                                                                         </item>
                                                                         <item guid="334da4c6-b888-448e-b49c-aa2c4a2d2b27" action="command" session="s3">
                                                                             <command>
-                                                                                <body>query filter set &quot;[filter_command] and ip.src==[src_ei] and ip.dst==[dest_ei]&quot;</body>
+                                                                                <body>query filter set &quot;[filter_command] and [ip_src]==[src_ei] and [ip_dst]==[dest_ei]&quot;</body>
                                                                             </command>
                                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                         </item>
@@ -5068,13 +5219,13 @@
                                                                                                     <item actionId="PassTestIfNotAlreadyFailed">
                                                                                                         <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                                                     </item>
-                                                                                                    <item actionId="SkipRemainingRules">
-                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                                                                    </item>
                                                                                                     <item actionId="Eval">
                                                                                                         <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
                                                                                                             <statement>id=&quot;&quot;</statement>
                                                                                                         </actionProperties>
+                                                                                                    </item>
+                                                                                                    <item actionId="SkipRemainingRules">
+                                                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                                                     </item>
                                                                                                 </actionsWhenFalse>
                                                                                             </ruleProperties>
@@ -5116,7 +5267,7 @@
                                                                                 <body>id:</body>
                                                                             </command>
                                                                             <nestedSteps>
-                                                                                <item guid="ab5c92c1-69b9-43e6-b9e7-24990c7cc826" action="command" session="s2">
+                                                                                <item guid="ab5c92c1-69b9-43e6-b9e7-24990c7cc826" action="command" session="s3">
                                                                                     <command>
                                                                                         <body>query details [id] pdml</body>
                                                                                     </command>
