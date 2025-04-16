@@ -5059,7 +5059,7 @@
                     <applicationProperties type="com.fnfr.svt.documents.OpenStepPropertyGroup">
                         <stepProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         <sessionProperties type="com.fnfr.svt.applications.wireshark.WiresharkSessionProperties">
-                            <advancedDisplayOptions inherit="false">-o nas-5gs.null_decipher:TRUE</advancedDisplayOptions>
+                            <advancedDisplayOptions inherit="false">-o nas-5gs.null_decipher:TRUE -V -2</advancedDisplayOptions>
                             <sessionbuilderInitializeAction type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </sessionProperties>
                         <sessionClass type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
@@ -5376,12 +5376,40 @@
                                                                             <item>
                                                                                 <extractorInfo extractorType="query">
                                                                                     <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                                        <query>details/item[field = &quot;tcp.ack_raw&quot;]/value</query>
+                                                                                        <query>boolean(details/item[field = &quot;http2.response_in&quot;]/value)</query>
+                                                                                    </extractorProperties>
+                                                                                </extractorInfo>
+                                                                                <processorInfo ruleType="assert">
+                                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                        <expression>str(value).lower() == &quot;true&quot;</expression>
+                                                                                        <actionsWhenFalse>
+                                                                                            <item actionId="FailTest">
+                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                            </item>
+                                                                                            <item actionId="DeclareExecutionIssue">
+                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Warning">
+                                                                                                    <message> +The SMSF Registration for 3GPP Access Response Message NOT FOUND</message>
+                                                                                                </actionProperties>
+                                                                                            </item>
+                                                                                            <item actionId="ExitProcedure">
+                                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExitProcedurePropertyGroup"/>
+                                                                                            </item>
+                                                                                            <item actionId="SkipRemainingRules">
+                                                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                                            </item>
+                                                                                        </actionsWhenFalse>
+                                                                                    </ruleProperties>
+                                                                                </processorInfo>
+                                                                            </item>
+                                                                            <item>
+                                                                                <extractorInfo extractorType="query">
+                                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                        <query>details/item[field = &quot;http2.response_in&quot;]/value</query>
                                                                                     </extractorProperties>
                                                                                 </extractorInfo>
                                                                                 <processorInfo ruleType="store">
                                                                                     <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
-                                                                                        <storageLocation>ack_raw</storageLocation>
+                                                                                        <storageLocation>response_id</storageLocation>
                                                                                         <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
                                                                                         <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
                                                                                         <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
@@ -5420,15 +5448,9 @@
                                                             </command>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
-                                                        <item guid="19abe42b-6335-412f-876c-01b0a7b57e5d" action="eval" useFieldsInCommand="false">
-                                                            <command>
-                                                                <body>response_id = &quot;&quot;</body>
-                                                            </command>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
                                                         <item guid="5e8070f0-7f2b-4a29-ac70-05a09929f012" action="command" session="s4">
                                                             <command>
-                                                                <body>query filter set &quot;tcp.seq_raw == [ack_raw] and http2&quot;</body>
+                                                                <body>query filter set &quot;frame.number==[response_id] and http2&quot;</body>
                                                             </command>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
