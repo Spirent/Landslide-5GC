@@ -2041,6 +2041,21 @@
                                                         </processorInfo>
                                                     </item>
                                                     <item>
+                                                        <extractorInfo extractorType="none">
+                                                            <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                                        </extractorInfo>
+                                                        <processorInfo ruleType="assert">
+                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                <expression>last_idx == 0</expression>
+                                                                <actionsWhenFalse>
+                                                                    <item actionId="SkipRemainingRules">
+                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                    </item>
+                                                                </actionsWhenFalse>
+                                                            </ruleProperties>
+                                                        </processorInfo>
+                                                    </item>
+                                                    <item>
                                                         <extractorInfo extractorType="query">
                                                             <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
                                                                 <query>sba_favorites_measurements()</query>
@@ -6265,27 +6280,6 @@
                                                 <body>-requestMethod GET -dataType json -rawResponse true -url runningTests/[sba_running_id]/measurements/favorites</body>
                                             </command>
                                             <postProcessing>
-                                                <analysisRules>
-                                                    <item>
-                                                        <extractorInfo extractorType="query">
-                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                <query>boolean(mapped/Json/favorites)</query>
-                                                            </extractorProperties>
-                                                        </extractorInfo>
-                                                        <processorInfo ruleType="assert">
-                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                <expression>value == &quot;true&quot;</expression>
-                                                                <actionsWhenTrue>
-                                                                    <item actionId="DeclareExecutionIssue">
-                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Information">
-                                                                            <message>Grabbing SBA measurements from running test ID: [sba_running_id]</message>
-                                                                        </actionProperties>
-                                                                    </item>
-                                                                </actionsWhenTrue>
-                                                            </ruleProperties>
-                                                        </processorInfo>
-                                                    </item>
-                                                </analysisRules>
                                                 <storeResponseAt>sba_favorites_measurements</storeResponseAt>
                                                 <storeResponseText>true</storeResponseText>
                                             </postProcessing>
@@ -6301,7 +6295,7 @@
                                     <nestedSteps>
                                         <item guid="ad12f24a-4209-4fa3-98a5-df8152c127da" action="call" useFieldsInCommand="false">
                                             <command>
-                                                <body>check_acceptance_criteria(measurements=&quot;&quot;, idx=idx, instance_number=instance_number, sba_favorites=sba_favorites_measurements, favorites=favorites_measurements, is_b2b=is_b2b, c_rate_ts=c_rate_ts, t_load_ts=t_load_ts)</body>
+                                                <body>check_acceptance_criteria(measurements=&quot;&quot;, sba_running_id=sba_running_id, idx=idx, instance_number=instance_number, sba_favorites=sba_favorites_measurements, favorites=favorites_measurements, is_b2b=is_b2b, c_rate_ts=c_rate_ts, t_load_ts=t_load_ts)</body>
                                             </command>
                                             <postProcessing>
                                                 <storeResponseAt>kpis_response</storeResponseAt>
@@ -6697,91 +6691,6 @@
                             </nestedSteps>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
-                        <item guid="07cf05f1-bcb6-44d1-bb92-da7cb2137c53" action="comment" useFieldsInCommand="false">
-                            <command>
-                                <body>Get KPIs from SBA favorites</body>
-                            </command>
-                            <nestedSteps>
-                                <item guid="8ad862e8-dde7-4c4f-b3aa-797dfee81927" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>print(sba_favorites)</body>
-                                    </command>
-                                    <postProcessing>
-                                        <analysisRules>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query>count(mapped/Json/favorites/item)</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="assert">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                        <expression>int(value) &gt; 0</expression>
-                                                        <actionsWhenFalse>
-                                                            <item actionId="Eval">
-                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                                    <statement>nf_register_requests = nf_register_successes = nf_register_failures= &quot;&quot;</statement>
-                                                                </actionProperties>
-                                                            </item>
-                                                            <item actionId="SkipRemainingRules">
-                                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                            </item>
-                                                        </actionsWhenFalse>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                        <query>//NRF_Producer__NF_Register_Requests</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="store">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
-                                                        <storageLocation>nf_register_requests</storageLocation>
-                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
-                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
-                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
-                                                        <query>//NRF_Producer__NF_Register_Successes</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="store">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
-                                                        <storageLocation>nf_register_successes</storageLocation>
-                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
-                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
-                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                            </item>
-                                            <item>
-                                                <extractorInfo extractorType="query">
-                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
-                                                        <query>//NRF_Producer__NF_Register_Failures</query>
-                                                    </extractorProperties>
-                                                </extractorInfo>
-                                                <processorInfo ruleType="store">
-                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
-                                                        <storageLocation>nf_register_failures</storageLocation>
-                                                        <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
-                                                        <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
-                                                        <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
-                                                    </ruleProperties>
-                                                </processorInfo>
-                                            </item>
-                                        </analysisRules>
-                                    </postProcessing>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                            </nestedSteps>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
                     </nestedSteps>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
@@ -7125,6 +7034,116 @@
                                 <body>int(idx) == 0:</body>
                             </command>
                             <nestedSteps>
+                                <item guid="af2ec5d4-2ad1-4b19-a480-dba41cefb3a8" action="comment" useFieldsInCommand="false">
+                                    <command>
+                                        <body>Add &quot;---&quot;</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="df383da9-e167-4470-98d4-8e131d661835" action="call" useFieldsInCommand="false">
+                                            <command>
+                                                <body>project://ai_LS_5G/utility_library/utils.fftc#insert_devider_string(length=&apos;80&apos;)</body>
+                                            </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="095c1e90-5e64-4d32-9f41-7ec832fc09d7" action="comment" useFieldsInCommand="false">
+                                    <command>
+                                        <body>Get KPIs from SBA favorites</body>
+                                    </command>
+                                    <nestedSteps>
+                                        <item guid="8ad862e8-dde7-4c4f-b3aa-797dfee81927" action="eval" useFieldsInCommand="false">
+                                            <command>
+                                                <body>print(sba_favorites)</body>
+                                            </command>
+                                            <postProcessing>
+                                                <analysisRules>
+                                                    <item>
+                                                        <extractorInfo extractorType="none">
+                                                            <extractorProperties type="com.fnfr.svt.documents.EmptyExtractorPropertyGroup"/>
+                                                        </extractorInfo>
+                                                        <processorInfo ruleType="message">
+                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.MessageProcessorPropertyGroup" severity="Information">
+                                                                <message>Grabbing SBA measurements from running test ID: [sba_running_id]</message>
+                                                                <tag sub="false" defaultValue=""/>
+                                                            </ruleProperties>
+                                                        </processorInfo>
+                                                    </item>
+                                                    <item>
+                                                        <extractorInfo extractorType="query">
+                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                <query>count(mapped/Json/favorites/item)</query>
+                                                            </extractorProperties>
+                                                        </extractorInfo>
+                                                        <processorInfo ruleType="assert">
+                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                <expression>int(value) &gt; 0</expression>
+                                                                <actionsWhenFalse>
+                                                                    <item actionId="Eval">
+                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                            <statement>nf_register_requests = nf_register_successes = nf_register_failures= &quot;&quot;</statement>
+                                                                        </actionProperties>
+                                                                    </item>
+                                                                    <item actionId="SkipRemainingRules">
+                                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                    </item>
+                                                                </actionsWhenFalse>
+                                                            </ruleProperties>
+                                                        </processorInfo>
+                                                    </item>
+                                                    <item>
+                                                        <extractorInfo extractorType="query">
+                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                <query>//NRF_Producer__NF_Register_Requests</query>
+                                                            </extractorProperties>
+                                                        </extractorInfo>
+                                                        <processorInfo ruleType="store">
+                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                <storageLocation>nf_register_requests</storageLocation>
+                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                            </ruleProperties>
+                                                        </processorInfo>
+                                                    </item>
+                                                    <item>
+                                                        <extractorInfo extractorType="query">
+                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                                                <query>//NRF_Producer__NF_Register_Successes</query>
+                                                            </extractorProperties>
+                                                        </extractorInfo>
+                                                        <processorInfo ruleType="store">
+                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                <storageLocation>nf_register_successes</storageLocation>
+                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                            </ruleProperties>
+                                                        </processorInfo>
+                                                    </item>
+                                                    <item>
+                                                        <extractorInfo extractorType="query">
+                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                                                <query>//NRF_Producer__NF_Register_Failures</query>
+                                                            </extractorProperties>
+                                                        </extractorInfo>
+                                                        <processorInfo ruleType="store">
+                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                <storageLocation>nf_register_failures</storageLocation>
+                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                            </ruleProperties>
+                                                        </processorInfo>
+                                                    </item>
+                                                </analysisRules>
+                                            </postProcessing>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                    </nestedSteps>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
                                 <item guid="78169075-70aa-4fd9-8b23-339fd74a35e6" action="comment" useFieldsInCommand="false">
                                     <command>
                                         <body>SBA</body>
@@ -7173,7 +7192,7 @@
                                                 </item>
                                                 <item guid="d5937828-f1e3-4e68-b5cc-5749182204d4" action="eval" useFieldsInCommand="false">
                                                     <command>
-                                                        <body>add_to_kpi = &quot;true&quot;</body>
+                                                        <body>add_to_kpi = &quot;false&quot;</body>
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
@@ -7245,7 +7264,7 @@
                                                 </item>
                                                 <item guid="4f9b3a12-5631-43ca-87e1-f259ab813557" action="eval" useFieldsInCommand="false">
                                                     <command>
-                                                        <body>add_to_kpi = &quot;true&quot;</body>
+                                                        <body>add_to_kpi = &quot;false&quot;</body>
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
@@ -7317,7 +7336,7 @@
                                                 </item>
                                                 <item guid="10f91c39-f3fd-484a-ab49-f795e3b799ee" action="eval" useFieldsInCommand="false">
                                                     <command>
-                                                        <body>add_to_kpi = &quot;true&quot;</body>
+                                                        <body>add_to_kpi = &quot;false&quot;</body>
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
@@ -8036,73 +8055,161 @@
                     </nestedSteps>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
-                <item guid="6d4148d4-cc12-4ce9-903f-bdd7d41b677c" action="comment" useFieldsInCommand="false">
+                <item guid="3b7c92c8-4781-40de-b578-1b3260f86924" action="if" useFieldsInCommand="false">
                     <command>
-                        <body>Add SBA KPIs to response</body>
+                        <body>int(idx) == 0:</body>
                     </command>
                     <nestedSteps>
-                        <item guid="f62e7715-9521-4aa1-ba23-d660084a3a72" action="comment" useFieldsInCommand="false">
+                        <item guid="6d4148d4-cc12-4ce9-903f-bdd7d41b677c" action="comment" useFieldsInCommand="false">
                             <command>
-                                <body>Define KPI names and values</body>
+                                <body>Add SBA KPIs to response</body>
                             </command>
                             <nestedSteps>
-                                <item guid="4cc7f256-189b-4ce0-9908-6ce2a5b31e8f" action="comment" useFieldsInCommand="false">
+                                <item guid="f62e7715-9521-4aa1-ba23-d660084a3a72" action="comment" useFieldsInCommand="false">
                                     <command>
-                                        <body>Create names and values - do not change</body>
+                                        <body>Define KPI names and values</body>
                                     </command>
                                     <nestedSteps>
-                                        <item guid="8a472556-adb8-4e50-a041-d13901e6d146" action="eval" useFieldsInCommand="false">
+                                        <item guid="4cc7f256-189b-4ce0-9908-6ce2a5b31e8f" action="comment" useFieldsInCommand="false">
                                             <command>
-                                                <body>names = []</body>
-                                            </command>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                        <item guid="a21892d7-fbfb-4f5a-a0d5-5f2dc77ae1a1" action="eval" useFieldsInCommand="false">
-                                            <command>
-                                                <body>values = []</body>
-                                            </command>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                    </nestedSteps>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                                <item guid="7a754849-1463-48de-aa5d-95c2386066ac" action="comment" useFieldsInCommand="false">
-                                    <command>
-                                        <body>SBA_KPIs</body>
-                                    </command>
-                                    <nestedSteps>
-                                        <item guid="6af5eb93-0994-4b2c-8a80-40189cd9f73d" action="comment" useFieldsInCommand="false">
-                                            <command>
-                                                <body>NF Register Requests</body>
+                                                <body>Create names and values - do not change</body>
                                             </command>
                                             <nestedSteps>
-                                                <item guid="66ac7544-6cdb-4d5c-846e-268ac4776730" action="eval" useFieldsInCommand="false">
+                                                <item guid="8a472556-adb8-4e50-a041-d13901e6d146" action="eval" useFieldsInCommand="false">
                                                     <command>
-                                                        <body>name = &quot;NF Register Requests&quot;</body>
+                                                        <body>names = []</body>
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
-                                                <item guid="c03109d2-258d-47d9-9e76-559536538c5d" action="eval" useFieldsInCommand="false">
+                                                <item guid="a21892d7-fbfb-4f5a-a0d5-5f2dc77ae1a1" action="eval" useFieldsInCommand="false">
                                                     <command>
-                                                        <body>value = nf_register_requests</body>
+                                                        <body>values = []</body>
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
-                                                <item guid="4dea18d7-c1ec-4588-96cc-03b514bed5b5" action="comment" useFieldsInCommand="false">
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="7a754849-1463-48de-aa5d-95c2386066ac" action="comment" useFieldsInCommand="false">
+                                            <command>
+                                                <body>SBA_KPIs</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="6af5eb93-0994-4b2c-8a80-40189cd9f73d" action="comment" useFieldsInCommand="false">
                                                     <command>
-                                                        <body>Add to list - Do not change</body>
+                                                        <body>NF Register Requests</body>
                                                     </command>
                                                     <nestedSteps>
-                                                        <item guid="d56d6581-b63d-4224-9370-096435ee6b3a" action="eval" useFieldsInCommand="false">
+                                                        <item guid="66ac7544-6cdb-4d5c-846e-268ac4776730" action="eval" useFieldsInCommand="false">
                                                             <command>
-                                                                <body>names.append(name)</body>
+                                                                <body>name = &quot;NF Register Requests&quot;</body>
                                                             </command>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
-                                                        <item guid="75a7d282-b0f6-46a9-953c-a82b9484f221" action="eval" useFieldsInCommand="false">
+                                                        <item guid="c03109d2-258d-47d9-9e76-559536538c5d" action="eval" useFieldsInCommand="false">
                                                             <command>
-                                                                <body>values.append(value)</body>
+                                                                <body>value = nf_register_requests</body>
                                                             </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="4dea18d7-c1ec-4588-96cc-03b514bed5b5" action="comment" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>Add to list - Do not change</body>
+                                                            </command>
+                                                            <nestedSteps>
+                                                                <item guid="d56d6581-b63d-4224-9370-096435ee6b3a" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>names.append(name)</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                                <item guid="75a7d282-b0f6-46a9-953c-a82b9484f221" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>values.append(value)</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                            </nestedSteps>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="7430a26f-31c7-4ec7-9b27-a866d817723c" action="comment" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>NF Register Successes</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="b4af3cc9-c8ef-46ae-ba94-ea39ee58e90d" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>name = &quot;NF Register Successes&quot;</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="89e4bbe5-0d0f-4475-a872-e1e511643a0f" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>value = nf_register_successes</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="3997b628-492f-4080-9317-9d61b79a1f28" action="comment" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>Add to list - Do not change</body>
+                                                            </command>
+                                                            <nestedSteps>
+                                                                <item guid="979be6e2-025a-4a8a-b967-85441d2b7fa3" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>names.append(name)</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                                <item guid="ef86d542-9560-45ea-b545-0ec57c49c055" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>values.append(value)</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                            </nestedSteps>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="7ef5e610-96b8-4fad-899d-1af2a37815f1" action="comment" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>NF Register Failures</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="71efd517-a888-4c49-b4e7-a6420b3c932e" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>name = &quot;NF Register Failures&quot;</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="96d73e5b-ea87-4b69-90b8-48348b06b24f" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>value = nf_register_failures</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="97069fcd-158c-4676-8425-84c70a2eff54" action="comment" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>Add to list - Do not change</body>
+                                                            </command>
+                                                            <nestedSteps>
+                                                                <item guid="8bfebafe-4ec3-472b-8850-8d369bf31420" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>names.append(name)</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                                <item guid="aef3c750-cb59-49ef-a369-cd71e2a7c142" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>values.append(value)</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                            </nestedSteps>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
                                                     </nestedSteps>
@@ -8111,120 +8218,39 @@
                                             </nestedSteps>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
-                                        <item guid="7430a26f-31c7-4ec7-9b27-a866d817723c" action="comment" useFieldsInCommand="false">
+                                        <item guid="acb4c79a-69da-40be-a479-694e546e4a66" action="comment" useFieldsInCommand="false">
                                             <command>
-                                                <body>NF Register Successes</body>
+                                                <body>Add KPIs to response - do not change</body>
                                             </command>
                                             <nestedSteps>
-                                                <item guid="b4af3cc9-c8ef-46ae-ba94-ea39ee58e90d" action="eval" useFieldsInCommand="false">
+                                                <item guid="adc05bf9-9fbc-4ee9-9db4-006eddc4af0a" action="for" useFieldsInCommand="false">
                                                     <command>
-                                                        <body>name = &quot;NF Register Successes&quot;</body>
-                                                    </command>
-                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                </item>
-                                                <item guid="89e4bbe5-0d0f-4475-a872-e1e511643a0f" action="eval" useFieldsInCommand="false">
-                                                    <command>
-                                                        <body>value = nf_register_successes</body>
-                                                    </command>
-                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                </item>
-                                                <item guid="3997b628-492f-4080-9317-9d61b79a1f28" action="comment" useFieldsInCommand="false">
-                                                    <command>
-                                                        <body>Add to list - Do not change</body>
+                                                        <body>i in range (0, len(names)):</body>
                                                     </command>
                                                     <nestedSteps>
-                                                        <item guid="979be6e2-025a-4a8a-b967-85441d2b7fa3" action="eval" useFieldsInCommand="false">
+                                                        <item guid="62efdd51-dae2-443f-bc79-7216a276381c" action="eval" useFieldsInCommand="false">
                                                             <command>
-                                                                <body>names.append(name)</body>
+                                                                <body>name = names[i];print(name)</body>
                                                             </command>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
-                                                        <item guid="ef86d542-9560-45ea-b545-0ec57c49c055" action="eval" useFieldsInCommand="false">
+                                                        <item guid="c511f586-6529-44a2-ac66-2a982153dc54" action="eval" useFieldsInCommand="false">
                                                             <command>
-                                                                <body>values.append(value)</body>
+                                                                <body>value = values[i];print(value)</body>
                                                             </command>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="67c045f1-717b-4dbf-bc51-004601b4e15b" action="json" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;response&apos;, pathValue=&apos;{&quot;SBA_KPIs/\\\\[[i]]&quot;:\\\\[{&quot;name&quot;:&quot;[name]&quot;,&quot;value&quot;:&quot;[value]&quot;}]}&apos;</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup" pathValue="{&quot;SBA_KPIs/\\[[i]]&quot;:\\[{&quot;name&quot;:&quot;[name]&quot;,&quot;value&quot;:&quot;[value]&quot;}]}" pathValue.inherit="false" pathValue.sub="true">
+                                                                <action inherit="false">addJsonNode</action>
+                                                                <documentName inherit="false">response</documentName>
+                                                            </applicationProperties>
                                                         </item>
                                                     </nestedSteps>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                </item>
-                                            </nestedSteps>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                        <item guid="7ef5e610-96b8-4fad-899d-1af2a37815f1" action="comment" useFieldsInCommand="false">
-                                            <command>
-                                                <body>NF Register Failures</body>
-                                            </command>
-                                            <nestedSteps>
-                                                <item guid="71efd517-a888-4c49-b4e7-a6420b3c932e" action="eval" useFieldsInCommand="false">
-                                                    <command>
-                                                        <body>name = &quot;NF Register Failures&quot;</body>
-                                                    </command>
-                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                </item>
-                                                <item guid="96d73e5b-ea87-4b69-90b8-48348b06b24f" action="eval" useFieldsInCommand="false">
-                                                    <command>
-                                                        <body>value = nf_register_failures</body>
-                                                    </command>
-                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                </item>
-                                                <item guid="97069fcd-158c-4676-8425-84c70a2eff54" action="comment" useFieldsInCommand="false">
-                                                    <command>
-                                                        <body>Add to list - Do not change</body>
-                                                    </command>
-                                                    <nestedSteps>
-                                                        <item guid="8bfebafe-4ec3-472b-8850-8d369bf31420" action="eval" useFieldsInCommand="false">
-                                                            <command>
-                                                                <body>names.append(name)</body>
-                                                            </command>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                        <item guid="aef3c750-cb59-49ef-a369-cd71e2a7c142" action="eval" useFieldsInCommand="false">
-                                                            <command>
-                                                                <body>values.append(value)</body>
-                                                            </command>
-                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                        </item>
-                                                    </nestedSteps>
-                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                </item>
-                                            </nestedSteps>
-                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                        </item>
-                                    </nestedSteps>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                                <item guid="acb4c79a-69da-40be-a479-694e546e4a66" action="comment" useFieldsInCommand="false">
-                                    <command>
-                                        <body>Add KPIs to response - do not change</body>
-                                    </command>
-                                    <nestedSteps>
-                                        <item guid="adc05bf9-9fbc-4ee9-9db4-006eddc4af0a" action="for" useFieldsInCommand="false">
-                                            <command>
-                                                <body>i in range (0, len(names)):</body>
-                                            </command>
-                                            <nestedSteps>
-                                                <item guid="62efdd51-dae2-443f-bc79-7216a276381c" action="eval" useFieldsInCommand="false">
-                                                    <command>
-                                                        <body>name = names[i];print(name)</body>
-                                                    </command>
-                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                </item>
-                                                <item guid="c511f586-6529-44a2-ac66-2a982153dc54" action="eval" useFieldsInCommand="false">
-                                                    <command>
-                                                        <body>value = values[i];print(value)</body>
-                                                    </command>
-                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                </item>
-                                                <item guid="67c045f1-717b-4dbf-bc51-004601b4e15b" action="json" useFieldsInCommand="false">
-                                                    <command>
-                                                        <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;response&apos;, pathValue=&apos;{&quot;SBA_KPIs/\\\\[[i]]&quot;:\\\\[{&quot;name&quot;:&quot;[name]&quot;,&quot;value&quot;:&quot;[value]&quot;}]}&apos;</body>
-                                                    </command>
-                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
-                                                        <action inherit="false">addJsonNode</action>
-                                                        <pathValue inherit="false" sub="true">{&quot;SBA_KPIs/\\[[i]]&quot;:\\[{&quot;name&quot;:&quot;[name]&quot;,&quot;value&quot;:&quot;[value]&quot;}]}</pathValue>
-                                                        <documentName inherit="false">response</documentName>
-                                                    </applicationProperties>
                                                 </item>
                                             </nestedSteps>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
@@ -8253,14 +8279,22 @@
                             </postProcessing>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
-                        <item guid="9f56032d-dbad-481c-9503-cdbd7a386727" action="add_favorites_to_KPIs" session="s1" useFieldsInCommand="false">
+                        <item guid="06027404-2b87-4b99-bd75-383dcf2cdf91" action="if" useFieldsInCommand="false">
                             <command>
-                                <body>(running_id=&apos;&apos;, favorites=sba_favorites, favorites_key_name=&apos;sba_favorites_measurements&apos;, response=response, skip_duplicate=&apos;false&apos;)</body>
+                                <body>int(idx) == 0:</body>
                             </command>
-                            <postProcessing>
-                                <storeResponseAt>response</storeResponseAt>
-                                <storeResponseText>true</storeResponseText>
-                            </postProcessing>
+                            <nestedSteps>
+                                <item guid="9f56032d-dbad-481c-9503-cdbd7a386727" action="add_favorites_to_KPIs" session="s1" useFieldsInCommand="false">
+                                    <command>
+                                        <body>(running_id=&apos;&apos;, favorites=sba_favorites, favorites_key_name=&apos;sba_favorites_measurements&apos;, response=response, skip_duplicate=&apos;false&apos;)</body>
+                                    </command>
+                                    <postProcessing>
+                                        <storeResponseAt>response</storeResponseAt>
+                                        <storeResponseText>true</storeResponseText>
+                                    </postProcessing>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
                     </nestedSteps>
@@ -8289,6 +8323,7 @@
             </steps>
             <arguments>
                 <item name="measurements"/>
+                <item name="sba_running_id"/>
                 <item name="idx"/>
                 <item name="instance_number"/>
                 <item name="sba_favorites"/>
