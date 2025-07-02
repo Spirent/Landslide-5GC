@@ -86,43 +86,8 @@
                         <body>Dump state</body>
                     </command>
                     <nestedSteps>
-                        <item guid="0e7daa74-1236-4189-ac33-8322dc1bbf16" action="dumpState" useFieldsInCommand="false">
-                            <postProcessing>
-                                <storeResponseAt>dumpstate_data</storeResponseAt>
-                                <storeResponseText>true</storeResponseText>
-                            </postProcessing>
-                            <applicationProperties type="com.fnfr.svt.execution.builtin.exec.DumpStateProperties"/>
-                        </item>
-                        <item guid="f48c7632-4487-4fe9-ae5d-37b148e5c970" action="eval" useFieldsInCommand="false">
-                            <command>
-                                <body>start_index = dumpstate_data.find(&quot;&lt;data&quot;)</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="61aaddbf-87dc-4d01-bcae-aea7abb444ae" action="eval" useFieldsInCommand="false">
-                            <command>
-                                <body>lword=len(&quot;&lt;/data&gt;&quot;)</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="85eeaddf-8aab-4286-a8ac-14b2b4deafa1" action="eval" useFieldsInCommand="false">
-                            <command>
-                                <body>end_index = dumpstate_data.find(&quot;&lt;/data&gt;&quot;)</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="acb7f016-f22c-478f-aa2f-9ef12be272e0" action="eval" useFieldsInCommand="false">
-                            <command>
-                                <body>parameter_data = dumpstate_data[start_index: end_index + lword].strip();print(parameter_data)</body>
-                            </command>
-                            <postProcessing isStoreResponseGlobal="true">
-                                <storeResponseAt>parameter_data</storeResponseAt>
-                                <storeResponseText>true</storeResponseText>
-                            </postProcessing>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
                         <item guid="b95bb984-50af-448a-81ba-328abaf078aa" action="dumpState" responseMap="project://my_project/response_maps/new_map.ffrm" useFieldsInCommand="false">
-                            <postProcessing>
+                            <postProcessing isStoreResponseGlobal="true">
                                 <analysisRules>
                                     <item>
                                         <extractorInfo extractorType="query">
@@ -206,6 +171,22 @@
                                         <processorInfo ruleType="store">
                                             <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
                                                 <storageLocation>resource_count</storageLocation>
+                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                            </ruleProperties>
+                                        </processorInfo>
+                                    </item>
+                                    <item>
+                                        <extractorInfo extractorType="regex">
+                                            <extractorProperties type="com.fnfr.svt.mapping.regex.extractors.RegexExtractorPropertyGroup">
+                                                <regex>(&lt;data .*&lt;/data&gt;)</regex>
+                                            </extractorProperties>
+                                        </extractorInfo>
+                                        <processorInfo ruleType="store">
+                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                <storageLocation>parameter_data</storageLocation>
+                                                <isStorageLocationGlobal>true</isStorageLocationGlobal>
                                                 <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
                                                 <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
                                                 <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
@@ -304,9 +285,8 @@
                                     <command>
                                         <body>action=&apos;setJsonValue&apos;, editResponseStructure=false, documentName=&apos;response&apos;, pathValue=&apos;{&quot;tas/username&quot;:&quot;[tas_username]&quot;,&quot;tas/ipAddress&quot;:&quot;[ipAddress]&quot;,&quot;tas/password&quot;:&quot;[tas_password]&quot;,&quot;tas/Hostname&quot;:&quot;[hostname]&quot;}&apos;</body>
                                     </command>
-                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup" pathValue="{&quot;tas/username&quot;:&quot;[tas_username]&quot;,&quot;tas/ipAddress&quot;:&quot;[ipAddress]&quot;,&quot;tas/password&quot;:&quot;[tas_password]&quot;,&quot;tas/Hostname&quot;:&quot;[hostname]&quot;}" pathValue.inherit="false" pathValue.sub="true">
                                         <action inherit="false">setJsonValue</action>
-                                        <pathValue inherit="false" sub="true">{&quot;tas/username&quot;:&quot;[tas_username]&quot;,&quot;tas/ipAddress&quot;:&quot;[ipAddress]&quot;,&quot;tas/password&quot;:&quot;[tas_password]&quot;,&quot;tas/Hostname&quot;:&quot;[hostname]&quot;}</pathValue>
                                         <documentName inherit="false">response</documentName>
                                     </applicationProperties>
                                 </item>
@@ -372,7 +352,7 @@
                                     <nestedSteps>
                                         <item guid="6cc02988-2f32-45e3-87c4-7bcafecdeb08" action="eval" useFieldsInCommand="false">
                                             <command>
-                                                <body>ts_name = query(&quot;LandslideGroupParams&quot;, &quot;name(data/parameters/&quot; + parameter_group_name + &quot;/Testservers/*[&quot; +str(i)+ &quot;])&quot;);print(ts_name)</body>
+                                                <body>ts_name = query(&quot;/data/LandslideGroupParams&quot;, &quot;name(data/parameters/&quot; + parameter_group_name + &quot;/Testservers/*[&quot; +str(i)+ &quot;])&quot;);print(ts_name)</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
@@ -395,9 +375,8 @@
                                                     <command>
                                                         <body>action=&apos;setJsonValue&apos;, editResponseStructure=false, documentName=&apos;ts_info&apos;, pathValue=&apos;{&quot;ts_param_name&quot;:&quot;[ts_name]&quot;}&apos;</body>
                                                     </command>
-                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup" pathValue="{&quot;ts_param_name&quot;:&quot;[ts_name]&quot;}" pathValue.inherit="false" pathValue.sub="true">
                                                         <action inherit="false">setJsonValue</action>
-                                                        <pathValue inherit="false" sub="true">{&quot;ts_param_name&quot;:&quot;[ts_name]&quot;}</pathValue>
                                                         <documentName inherit="false">ts_info</documentName>
                                                     </applicationProperties>
                                                 </item>
@@ -456,9 +435,8 @@
                                                             <command>
                                                                 <body>action=&apos;setJsonValue&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;response&apos;, pathValue=&apos;{&quot;isB2B&quot;:true}&apos;</body>
                                                             </command>
-                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup" pathValue="{&quot;isB2B&quot;:true}" pathValue.inherit="false">
                                                                 <action inherit="false">setJsonValue</action>
-                                                                <pathValue inherit="false">{&quot;isB2B&quot;:true}</pathValue>
                                                                 <documentName inherit="false">response</documentName>
                                                             </applicationProperties>
                                                         </item>
@@ -577,9 +555,8 @@
                                                     <command>
                                                         <body>action=&apos;setJsonValue&apos;, editResponseStructure=false, documentName=&apos;ts_info&apos;, pathValue=&apos;{&quot;Model&quot;:&quot;[ls_model]&quot;,&quot;topo_device_name&quot;:&quot;[topo_device_name]&quot;,&quot;TS Name&quot;:&quot;[ls_ts_name]&quot;,&quot;Make&quot;:&quot;[ls_make]&quot;}&apos;</body>
                                                     </command>
-                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup" pathValue="{&quot;Model&quot;:&quot;[ls_model]&quot;,&quot;topo_device_name&quot;:&quot;[topo_device_name]&quot;,&quot;TS Name&quot;:&quot;[ls_ts_name]&quot;,&quot;Make&quot;:&quot;[ls_make]&quot;}" pathValue.inherit="false" pathValue.sub="true">
                                                         <action inherit="false">setJsonValue</action>
-                                                        <pathValue inherit="false" sub="true">{&quot;Model&quot;:&quot;[ls_model]&quot;,&quot;topo_device_name&quot;:&quot;[topo_device_name]&quot;,&quot;TS Name&quot;:&quot;[ls_ts_name]&quot;,&quot;Make&quot;:&quot;[ls_make]&quot;}</pathValue>
                                                         <documentName inherit="false">ts_info</documentName>
                                                     </applicationProperties>
                                                 </item>
@@ -596,7 +573,7 @@
                                                         </item>
                                                         <item guid="41adea98-0237-4c05-8202-a105217ecd92" action="eval" useFieldsInCommand="false">
                                                             <command>
-                                                                <body>port_count = query(&apos;LandslideGroupParams&apos;,query_path);print(port_count)</body>
+                                                                <body>port_count = query(&apos;/data/LandslideGroupParams&apos;,query_path);print(port_count)</body>
                                                             </command>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
@@ -647,7 +624,7 @@
                                                                 </item>
                                                                 <item guid="7a103fd0-45d5-4ff7-b3a9-d5a66b2b0f7e" action="eval" useFieldsInCommand="false">
                                                                     <command>
-                                                                        <body>port_name = query(&apos;LandslideGroupParams&apos;,query_path);print(port_name)</body>
+                                                                        <body>port_name = query(&apos;/data/LandslideGroupParams&apos;,query_path);print(port_name)</body>
                                                                     </command>
                                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                 </item>
@@ -659,7 +636,7 @@
                                                                 </item>
                                                                 <item guid="3007724b-2611-4102-a426-0031be58b96d" action="eval" useFieldsInCommand="false">
                                                                     <command>
-                                                                        <body>port_property_count = query(&apos;LandslideGroupParams&apos;,query_path);print(port_property_count)</body>
+                                                                        <body>port_property_count = query(&apos;/data/LandslideGroupParams&apos;,query_path);print(port_property_count)</body>
                                                                     </command>
                                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                 </item>
@@ -676,7 +653,7 @@
                                                                         </item>
                                                                         <item guid="597f67bc-5d1f-4ca6-8eb2-724cd9f3de05" action="eval" useFieldsInCommand="false">
                                                                             <command>
-                                                                                <body>port_property_name = query(&apos;LandslideGroupParams&apos;,query_path);print(port_property_name)</body>
+                                                                                <body>port_property_name = query(&apos;/data/LandslideGroupParams&apos;,query_path);print(port_property_name)</body>
                                                                             </command>
                                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                         </item>
@@ -753,11 +730,10 @@
                                                                         </item>
                                                                         <item guid="75c81ca0-04ca-4085-8d68-71c671ac8616" action="json" useFieldsInCommand="false">
                                                                             <command>
-                                                                                <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;port_info&apos;, pathValue=&apos;{&quot;/&quot;:{&quot;[port_property_name]&quot;:&quot;[port_property_value]&quot;}}&apos;</body>
+                                                                                <body>action=&apos;addJsonNode&apos;, editResponseStructure=false, documentName=&apos;port_info&apos;, pathValue=&apos;{&quot;/&quot;:{&quot;[port_property_name]&quot;:&quot;[port_property_value]&quot;}}&apos;</body>
                                                                             </command>
-                                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup" pathValue="{&quot;/&quot;:{&quot;[port_property_name]&quot;:&quot;[port_property_value]&quot;}}" pathValue.inherit="false" pathValue.sub="true">
                                                                                 <action inherit="false">addJsonNode</action>
-                                                                                <pathValue inherit="false" sub="true">{&quot;/&quot;:{&quot;[port_property_name]&quot;:&quot;[port_property_value]&quot;}}</pathValue>
                                                                                 <documentName inherit="false">port_info</documentName>
                                                                             </applicationProperties>
                                                                         </item>
@@ -773,9 +749,8 @@
                                                                             <command>
                                                                                 <body>action=&apos;setJsonValue&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;port_info&apos;, pathValue=&apos;{&quot;name&quot;:&quot;[port_name]&quot;}&apos;</body>
                                                                             </command>
-                                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup" pathValue="{&quot;name&quot;:&quot;[port_name]&quot;}" pathValue.inherit="false" pathValue.sub="true">
                                                                                 <action inherit="false">setJsonValue</action>
-                                                                                <pathValue inherit="false" sub="true">{&quot;name&quot;:&quot;[port_name]&quot;}</pathValue>
                                                                                 <documentName inherit="false">port_info</documentName>
                                                                             </applicationProperties>
                                                                         </item>
@@ -783,9 +758,8 @@
                                                                             <command>
                                                                                 <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;ts_info&apos;, pathValue=&apos;{&quot;ports/\\\\[[port_index]]&quot;:[port_info]}&apos;</body>
                                                                             </command>
-                                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup" pathValue="{&quot;ports/\\[[port_index]]&quot;:[port_info]}" pathValue.inherit="false" pathValue.sub="true">
                                                                                 <action inherit="false">addJsonNode</action>
-                                                                                <pathValue inherit="false" sub="true">{&quot;ports/\\[[port_index]]&quot;:[port_info]}</pathValue>
                                                                                 <documentName inherit="false">ts_info</documentName>
                                                                             </applicationProperties>
                                                                         </item>
@@ -875,9 +849,8 @@
                                                     <command>
                                                         <body>action=&apos;setJsonValue&apos;, editResponseStructure=false, documentName=&apos;ts_info&apos;, pathValue=&apos;{&quot;Port Number&quot;:[port_number]}&apos;</body>
                                                     </command>
-                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup" pathValue="{&quot;Port Number&quot;:[port_number]}" pathValue.inherit="false" pathValue.sub="true">
                                                         <action inherit="false">setJsonValue</action>
-                                                        <pathValue inherit="false" sub="true">{&quot;Port Number&quot;:[port_number]}</pathValue>
                                                         <documentName inherit="false">ts_info</documentName>
                                                     </applicationProperties>
                                                 </item>
@@ -885,9 +858,8 @@
                                                     <command>
                                                         <body>action=&apos;addJsonNode&apos;, editResponseStructure=false, documentName=&apos;response&apos;, pathValue=&apos;{&quot;testservers/\\\\[[ts_index]]&quot;:[ts_info]}&apos;</body>
                                                     </command>
-                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup" pathValue="{&quot;testservers/\\[[ts_index]]&quot;:[ts_info]}" pathValue.inherit="false" pathValue.sub="true">
                                                         <action inherit="false">addJsonNode</action>
-                                                        <pathValue inherit="false" sub="true">{&quot;testservers/\\[[ts_index]]&quot;:[ts_info]}</pathValue>
                                                         <documentName inherit="false">response</documentName>
                                                     </applicationProperties>
                                                 </item>
@@ -1112,9 +1084,8 @@
                                                                                     <command>
                                                                                         <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;sut_info&apos;, pathValue=&apos;{&quot;/&quot;:{&quot;[property_name]&quot;:&quot;[property_value]&quot;}}&apos;</body>
                                                                                     </command>
-                                                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup" pathValue="{&quot;/&quot;:{&quot;[property_name]&quot;:&quot;[property_value]&quot;}}" pathValue.inherit="false" pathValue.sub="true">
                                                                                         <action inherit="false">addJsonNode</action>
-                                                                                        <pathValue inherit="false" sub="true">{&quot;/&quot;:{&quot;[property_name]&quot;:&quot;[property_value]&quot;}}</pathValue>
                                                                                         <documentName inherit="false">sut_info</documentName>
                                                                                     </applicationProperties>
                                                                                 </item>
@@ -1134,9 +1105,8 @@
                                                     <command>
                                                         <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;response&apos;, pathValue=&apos;{&quot;suts/\\\\[0]&quot;:[sut_info]}&apos;</body>
                                                     </command>
-                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
+                                                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup" pathValue="{&quot;suts/\\[0]&quot;:[sut_info]}" pathValue.inherit="false" pathValue.sub="true">
                                                         <action inherit="false">addJsonNode</action>
-                                                        <pathValue inherit="false" sub="true">{&quot;suts/\\[0]&quot;:[sut_info]}</pathValue>
                                                         <documentName inherit="false">response</documentName>
                                                     </applicationProperties>
                                                 </item>

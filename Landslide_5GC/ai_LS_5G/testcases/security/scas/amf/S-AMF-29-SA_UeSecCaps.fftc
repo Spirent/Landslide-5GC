@@ -3311,6 +3311,60 @@
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
+                                                <item guid="f8c24793-f025-4bcd-9d4e-f2b20b46f275" action="comment" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>Check if the GnbControlAddr from nodal is using IPV6, and update all the filter to use ipv6 as we only support ipv6 to ipv6</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="94ded6e9-aaca-4055-9d8b-e3305ea0853c" action="isIPv4" session="s1" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>(ip=ue_ip)</body>
+                                                            </command>
+                                                            <postProcessing>
+                                                                <analysisRules>
+                                                                    <item>
+                                                                        <extractorInfo extractorType="query">
+                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                <query>responseLine()</query>
+                                                                            </extractorProperties>
+                                                                        </extractorInfo>
+                                                                        <processorInfo ruleType="assert">
+                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                <expression>str(value).lower() == &quot;true&quot;</expression>
+                                                                                <actionsWhenTrue>
+                                                                                    <item actionId="Eval">
+                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                            <statement>ip_src=&quot;ip.src&quot;</statement>
+                                                                                        </actionProperties>
+                                                                                    </item>
+                                                                                    <item actionId="Eval">
+                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                            <statement>ip_dst=&quot;ip.dst&quot;</statement>
+                                                                                        </actionProperties>
+                                                                                    </item>
+                                                                                </actionsWhenTrue>
+                                                                                <actionsWhenFalse>
+                                                                                    <item actionId="Eval">
+                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                            <statement>ip_src=&quot;ipv6.src&quot;</statement>
+                                                                                        </actionProperties>
+                                                                                    </item>
+                                                                                    <item actionId="Eval">
+                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                                                            <statement>ip_dst=&quot;ipv6.dst&quot;</statement>
+                                                                                        </actionProperties>
+                                                                                    </item>
+                                                                                </actionsWhenFalse>
+                                                                            </ruleProperties>
+                                                                        </processorInfo>
+                                                                    </item>
+                                                                </analysisRules>
+                                                            </postProcessing>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
                                                 <item guid="631386a5-1781-40f1-8b96-c4cfebe64457" action="eval" useFieldsInCommand="false">
                                                     <command>
                                                         <body>print(pcap)</body>
@@ -3382,7 +3436,7 @@
                                                         </item>
                                                         <item guid="299f44a9-1c38-4446-b9af-e264b6afcf8a" action="command" session="s4">
                                                             <command>
-                                                                <body>query filter set &quot;ip.src == [ue_ip] and nas-5gs.mm.message_type == 0x41 &amp;&amp; ngap.procedureCode == 15&quot;</body>
+                                                                <body>query filter set &quot;[ip_src] == [ue_ip] and nas-5gs.mm.message_type == 0x41 &amp;&amp; ngap.procedureCode == 15&quot;</body>
                                                             </command>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
@@ -3555,7 +3609,7 @@
                                                         </item>
                                                         <item guid="dd30b51e-353c-4fe8-9cc2-adeffb9de855" action="command" session="s4">
                                                             <command>
-                                                                <body>query filter set &quot;ip.dst == [ue_ip] and ngap.procedureCode == 14&quot;</body>
+                                                                <body>query filter set &quot;[ip_dst] == [ue_ip] and ngap.procedureCode == 14&quot;</body>
                                                             </command>
                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </item>
