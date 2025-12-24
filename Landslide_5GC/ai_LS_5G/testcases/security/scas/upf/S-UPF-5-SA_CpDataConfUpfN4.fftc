@@ -614,7 +614,7 @@
                         </item>
                         <item guid="31ab3659-e69c-4488-a29e-02223a028c80" action="eval" useFieldsInCommand="false">
                             <command>
-                                <body>tas_api_url = &quot;{0}:8080/api&quot;.format(tas_hostname if tas_hostname else tas_ipaddress)</body>
+                                <body>tas_api_url = &quot;{0}:443/api&quot;.format(tas_hostname if tas_hostname else tas_ipaddress)</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
@@ -625,7 +625,7 @@
                             <nestedSteps>
                                 <item guid="eb353ce4-997e-4cde-80f7-e066870ffc11" action="eval" useFieldsInCommand="false">
                                     <command>
-                                        <body>tas_api_url = &quot;http://{0}&quot;.format(tas_api_url)</body>
+                                        <body>tas_api_url = &quot;https://{0}&quot;.format(tas_api_url)</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
@@ -1786,9 +1786,19 @@
                                                                 <body>file in pcap_files:</body>
                                                             </command>
                                                             <nestedSteps>
+                                                                <item guid="1f164d89-687e-497c-8b3e-8e45a04d0e68" action="call" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>project://ai_LS_5G/utility_library/utils.fftc#extract_the_filename_from_result_link(file_name=file)</body>
+                                                                    </command>
+                                                                    <postProcessing>
+                                                                        <storeResponseAt>file_name</storeResponseAt>
+                                                                        <storeResponseText>true</storeResponseText>
+                                                                    </postProcessing>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
                                                                 <item guid="a898a141-8213-4515-b4ee-37403e10da14" action="SaveResult" session="s1">
                                                                     <command>
-                                                                        <body>-runningTestId [running_nodal_id] -location &quot;[info(&apos;tempDir&apos;, &apos;uri&apos;)]/[file]&quot; -filepattern [file]</body>
+                                                                        <body>-runningTestId [running_nodal_id] -location &quot;[info(&apos;tempDir&apos;, &apos;uri&apos;)]/[file_name]&quot; -filepattern [file_name]</body>
                                                                     </command>
                                                                     <postProcessing>
                                                                         <analysisRules>
@@ -1809,7 +1819,7 @@
                                                                             </item>
                                                                         </analysisRules>
                                                                     </postProcessing>
-                                                                    <applicationProperties type="com.fnfr.itest.platform2.shared.documents.ntaf.NtafTransferableDocumentObject" action="SaveResult" subharness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harnessName="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" runningTestId="[running_nodal_id]" runningTestId.inherit="false" location="[info(&apos;tempDir&apos;, &apos;uri&apos;)]/[file]" location.inherit="false" filepattern="[file]" filepattern.inherit="false"/>
+                                                                    <applicationProperties type="com.fnfr.itest.platform2.shared.documents.ntaf.NtafTransferableDocumentObject" action="SaveResult" subharness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harnessName="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" runningTestId="[running_nodal_id]" runningTestId.inherit="false" location="[info(&apos;tempDir&apos;, &apos;uri&apos;)]/[file_name]" location.inherit="false" filepattern="[file_name]" filepattern.inherit="false"/>
                                                                 </item>
                                                                 <item guid="fb3974f7-4b05-4dec-bcdc-6d0b3a629a58" action="eval" useFieldsInCommand="false">
                                                                     <command>
@@ -1916,48 +1926,127 @@
                                                         <message inherit="false">1. Validate that ESP packets are encrypted and authenticated by use valid EI/ER keys from *.info_report.csv</message>
                                                     </applicationProperties>
                                                 </item>
-                                                <item guid="683d7a90-fefb-4d45-9ac4-bb379e2fd9fc" action="open" session="s4">
+                                                <item guid="f24d0e18-698c-4c9c-8bbe-8bc6e7f38350" action="comment" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>Get Tshark Version and apply protocol control</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="c5c132bd-b5e7-403c-8ed5-93edb6b7f0b9" action="open" session="s6" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>application:com.fnfr.svt.applications.wireshark</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.OpenStepPropertyGroup">
+                                                                <stepProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                <sessionProperties type="com.fnfr.svt.applications.wireshark.WiresharkSessionProperties">
+                                                                    <sessionbuilderInitializeAction type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </sessionProperties>
+                                                                <sessionClass type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                <sessionVersion type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                            </applicationProperties>
+                                                        </item>
+                                                        <item guid="b11142cc-07b0-4355-85be-01c52b2600db" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>pcap_exist = True</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="f4559ede-d36c-45d9-ab55-0a9497cb4f11" action="call" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>project://ai_LS_5G/utility_library/pcap_utils.fftc#get_tshark_version(session=&apos;s6&apos;)</body>
+                                                            </command>
+                                                            <postProcessing>
+                                                                <analysisRules>
+                                                                    <item>
+                                                                        <extractorInfo extractorType="query">
+                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                <query>responseLine()</query>
+                                                                            </extractorProperties>
+                                                                        </extractorInfo>
+                                                                        <processorInfo ruleType="assert">
+                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                                                                <expression>True</expression>
+                                                                                <actionsWhenTrue>
+                                                                                    <item actionId="DeclareExecutionIssue">
+                                                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Information">
+                                                                                            <message>Wireshark/tshark version: [value]</message>
+                                                                                        </actionProperties>
+                                                                                    </item>
+                                                                                </actionsWhenTrue>
+                                                                            </ruleProperties>
+                                                                        </processorInfo>
+                                                                    </item>
+                                                                    <item>
+                                                                        <extractorInfo extractorType="query">
+                                                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
+                                                                                <query>responseLine()</query>
+                                                                            </extractorProperties>
+                                                                        </extractorInfo>
+                                                                        <processorInfo ruleType="store">
+                                                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.StoreProcessorPropertyGroup">
+                                                                                <storageLocation>version</storageLocation>
+                                                                                <responseValue type="com.fnfr.documents.PropertyBoolean">false</responseValue>
+                                                                                <variable type="com.fnfr.documents.PropertyBoolean">true</variable>
+                                                                                <secret type="com.fnfr.documents.PropertyBoolean">false</secret>
+                                                                            </ruleProperties>
+                                                                        </processorInfo>
+                                                                    </item>
+                                                                </analysisRules>
+                                                            </postProcessing>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="06e84b9f-5252-4e91-aa62-6f38a2ce0d54" action="close" session="s6">
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="c331af66-72c6-4324-90e2-0013c8e67793" action="comment" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>RoughTime is the new protocol introduced since wireshark 4.6.0</body>
+                                                    </command>
+                                                    <nestedSteps>
+                                                        <item guid="75908e5e-bf82-4076-859e-49a15339609c" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>disable_roughtime= &quot;&quot;</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="2ec6e8b3-3031-4288-8181-b97bca3ccef2" action="eval" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>version= tuple(map(int, version.split(&apos;.&apos;)))</body>
+                                                            </command>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                        <item guid="c7f40b87-9f20-4d97-80d9-065e3b9f506b" action="if" useFieldsInCommand="false">
+                                                            <command>
+                                                                <body>version &gt;= (4, 6, 0):</body>
+                                                            </command>
+                                                            <nestedSteps>
+                                                                <item guid="906df7df-d95b-4aed-b4ce-29959c5672c8" action="eval" useFieldsInCommand="false">
+                                                                    <command>
+                                                                        <body>disable_roughtime= &quot;--disable-protocol roughtime&quot;</body>
+                                                                    </command>
+                                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                                </item>
+                                                            </nestedSteps>
+                                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                        </item>
+                                                    </nestedSteps>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="ec2ce30b-c166-48dc-8096-ae92705e1340" action="open" session="s4">
                                                     <command>
                                                         <body>application:com.fnfr.svt.applications.wireshark</body>
                                                     </command>
                                                     <applicationProperties type="com.fnfr.svt.documents.OpenStepPropertyGroup">
                                                         <stepProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         <sessionProperties type="com.fnfr.svt.applications.wireshark.WiresharkSessionProperties">
-                                                            <advancedDisplayOptions inherit="false">[valid_key_esp]</advancedDisplayOptions>
+                                                            <advancedDisplayOptions inherit="false">[valid_key_esp] [disable_roughtime]</advancedDisplayOptions>
                                                             <sessionbuilderInitializeAction type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         </sessionProperties>
                                                         <sessionClass type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                         <sessionVersion type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                     </applicationProperties>
-                                                </item>
-                                                <item guid="f4559ede-d36c-45d9-ab55-0a9497cb4f11" action="call" useFieldsInCommand="false">
-                                                    <command>
-                                                        <body>project://ai_LS_5G/utility_library/pcap_utils.fftc#get_tshark_version(session=&apos;s4&apos;)</body>
-                                                    </command>
-                                                    <postProcessing>
-                                                        <analysisRules>
-                                                            <item>
-                                                                <extractorInfo extractorType="query">
-                                                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                                                        <query>responseLine()</query>
-                                                                    </extractorProperties>
-                                                                </extractorInfo>
-                                                                <processorInfo ruleType="assert">
-                                                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                                        <expression>True</expression>
-                                                                        <actionsWhenTrue>
-                                                                            <item actionId="DeclareExecutionIssue">
-                                                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Information">
-                                                                                    <message>Wireshark/tshark version: [value]</message>
-                                                                                </actionProperties>
-                                                                            </item>
-                                                                        </actionsWhenTrue>
-                                                                    </ruleProperties>
-                                                                </processorInfo>
-                                                            </item>
-                                                        </analysisRules>
-                                                    </postProcessing>
-                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                 </item>
                                                 <item guid="95b38e45-033f-470c-9bcc-be9a651fb6e3" action="call" useFieldsInCommand="false">
                                                     <command>
@@ -4788,6 +4877,16 @@
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
                             </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="f72fdf98-ad75-4cf5-b309-25cc317f51a8" action="call" useFieldsInCommand="false">
+                            <command>
+                                <body>project://ai_LS_5G/utility_library/utils.fftc#extract_the_filename_from_result_link(file_name=file_name)</body>
+                            </command>
+                            <postProcessing>
+                                <storeResponseAt>file_name</storeResponseAt>
+                                <storeResponseText>true</storeResponseText>
+                            </postProcessing>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
                         <item guid="9ae52c23-540d-492f-bd51-24d68d0ab12c" action="SaveResult" session="s1">

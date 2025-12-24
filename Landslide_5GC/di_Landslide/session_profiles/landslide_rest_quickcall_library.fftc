@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
-<testCase version="25.3.0.202507170926" entryPoint="add_favorites_to_KPIs">
+<testCase version="25.4.0.202511261745" entryPoint="add_favorites_to_KPIs">
     <general>
         <sessionClass includeTestCase="true" sessionType="project://di_Landslide/session_profiles/landslide_rest.ffsp"/>
         <language>Python</language>
     </general>
     <execution>
-        <parameters version="25.3.0.202507170926">
+        <parameters version="25.4.0.202511261745">
             <parameters escape="true">
                 <parameters xmlns:pt="http://www.fnfr.com/schemas/parameterTree">
                     <NetworkHost_MaxNumClientIpAddress>
@@ -1258,6 +1258,16 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
+                                        <item guid="7dcf0268-22dd-48d3-ba49-1bf441b5983f" action="call" useFieldsInCommand="false">
+                                            <command>
+                                                <body>extract_the_filename_from_result_link(file_name=file_name)</body>
+                                            </command>
+                                            <postProcessing>
+                                                <storeResponseAt>file_name</storeResponseAt>
+                                                <storeResponseText>true</storeResponseText>
+                                            </postProcessing>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
                                         <item guid="56c77a39-c881-44a6-aace-896e9fff3887" action="eval" useFieldsInCommand="false">
                                             <command>
                                                 <body>running_id_full = &apos;{0}{1}&apos;.format(file_name.split(running_id)[0], running_id);print(running_id)</body>
@@ -1286,18 +1296,18 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                         </item>
                         <item guid="ad708acb-bab1-4862-bd04-0bc3274310a3" action="eval" useFieldsInCommand="false">
                             <command>
-                                <body>tas_result_url = &quot;{0}/results.cgi?{1}+0+{2}&quot;.format(tas_ipaddress if tas_ipaddress else tas_hostname, tas_username, running_id_full)</body>
+                                <body>tas_result_url = &quot;{0}/apps/results-center/list/{1}?name={2}&quot;.format(tas_ipaddress if tas_ipaddress else tas_hostname, tas_username, running_id_full)</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
                         <item guid="1ddc5baf-637b-4c1c-baa7-79d47911e210" action="if" useFieldsInCommand="false">
                             <command>
-                                <body>not tas_result_url.startswith(&quot;http://&quot;):</body>
+                                <body>not tas_result_url.startswith(&quot;https://&quot;):</body>
                             </command>
                             <nestedSteps>
                                 <item guid="4a7ebb0e-fccb-40e5-a92d-2f34d014f19a" action="eval" useFieldsInCommand="false">
                                     <command>
-                                        <body>tas_result_url = &quot;http://{0}&quot;.format(tas_result_url);print(tas_result_url)</body>
+                                        <body>tas_result_url = &quot;https://{0}&quot;.format(tas_result_url);print(tas_result_url)</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
@@ -3308,7 +3318,7 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                 </item>
                                 <item guid="e2c223f4-f146-499a-a99d-b666ed9cfdc4" action="json" useFieldsInCommand="false">
                                     <command>
-                                        <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;remote_run_data&apos;, pathValue=&apos;{&quot;tsGroups/\\\\[0]/testCases/\\\\[0]/parameters/&quot;:{&quot;NumIpAddr&quot;:&quot;[num_ip]&quot;}}&apos;</body>
+                                        <body>action=&apos;addJsonNode&apos;, editResponseStructure=false, documentName=&apos;remote_run_data&apos;, pathValue=&apos;{&quot;tsGroups/\\\\[0]/testCases/\\\\[0]/parameters/&quot;:{&quot;NumIpAddr&quot;:&quot;[num_ip]&quot;}}&apos;</body>
                                     </command>
                                     <postProcessing>
                                         <analysisRules>
@@ -8461,111 +8471,43 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
             </arguments>
             <response>{}</response>
         </item>
-        <item name="get_maximum_numipaddr" isPublic="true">
+        <item name="extract_the_filename_from_result_link" isPublic="true">
             <steps>
-                <item guid="01ee9ac3-6b49-4a17-bb86-f98879ea4448" action="Custom" session="[session]">
+                <item guid="43965b9a-35f2-4364-b5da-c4f87d953dfb" action="if" useFieldsInCommand="false">
                     <command>
-                        <body>-requestMethod GET -dataType json -rawResponse true -url testServers/[ts_id]</body>
-                    </command>
-                    <postProcessing>
-                        <analysisRules>
-                            <item>
-                                <extractorInfo extractorType="query">
-                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
-                                        <query>//requestedLicense</query>
-                                    </extractorProperties>
-                                </extractorInfo>
-                                <processorInfo ruleType="assert">
-                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                        <expression>value != &quot;&quot;</expression>
-                                        <actionsWhenTrue>
-                                            <item actionId="Eval">
-                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                    <statement>ts_license = f&quot;TS_Lic_{value}&quot;</statement>
-                                                </actionProperties>
-                                            </item>
-                                        </actionsWhenTrue>
-                                        <actionsWhenFalse>
-                                            <item actionId="DeclareExecutionIssue">
-                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Warning">
-                                                    <message>Cannot get TS license of TS ID: [ts_id]</message>
-                                                </actionProperties>
-                                            </item>
-                                            <item actionId="Eval">
-                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                    <statement>ts_license = &quot;&quot;</statement>
-                                                </actionProperties>
-                                            </item>
-                                        </actionsWhenFalse>
-                                    </ruleProperties>
-                                </processorInfo>
-                            </item>
-                        </analysisRules>
-                    </postProcessing>
-                    <applicationProperties type="com.fnfr.itest.platform2.shared.documents.ntaf.NtafTransferableDocumentObject" action="Custom" subharness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harnessName="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" rawResponse="true" rawResponse.inherit="false" url="testServers/[ts_id]" url.inherit="false"/>
-                </item>
-                <item guid="7aa0153f-519d-49b1-83ec-3ef495fca518" action="if" useFieldsInCommand="false">
-                    <command>
-                        <body>not ts_license:</body>
+                        <body>&quot;filename&quot; in file_name:</body>
                     </command>
                     <nestedSteps>
-                        <item guid="ad4b7849-dbfa-44c7-b9dc-5d1de235e6b7" action="return">
+                        <item guid="0359201a-4f62-4cf8-8a84-cdc24d73c539" action="eval" useFieldsInCommand="false">
                             <command>
-                                <body>[session_capacity]</body>
+                                <body>import re</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="f0dc536f-2b15-4b90-99ce-1542cc71a9bc" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>file_name = re.search(r&apos;(?:\\?|&amp;)filename=([^&amp;]+)&apos;, file_name).group(1)</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="822d0dd1-0bda-49bc-9aba-41c35a581239" action="return">
+                            <command>
+                                <body>[file_name]</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
                     </nestedSteps>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
-                <item guid="cce4bc47-a9c5-4379-8980-6037e788f0ee" action="eval" useFieldsInCommand="false">
+                <item guid="23736bf1-d133-4384-ba70-99ba44efa3cb" action="return">
                     <command>
-                        <body>param_path = &apos;NetworkHost_MaxNumClientIpAddress/{0}&apos;.format(ts_license)</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="839dbd61-8d40-4f4d-8245-734a50f27d66" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>max_ip = param(param_path, session_capacity);print(max_ip)</body>
-                    </command>
-                    <eventHandlers>
-                        <item name="OnInterpreterError">
-                            <item actionId="Eval">
-                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                    <statement>max_ip = session_capacity</statement>
-                                </actionProperties>
-                            </item>
-                        </item>
-                    </eventHandlers>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="0e1681ed-566b-431e-8c40-c3c13cbdbbe9" action="if" useFieldsInCommand="false">
-                    <command>
-                        <body>int(session_capacity) &gt; int(max_ip):</body>
-                    </command>
-                    <nestedSteps>
-                        <item guid="48500631-ccaa-4158-9d83-a8d4d8f5cbbf" action="eval" useFieldsInCommand="false">
-                            <command>
-                                <body>session_capacity = max_ip</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                    </nestedSteps>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="7c6c2924-b029-4b57-ada8-ab098a3244f9" action="return">
-                    <command>
-                        <body>[session_capacity]</body>
+                        <body>[file_name]</body>
                     </command>
                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                 </item>
             </steps>
             <arguments>
-                <item name="ts_id"/>
-                <item name="session_capacity">
-                    <defaultValue>100000</defaultValue>
-                    <isMandatory>true</isMandatory>
-                </item>
+                <item name="file_name"/>
             </arguments>
         </item>
         <item name="get_ethernet_mapped_list" isPublic="true">
@@ -9515,6 +9457,113 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                 </item>
             </arguments>
         </item>
+        <item name="get_maximum_numipaddr" isPublic="true">
+            <steps>
+                <item guid="01ee9ac3-6b49-4a17-bb86-f98879ea4448" action="Custom" session="[session]">
+                    <command>
+                        <body>-requestMethod GET -dataType json -rawResponse true -url testServers/[ts_id]</body>
+                    </command>
+                    <postProcessing>
+                        <analysisRules>
+                            <item>
+                                <extractorInfo extractorType="query">
+                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup" declareNoMatchIssue="false">
+                                        <query>//requestedLicense</query>
+                                    </extractorProperties>
+                                </extractorInfo>
+                                <processorInfo ruleType="assert">
+                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
+                                        <expression>value != &quot;&quot;</expression>
+                                        <actionsWhenTrue>
+                                            <item actionId="Eval">
+                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                    <statement>ts_license = f&quot;TS_Lic_{value}&quot;</statement>
+                                                </actionProperties>
+                                            </item>
+                                        </actionsWhenTrue>
+                                        <actionsWhenFalse>
+                                            <item actionId="DeclareExecutionIssue">
+                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Warning">
+                                                    <message>Cannot get TS license of TS ID: [ts_id]</message>
+                                                </actionProperties>
+                                            </item>
+                                            <item actionId="Eval">
+                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                                    <statement>ts_license = &quot;&quot;</statement>
+                                                </actionProperties>
+                                            </item>
+                                        </actionsWhenFalse>
+                                    </ruleProperties>
+                                </processorInfo>
+                            </item>
+                        </analysisRules>
+                    </postProcessing>
+                    <applicationProperties type="com.fnfr.itest.platform2.shared.documents.ntaf.NtafTransferableDocumentObject" action="Custom" subharness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harnessName="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" rawResponse="true" rawResponse.inherit="false" url="testServers/[ts_id]" url.inherit="false"/>
+                </item>
+                <item guid="7aa0153f-519d-49b1-83ec-3ef495fca518" action="if" useFieldsInCommand="false">
+                    <command>
+                        <body>not ts_license:</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="ad4b7849-dbfa-44c7-b9dc-5d1de235e6b7" action="return">
+                            <command>
+                                <body>[session_capacity]</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="cce4bc47-a9c5-4379-8980-6037e788f0ee" action="eval" useFieldsInCommand="false">
+                    <command>
+                        <body>param_path = &apos;NetworkHost_MaxNumClientIpAddress/{0}&apos;.format(ts_license)</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="839dbd61-8d40-4f4d-8245-734a50f27d66" action="eval" useFieldsInCommand="false">
+                    <command>
+                        <body>max_ip = param(param_path, session_capacity);print(max_ip)</body>
+                    </command>
+                    <eventHandlers>
+                        <item name="OnInterpreterError">
+                            <item actionId="Eval">
+                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
+                                    <statement>max_ip = session_capacity</statement>
+                                </actionProperties>
+                            </item>
+                        </item>
+                    </eventHandlers>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="0e1681ed-566b-431e-8c40-c3c13cbdbbe9" action="if" useFieldsInCommand="false">
+                    <command>
+                        <body>int(session_capacity) &gt; int(max_ip):</body>
+                    </command>
+                    <nestedSteps>
+                        <item guid="48500631-ccaa-4158-9d83-a8d4d8f5cbbf" action="eval" useFieldsInCommand="false">
+                            <command>
+                                <body>session_capacity = max_ip</body>
+                            </command>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                    </nestedSteps>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="7c6c2924-b029-4b57-ada8-ab098a3244f9" action="return">
+                    <command>
+                        <body>[session_capacity]</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+            </steps>
+            <arguments>
+                <item name="ts_id"/>
+                <item name="session_capacity">
+                    <defaultValue>100000</defaultValue>
+                    <isMandatory>true</isMandatory>
+                </item>
+            </arguments>
+        </item>
         <item name="get_parameters_from_group" isPublic="true">
             <steps>
                 <item guid="809a0d6a-c955-4c9c-af91-ccecf70d04bf" action="comment" useFieldsInCommand="false" skippReporting="false">
@@ -10283,9 +10332,9 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                                                                             </eventHandlers>
                                                                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                                                                         </item>
-                                                                                        <item guid="5e516c80-2a2a-4f60-865f-102415404f52" action="if" useFieldsInCommand="false">
+                                                                                        <item guid="5e516c80-2a2a-4f60-865f-102415404f52" action="comment" useFieldsInCommand="false">
                                                                                             <command>
-                                                                                                <body>child_value.startswith(&quot;$&quot;):</body>
+                                                                                                <body>Add child value and update value if needed</body>
                                                                                             </command>
                                                                                             <nestedSteps>
                                                                                                 <item guid="d2fb169d-5ec8-470e-a309-bcc8099c299d" action="eval" useFieldsInCommand="false">
@@ -10316,12 +10365,12 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                                                                                 </item>
                                                                                                 <item guid="4f615c7c-019b-40fe-bfa5-dea70a002f34" action="comment" useFieldsInCommand="false">
                                                                                                     <command>
-                                                                                                        <body>Update physical port for ipv6</body>
+                                                                                                        <body>Update physical port for ipv6 applied to both linked (starting with $) and hard-coded values</body>
                                                                                                     </command>
                                                                                                     <nestedSteps>
                                                                                                         <item guid="7efa9c9a-885c-4791-b3ee-2f6b3fb9d3d5" action="if" useFieldsInCommand="false">
                                                                                                             <command>
-                                                                                                                <body>child_name == &quot;phy&quot; or child_name == &quot;forcedEthInterface&quot;:</body>
+                                                                                                                <body>child_name == &quot;phy&quot;:</body>
                                                                                                             </command>
                                                                                                             <nestedSteps>
                                                                                                                 <item guid="24aea2ab-7659-4ff5-b354-8c7118f6fbe2" action="eval" skip="true" useFieldsInCommand="false">
@@ -10687,7 +10736,7 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                             <nestedSteps>
                                 <item guid="d031b70e-2b76-4b1a-b2e0-ba378d47060f" action="json" useFieldsInCommand="false">
                                     <command>
-                                        <body>action=&apos;getJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;result_files&apos;, pathValue=&apos;{&quot;\\\\[[i]]&quot;}&apos;</body>
+                                        <body>action=&apos;getJsonNode&apos;, editResponseStructure=false, documentName=&apos;result_files&apos;, pathValue=&apos;{&quot;\\\\[[i]]&quot;}&apos;</body>
                                     </command>
                                     <postProcessing>
                                         <analysisRules>
@@ -10730,6 +10779,16 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                                             <command>
                                                 <body>file_name = file_url[(file_url.rindex(&quot;/&quot;) + 1):len(file_url)]</body>
                                             </command>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="9b362d9d-ee12-4520-a83e-734b9fcc873f" action="call" useFieldsInCommand="false">
+                                            <command>
+                                                <body>extract_the_filename_from_result_link(file_name=file_name)</body>
+                                            </command>
+                                            <postProcessing>
+                                                <storeResponseAt>file_name</storeResponseAt>
+                                                <storeResponseText>true</storeResponseText>
+                                            </postProcessing>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
                                         <item guid="84bc3421-b51c-462a-987b-6e0a2074a731" action="eval" useFieldsInCommand="false">
@@ -15045,46 +15104,6 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
             </arguments>
             <response>{}</response>
         </item>
-        <item name="is_du_nodal_test" isPublic="true">
-            <steps>
-                <item guid="72f87dee-f631-4296-b63c-f90eda567d7e" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>test_name = info(&apos;testCaseName&apos;, &apos;main&apos;)</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="7ed9f540-9548-4e9c-9cea-c984decc6186" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>import re</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="4907b9ba-2134-49ee-bb8f-fc89572644cd" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>pattern = r&quot;^[EI]-(ORAN|DU)-&quot;</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="d6535fba-7e45-4f9d-86ff-1921e7e48c71" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>match = re.search(pattern, test_name)</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="d152b72b-db37-45e2-8f90-cc6255c15968" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>is_matched = (match != None)</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="ad30da6e-55a3-4c47-b014-0a5e97c837bf" action="return">
-                    <command>
-                        <body>[is_matched]</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-            </steps>
-        </item>
         <item name="isIPv4" isPublic="true">
             <steps>
                 <item guid="565df06f-7a71-4b50-8af3-46f55f717b27" action="eval" useFieldsInCommand="false">
@@ -15143,6 +15162,46 @@ Format: [ts index]:[tc index]:[type]:[parameter name]:[parameter value];...
                 </item>
             </arguments>
             <response>{}</response>
+        </item>
+        <item name="is_du_nodal_test" isPublic="true">
+            <steps>
+                <item guid="72f87dee-f631-4296-b63c-f90eda567d7e" action="eval" useFieldsInCommand="false">
+                    <command>
+                        <body>test_name = info(&apos;testCaseName&apos;, &apos;main&apos;)</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="7ed9f540-9548-4e9c-9cea-c984decc6186" action="eval" useFieldsInCommand="false">
+                    <command>
+                        <body>import re</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="4907b9ba-2134-49ee-bb8f-fc89572644cd" action="eval" useFieldsInCommand="false">
+                    <command>
+                        <body>pattern = r&quot;^[EI]-(ORAN|DU)-&quot;</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="d6535fba-7e45-4f9d-86ff-1921e7e48c71" action="eval" useFieldsInCommand="false">
+                    <command>
+                        <body>match = re.search(pattern, test_name)</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="d152b72b-db37-45e2-8f90-cc6255c15968" action="eval" useFieldsInCommand="false">
+                    <command>
+                        <body>is_matched = (match != None)</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+                <item guid="ad30da6e-55a3-4c47-b014-0a5e97c837bf" action="return">
+                    <command>
+                        <body>[is_matched]</body>
+                    </command>
+                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                </item>
+            </steps>
         </item>
         <item name="is_test_session_exists" isPublic="true">
             <steps>
@@ -20455,10 +20514,14 @@ Steps format: &quot;group index:tc index:action:pre group index:pre tc index:pre
                                         <body>file_url:</body>
                                     </command>
                                     <nestedSteps>
-                                        <item guid="513fcba5-8f3d-4130-8f47-78d624d2550d" action="eval" useFieldsInCommand="false">
+                                        <item guid="8df09056-0638-4c3c-b3ea-7a06bc373f71" action="extract_the_filename_from_result_link" session="[session]" useFieldsInCommand="false">
                                             <command>
-                                                <body>file_name = file_url[(file_url.rindex(&quot;/&quot;) + 1):len(file_url)]</body>
+                                                <body>(file_name=file_url)</body>
                                             </command>
+                                            <postProcessing>
+                                                <storeResponseAt>file_name</storeResponseAt>
+                                                <storeResponseText>true</storeResponseText>
+                                            </postProcessing>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
                                         <item guid="9c600ed2-fc5a-4e42-b95d-e05793a88a5b" action="GET" session="r1">
