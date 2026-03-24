@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<testCase version="25.3.0.202507170926">
+<testCase version="25.4.0.202512130118">
     <general>
         <documentation>E-5GC-37-PF: Home Routed Roaming PDU Session Establish - Performance Testing</documentation>
         <tags>E-5GC-37-PF</tags>
@@ -199,7 +199,7 @@
                                         </item>
                                         <item guid="3ca016f2-5ddc-45b1-be2f-ed498f22f409" action="eval" useFieldsInCommand="false">
                                             <command>
-                                                <body>params = params + &quot;;TC_parameters/Start_Threshold_Percent:(50,80):false&quot;</body>
+                                                <body>params = params + &quot;;TC_parameters/Start_Threshold_Percent:(50,80):false;TC_parameters/Session_Active_Timer:(60):false&quot;</body>
                                             </command>
                                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                         </item>
@@ -738,9 +738,47 @@
                         <body>Update DNS Zone File</body>
                     </command>
                     <nestedSteps>
-                        <item guid="d66f316e-3781-40ca-9e3f-0b5f7430afa2" action="call" useFieldsInCommand="false">
+                        <item guid="3e2f88b5-a995-4b7f-a413-baeccc423e9c" action="comment" useFieldsInCommand="false">
                             <command>
-                                <body>update_DNS_file_for_nodal(library_id=library_id, output_library_name=tas_username)</body>
+                                <body>Define mappings between default IP addresses/hosts and their updated counterparts</body>
+                            </command>
+                            <nestedSteps>
+                                <item guid="fb0b6896-fbbf-456c-8843-491d54e6b52c" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>smf_ip = param(&apos;LS_Nodal_favorite_params/TS1/ts0/tc0/SmfSbiNodeSrvAddr/ip&apos;, &apos;&apos;)</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="edb66be5-652d-45d1-981b-047caa61e26d" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>amf_ip = param(&apos;LS_Nodal_favorite_params/TS1/ts0/tc0/AmfSbiNodeSrvAddr/ip&apos;, &apos;&apos;)</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="6923beab-ca00-454d-9403-d96ca19554af" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>nodal_dns_replacements = {}</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="36fdbdfa-e389-4e92-887f-a974e5e8807f" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>nodal_dns_replacements[&apos; 10.202.1.1 &apos;] = smf_ip</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="b97c0c1e-4642-4129-8bc9-f33917ea2f4b" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>nodal_dns_replacements[&apos; 10.202.1.52 &apos;] = amf_ip</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                            </nestedSteps>
+                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                        </item>
+                        <item guid="d66f316e-3781-40ca-9e3f-0b5f7430afa2" action="upload_new_DNS_file" session="s1" useFieldsInCommand="false">
+                            <command>
+                                <body>(source_library_id=library_id, source_dns_file_name=&apos;E_5GC_37_V_Zone_File&apos;, replacement_map=nodal_dns_replacements, destination_library_name=tas_username)</body>
                             </command>
                             <postProcessing>
                                 <analysisRules>
@@ -970,7 +1008,13 @@
                             <nestedSteps>
                                 <item guid="809eb246-0efb-4c6c-919a-35834ca7a8e6" action="eval" useFieldsInCommand="false">
                                     <command>
-                                        <body>automation_steps = &quot;0:3:Init:-1:-1::0;0:3:Start:-1:-1::0;0:1:Init:0:3:RUNNING:0;0:1:Start:-1:-1::0;0:0:Init:0:1:RUNNING:0;0:0:Start:-1:-1::0;0:2:Init:0:0:RUNNING:0;-4:-4::-1:-1::0;0:2:Start:-1:-1::0;0:2:Stop:0:2:RUNNING:120;0:2:Cleanup:0:2:STOPPED:0;0:0:Stop:-1:-1::0;0:0:Cleanup:0:0:STOPPED:0;0:1:Stop:-1:-1::0;0:1:Cleanup:0:1:STOPPED:0;0:3:Stop:-1:-1::0;0:3:Cleanup:0:3:STOPPED:0&quot;</body>
+                                        <body>s_act_timer_ts = int(param(&quot;TC_parameters/Session_Active_Timer&quot;,120))</body>
+                                    </command>
+                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                </item>
+                                <item guid="46cd45e3-d5c3-44fc-a7a5-8c2f89969cf9" action="eval" useFieldsInCommand="false">
+                                    <command>
+                                        <body>automation_steps = f&quot;0:3:Init:-1:-1::0;0:3:Start:-1:-1::0;0:1:Init:0:3:RUNNING:0;0:1:Start:-1:-1::0;0:0:Init:0:1:RUNNING:0;0:0:Start:-1:-1::0;0:2:Init:0:0:RUNNING:0;-4:-4::-1:-1::0;0:2:Start:-1:-1::0;0:2:Stop:0:2:RUNNING:{s_act_timer_ts};0:2:Cleanup:0:2:STOPPED:0;0:0:Stop:-1:-1::0;0:0:Cleanup:0:0:STOPPED:0;0:1:Stop:-1:-1::0;0:1:Cleanup:0:1:STOPPED:0;0:3:Stop:-1:-1::0;0:3:Cleanup:0:3:STOPPED:0&quot;</body>
                                     </command>
                                     <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                                 </item>
@@ -1200,9 +1244,59 @@
                                         <body>Update DNS Zone File for SUT</body>
                                     </command>
                                     <nestedSteps>
-                                        <item guid="d66f316e-3781-40ca-9e3f-0b5f7430afa2" action="call" useFieldsInCommand="false">
+                                        <item guid="4e8a34db-f8d4-4eb8-9cc5-80ced535276b" action="comment" useFieldsInCommand="false">
                                             <command>
-                                                <body>update_DNS_file_for_SUT_if_needed(library_id=library_id, output_library_name=tas_username)</body>
+                                                <body>Define mappings between default IP addresses/hosts and their updated counterparts</body>
+                                            </command>
+                                            <nestedSteps>
+                                                <item guid="ee859c7f-e990-4c6c-91a7-3c13770007fe" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>udm_ip =param(&apos;LS_Emulated_SUT_favorite_params/ts0/tc0/UdmSbiNodeSrvAddr/ip&apos;,&apos;&apos;)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="e7292ca7-7f3f-426d-82f5-33f3caa9a489" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>smf_ip = param(&apos;LS_Emulated_SUT_favorite_params/ts0/tc0/SmfSbiNodeSrvAddr/ip&apos;, &apos;&apos;)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="0c08680d-497d-4373-bf62-c8c39c00dfbf" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>ausf_ip = param(&apos;LS_Emulated_SUT_favorite_params/ts0/tc0/AusfSbiNodeSrvAddr/ip&apos;, &apos;&apos;)</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="4a1868d1-b6ea-4825-9f85-52c3ad5c268d" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>sut_dns_replacements = {}</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="28c35f23-bb40-4d25-abb8-69fa2e2c32f7" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>sut_dns_replacements[&apos; 10.202.100.3 &apos;] = udm_ip</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="36f0caf8-c3c3-44ae-9bdc-4aeb60d6cc49" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>sut_dns_replacements[&apos; 10.202.100.1 &apos;] = smf_ip</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                                <item guid="c742dad6-e497-4755-8f46-bfca52e6cf42" action="eval" useFieldsInCommand="false">
+                                                    <command>
+                                                        <body>sut_dns_replacements[&apos; 10.202.100.2 &apos;] = ausf_ip</body>
+                                                    </command>
+                                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                                </item>
+                                            </nestedSteps>
+                                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
+                                        </item>
+                                        <item guid="d66f316e-3781-40ca-9e3f-0b5f7430afa2" action="upload_new_DNS_file" session="s1" useFieldsInCommand="false">
+                                            <command>
+                                                <body>(source_library_id=library_id, source_dns_file_name=&apos;E_5GC_37_H_Zone_File&apos;, replacement_map=sut_dns_replacements, destination_library_name=tas_username)</body>
                                             </command>
                                             <postProcessing>
                                                 <analysisRules>
@@ -4406,9 +4500,9 @@
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
-                        <item guid="fd4ef49f-9876-4d06-a25c-c527cc88e0d1" action="eval" useFieldsInCommand="false">
+                        <item guid="0dff3b1b-eec6-44b9-9665-e104f9839a45" action="eval" useFieldsInCommand="false">
                             <command>
-                                <body>s_act_timer_ts = 120</body>
+                                <body>s_act_timer_ts = int(param(&quot;TC_parameters/Session_Active_Timer&quot;,120))</body>
                             </command>
                             <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
                         </item>
@@ -7723,631 +7817,6 @@
                 <item name="session_capacity"/>
             </arguments>
             <response>{}</response>
-        </item>
-        <item name="update_DNS_file_for_nodal" isPublic="true">
-            <steps>
-                <item guid="0d7eea52-0bb7-4ffa-8581-c47934d96ee3" action="json" useFieldsInCommand="false">
-                    <command>
-                        <body>action=&apos;createJson&apos;, documentName=&apos;response&apos;, fromFile=false, jsonString=&apos;{}&apos;</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
-                        <action inherit="false">createJson</action>
-                        <jsonString inherit="false">{}</jsonString>
-                        <documentName inherit="false">response</documentName>
-                    </applicationProperties>
-                </item>
-                <item guid="b8a8b24e-9f2b-44c7-8197-ef27bdb87355" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>success = False</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="b262b739-9563-4e77-8f72-13120200a3f3" action="call" useFieldsInCommand="false">
-                    <command>
-                        <body>create_file_name_with_current_time(prefix=&apos;E_5GC_37_V_Zone_File&apos;)</body>
-                    </command>
-                    <postProcessing>
-                        <storeResponseAt>output_file_name</storeResponseAt>
-                        <storeResponseText>true</storeResponseText>
-                    </postProcessing>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="b0608af7-fdc5-4114-87d6-0d54e0f2d8f4" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>file_path =info(&apos;tempDir&apos;, &apos;uri&apos;) + output_file_name; print(file_path)</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="5438ec1e-e2a6-474d-b44d-f5d9e9d52ed0" action="get_library_id" session="s1" useFieldsInCommand="false">
-                    <command>
-                        <body>(libraryName=output_library_name)</body>
-                    </command>
-                    <postProcessing>
-                        <storeResponseAt>user_library_id</storeResponseAt>
-                        <storeResponseText>true</storeResponseText>
-                    </postProcessing>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="f222c6e5-5e96-417b-a955-1d0ea2542ae5" action="Custom" session="s1">
-                    <command>
-                        <body>-requestMethod GET -dataType json -requestBody {
-} -rawResponse true -url libraries/[library_id]/tdfs/E_5GC_36_V_Zone_File.txt</body>
-                    </command>
-                    <postProcessing>
-                        <analysisRules>
-                            <item>
-                                <extractorInfo extractorType="query">
-                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                        <query>boolean(mapped/Json/reason)</query>
-                                    </extractorProperties>
-                                </extractorInfo>
-                                <processorInfo ruleType="assert">
-                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                        <expression>str(value)==&apos;false&apos;</expression>
-                                        <actionsWhenFalse>
-                                            <item actionId="FailTest">
-                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                            </item>
-                                            <item actionId="DeclareExecutionIssue">
-                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                    <message>Test data file E_5GC_36_V_Zone_File.txt can not get</message>
-                                                </actionProperties>
-                                            </item>
-                                            <item actionId="ExitExecution">
-                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                            </item>
-                                        </actionsWhenFalse>
-                                    </ruleProperties>
-                                </processorInfo>
-                            </item>
-                        </analysisRules>
-                        <storeResponseAt>original_content</storeResponseAt>
-                        <storeResponseText>true</storeResponseText>
-                    </postProcessing>
-                    <applicationProperties type="com.fnfr.itest.platform2.shared.documents.ntaf.NtafTransferableDocumentObject" action="Custom" subharness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harnessName="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" requestMethod.inherit="false" dataType.inherit="false" rawResponse="true" rawResponse.inherit="false" url="libraries/[library_id]/tdfs/E_5GC_36_V_Zone_File.txt" url.inherit="false">
-                        <requestBody inherit="false">{
-}</requestBody>
-                    </applicationProperties>
-                </item>
-                <item guid="dbc6ae88-e54c-4921-a9bc-3a45640e1a1f" action="comment" useFieldsInCommand="false">
-                    <command>
-                        <body>Update ip</body>
-                    </command>
-                    <nestedSteps>
-                        <item guid="db9e0f9b-212b-4cd1-9009-773143cec0bb" action="eval" useFieldsInCommand="false">
-                            <command>
-                                <body>print(original_content)</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="4d3fbb8c-4bfe-4496-af93-f8b90cf55c56" action="comment" useFieldsInCommand="false">
-                            <command>
-                                <body>Get ip from param</body>
-                            </command>
-                            <nestedSteps>
-                                <item guid="fb0b6896-fbbf-456c-8843-491d54e6b52c" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>smf_ip = param(&apos;LS_Nodal_favorite_params/TS1/ts0/tc0/SmfSbiNodeSrvAddr/ip&apos;, &apos;&apos;)</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                                <item guid="edb66be5-652d-45d1-981b-047caa61e26d" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>amf_ip = param(&apos;LS_Nodal_favorite_params/TS1/ts0/tc0/AmfSbiNodeSrvAddr/ip&apos;, &apos;&apos;)</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                            </nestedSteps>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="bc83c043-f926-416e-bafa-a5cfe9a6307d" action="comment" useFieldsInCommand="false">
-                            <command>
-                                <body>Replace ip</body>
-                            </command>
-                            <nestedSteps>
-                                <item guid="36fdbdfa-e389-4e92-887f-a974e5e8807f" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>new_content=str(original_content).replace(&apos; 10.202.1.1 &apos;, smf_ip)</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                                <item guid="b97c0c1e-4642-4129-8bc9-f33917ea2f4b" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>new_content=new_content.replace(&apos; 10.202.1.52 &apos;, amf_ip)</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                            </nestedSteps>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="44b6fce4-4b9f-425a-b0ce-bd7cd12a7de8" action="comment" useFieldsInCommand="false">
-                            <command>
-                                <body>Save to file in tmp local</body>
-                            </command>
-                            <nestedSteps>
-                                <item guid="5ead8526-4086-4718-a1a6-1f0b8a44cdb1" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>print(new_content)</body>
-                                    </command>
-                                    <postProcessing>
-                                        <storeResponseText>true</storeResponseText>
-                                        <responseFile inherit="false" sub="true">[file_path]</responseFile>
-                                        <appendRespToFile inherit="false">false</appendRespToFile>
-                                        <appendCommand inherit="false">false</appendCommand>
-                                        <appendTimestamp inherit="false">false</appendTimestamp>
-                                    </postProcessing>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                            </nestedSteps>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                    </nestedSteps>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="f7d01b2d-0413-4e81-9131-56eb7f6e5741" action="comment" useFieldsInCommand="false">
-                    <command>
-                        <body>POST new TDF to user library</body>
-                    </command>
-                    <nestedSteps>
-                        <item guid="ab51ab34-efd4-4b58-8bd8-d67f9cd339f1" action="Custom" session="s1">
-                            <command>
-                                <body>-requestMethod POST -dataType binary -requestBody {
-} -rawResponse true -filePath &quot;[info(&apos;tempDir&apos;, &apos;uri&apos;)]/[output_file_name]&quot; -url libraries/[user_library_id]/tdfs/[output_file_name]</body>
-                            </command>
-                            <postProcessing>
-                                <analysisRules>
-                                    <item>
-                                        <extractorInfo extractorType="contains">
-                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.ExtractorContainsPropertyGroup">
-                                                <searchString>TDF saved</searchString>
-                                            </extractorProperties>
-                                        </extractorInfo>
-                                        <processorInfo ruleType="assert">
-                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                <expression>value == 1</expression>
-                                                <actionsWhenTrue>
-                                                    <item actionId="DeclareExecutionIssue">
-                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Information">
-                                                            <message>Test data file [output_file_name] uploaded success</message>
-                                                        </actionProperties>
-                                                    </item>
-                                                    <item actionId="Eval">
-                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                            <statement>success = True</statement>
-                                                        </actionProperties>
-                                                    </item>
-                                                </actionsWhenTrue>
-                                                <actionsWhenFalse>
-                                                    <item actionId="FailTest">
-                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                    </item>
-                                                    <item actionId="DeclareExecutionIssue">
-                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                            <message>Test data file [output_file_name] can not upload</message>
-                                                        </actionProperties>
-                                                    </item>
-                                                    <item actionId="ExitExecution">
-                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                    </item>
-                                                </actionsWhenFalse>
-                                            </ruleProperties>
-                                        </processorInfo>
-                                    </item>
-                                </analysisRules>
-                            </postProcessing>
-                            <applicationProperties type="com.fnfr.itest.platform2.shared.documents.ntaf.NtafTransferableDocumentObject" action="Custom" subharness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harnessName="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" requestMethod="POST" requestMethod.inherit="false" dataType="binary" dataType.inherit="false" rawResponse="true" rawResponse.inherit="false" filePath="[info(&apos;tempDir&apos;, &apos;uri&apos;)]/[output_file_name]" filePath.inherit="false" url="libraries/[user_library_id]/tdfs/[output_file_name]" url.inherit="false">
-                                <requestBody inherit="false">{
-}</requestBody>
-                            </applicationProperties>
-                        </item>
-                    </nestedSteps>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="1afcde94-5261-48bd-9ac9-00af20dd4f16" action="comment" useFieldsInCommand="false">
-                    <command>
-                        <body>Delete file after use</body>
-                    </command>
-                    <nestedSteps>
-                        <item guid="5422df89-3bc0-4093-90f6-cf77d719b03a" action="eval" useFieldsInCommand="false">
-                            <command>
-                                <body>import os</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="8748ae54-9ff3-4844-8cec-12e384bad908" action="if" useFieldsInCommand="false">
-                            <command>
-                                <body>os.path.exists(file_path):</body>
-                            </command>
-                            <nestedSteps>
-                                <item guid="fb12800b-37cb-4338-9f0f-5c98345cb5a9" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>os.remove(file_path)</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                            </nestedSteps>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                    </nestedSteps>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="3b3b814b-9cbd-48a6-92fc-2a4bbb27c152" action="if" useFieldsInCommand="false">
-                    <command>
-                        <body>success:</body>
-                    </command>
-                    <nestedSteps>
-                        <item guid="1e9b41ed-4961-45a2-a304-cc950981dd53" action="json" useFieldsInCommand="false">
-                            <command>
-                                <body>action=&apos;addJsonNode&apos;, editResponseStructure=false, documentName=&apos;response&apos;, pathValue=&apos;{&quot;library_id&quot;:&quot;[user_library_id]&quot;}&apos;</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup" pathValue="{&quot;library_id&quot;:&quot;[user_library_id]&quot;}" pathValue.inherit="false" pathValue.sub="true">
-                                <action inherit="false">addJsonNode</action>
-                                <documentName inherit="false">response</documentName>
-                            </applicationProperties>
-                        </item>
-                        <item guid="f919fa67-30cf-464f-ad3d-37b435f68e3e" action="json" useFieldsInCommand="false">
-                            <command>
-                                <body>action=&apos;addJsonNode&apos;, editResponseStructure=false, documentName=&apos;response&apos;, pathValue=&apos;{&quot;new_file_name&quot;:&quot;[output_file_name]&quot;}&apos;</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup" pathValue="{&quot;new_file_name&quot;:&quot;[output_file_name]&quot;}" pathValue.inherit="false" pathValue.sub="true">
-                                <action inherit="false">addJsonNode</action>
-                                <documentName inherit="false">response</documentName>
-                            </applicationProperties>
-                        </item>
-                    </nestedSteps>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="12bccdc3-ea01-48dd-a1e1-035a068489af" action="return">
-                    <command>
-                        <body>[response]</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-            </steps>
-            <arguments>
-                <item name="output_library_name">
-                    <defaultValue>sms</defaultValue>
-                </item>
-                <item name="library_id"/>
-            </arguments>
-        </item>
-        <item name="update_DNS_file_for_SUT_if_needed" isPublic="true">
-            <steps>
-                <item guid="3f67f418-6d5e-4552-b2d1-f6073d7e3600" action="json" useFieldsInCommand="false">
-                    <command>
-                        <body>action=&apos;createJson&apos;, documentName=&apos;response&apos;, fromFile=false, jsonString=&apos;{}&apos;</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup">
-                        <action inherit="false">createJson</action>
-                        <jsonString inherit="false">{}</jsonString>
-                        <documentName inherit="false">response</documentName>
-                    </applicationProperties>
-                </item>
-                <item guid="ce53b5f1-37b5-4b2f-9116-0a21433da7ec" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>success = False</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="fede91fc-919e-461f-aa94-2f7009f19276" action="call" useFieldsInCommand="false">
-                    <command>
-                        <body>create_file_name_with_current_time(prefix=&apos;E_5GC_37_H_Zone_File&apos;)</body>
-                    </command>
-                    <postProcessing>
-                        <storeResponseAt>output_file_name</storeResponseAt>
-                        <storeResponseText>true</storeResponseText>
-                    </postProcessing>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="5c5cf70b-13fd-4ce8-8f17-9ea9f7a242b6" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>file_path =info(&apos;tempDir&apos;, &apos;uri&apos;) + output_file_name; print(file_path)</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="db6f815e-8472-4877-b96a-d506a6c4348e" action="get_library_id" session="s1" useFieldsInCommand="false">
-                    <command>
-                        <body>(libraryName=output_library_name)</body>
-                    </command>
-                    <postProcessing>
-                        <storeResponseAt>user_library_id</storeResponseAt>
-                        <storeResponseText>true</storeResponseText>
-                    </postProcessing>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="1bed0027-3fc8-4de3-9c8a-724e04c88b0d" action="Custom" session="s1">
-                    <command>
-                        <body>-requestMethod GET -dataType json -requestBody {
-} -rawResponse true -url libraries/[library_id]/tdfs/E_5GC_36_H_Zone_File.txt</body>
-                    </command>
-                    <postProcessing>
-                        <analysisRules>
-                            <item>
-                                <extractorInfo extractorType="query">
-                                    <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.QueryDataExtractorPropertyGroup">
-                                        <query>boolean(mapped/Json/reason)</query>
-                                    </extractorProperties>
-                                </extractorInfo>
-                                <processorInfo ruleType="assert">
-                                    <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                        <expression>str(value)==&apos;false&apos;</expression>
-                                        <actionsWhenFalse>
-                                            <item actionId="FailTest">
-                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                            </item>
-                                            <item actionId="DeclareExecutionIssue">
-                                                <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                    <message>Test data file S-SEPP-3-SA_ZoneFile.txt can not get</message>
-                                                </actionProperties>
-                                            </item>
-                                            <item actionId="ExitExecution">
-                                                <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                            </item>
-                                        </actionsWhenFalse>
-                                    </ruleProperties>
-                                </processorInfo>
-                            </item>
-                        </analysisRules>
-                        <storeResponseAt>original_content</storeResponseAt>
-                        <storeResponseText>true</storeResponseText>
-                    </postProcessing>
-                    <applicationProperties type="com.fnfr.itest.platform2.shared.documents.ntaf.NtafTransferableDocumentObject" action="Custom" subharness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harnessName="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" requestMethod.inherit="false" dataType.inherit="false" rawResponse="true" rawResponse.inherit="false" url="libraries/[library_id]/tdfs/E_5GC_36_H_Zone_File.txt" url.inherit="false">
-                        <requestBody inherit="false">{
-}</requestBody>
-                    </applicationProperties>
-                </item>
-                <item guid="78c13153-d43a-4918-aad7-083efa7327c2" action="comment" useFieldsInCommand="false">
-                    <command>
-                        <body>Update ip</body>
-                    </command>
-                    <nestedSteps>
-                        <item guid="2aef88b7-df0d-4541-8dbf-f10b9edd185d" action="eval" useFieldsInCommand="false">
-                            <command>
-                                <body>print(original_content)</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="aeaba2a5-e63f-4c95-bfd3-a4c77b114479" action="comment" useFieldsInCommand="false">
-                            <command>
-                                <body>Get ip from param</body>
-                            </command>
-                            <nestedSteps>
-                                <item guid="ee859c7f-e990-4c6c-91a7-3c13770007fe" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>udm_ip =param(&apos;LS_Emulated_SUT_favorite_params/ts0/tc0/UdmSbiNodeSrvAddr/ip&apos;,&apos;&apos;)</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                                <item guid="e7292ca7-7f3f-426d-82f5-33f3caa9a489" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>smf_ip = param(&apos;LS_Emulated_SUT_favorite_params/ts0/tc0/SmfSbiNodeSrvAddr/ip&apos;, &apos;&apos;)</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                                <item guid="0c08680d-497d-4373-bf62-c8c39c00dfbf" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>ausf_ip = param(&apos;LS_Emulated_SUT_favorite_params/ts0/tc0/AusfSbiNodeSrvAddr/ip&apos;, &apos;&apos;)</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                            </nestedSteps>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="8c2b2863-10f0-4fd7-beff-d6dfcc36d9b4" action="comment" useFieldsInCommand="false">
-                            <command>
-                                <body>Replace ip</body>
-                            </command>
-                            <nestedSteps>
-                                <item guid="28c35f23-bb40-4d25-abb8-69fa2e2c32f7" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>new_content=str(original_content).replace(&apos; 10.202.100.3 &apos;, udm_ip)</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                                <item guid="36f0caf8-c3c3-44ae-9bdc-4aeb60d6cc49" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>new_content=new_content.replace(&apos; 10.202.100.1 &apos;, smf_ip)</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                                <item guid="c742dad6-e497-4755-8f46-bfca52e6cf42" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>new_content=new_content.replace(&apos; 10.202.100.2 &apos;, ausf_ip)</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                            </nestedSteps>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="1fb95b3e-77e2-4068-bbf5-2658ccfd2df1" action="comment" useFieldsInCommand="false">
-                            <command>
-                                <body>Save to file in tmp local</body>
-                            </command>
-                            <nestedSteps>
-                                <item guid="f056d144-d5d4-4055-865a-89c395b9e787" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>print(new_content)</body>
-                                    </command>
-                                    <postProcessing>
-                                        <storeResponseText>true</storeResponseText>
-                                        <responseFile inherit="false" sub="true">[file_path]</responseFile>
-                                        <appendRespToFile inherit="false">false</appendRespToFile>
-                                        <appendCommand inherit="false">false</appendCommand>
-                                        <appendTimestamp inherit="false">false</appendTimestamp>
-                                    </postProcessing>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                            </nestedSteps>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                    </nestedSteps>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="215f1541-dc19-4193-8fde-4bf3495caaff" action="comment" useFieldsInCommand="false">
-                    <command>
-                        <body>POST new TDF to user library</body>
-                    </command>
-                    <nestedSteps>
-                        <item guid="234557a4-f80f-4332-a066-bac5920d3e21" action="Custom" session="s1">
-                            <command>
-                                <body>-requestMethod POST -dataType binary -requestBody {
-} -rawResponse true -filePath &quot;[info(&apos;tempDir&apos;, &apos;uri&apos;)]/[output_file_name]&quot; -url libraries/[user_library_id]/tdfs/[output_file_name]</body>
-                            </command>
-                            <postProcessing>
-                                <analysisRules>
-                                    <item>
-                                        <extractorInfo extractorType="contains">
-                                            <extractorProperties type="com.fnfr.svt.mapping.execution.extractors.ExtractorContainsPropertyGroup">
-                                                <searchString>TDF saved</searchString>
-                                            </extractorProperties>
-                                        </extractorInfo>
-                                        <processorInfo ruleType="assert">
-                                            <ruleProperties type="com.fnfr.svt.execution.builtin.processors.AssertionPropertyGroup">
-                                                <expression>value == 1</expression>
-                                                <actionsWhenTrue>
-                                                    <item actionId="DeclareExecutionIssue">
-                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup" severity="Information">
-                                                            <message>Test data file [output_file_name] uploaded success</message>
-                                                        </actionProperties>
-                                                    </item>
-                                                    <item actionId="Eval">
-                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.EvalActionPropertyGroup">
-                                                            <statement>success = True</statement>
-                                                        </actionProperties>
-                                                    </item>
-                                                </actionsWhenTrue>
-                                                <actionsWhenFalse>
-                                                    <item actionId="FailTest">
-                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                    </item>
-                                                    <item actionId="DeclareExecutionIssue">
-                                                        <actionProperties type="com.fnfr.svt.execution.builtin.actions.ExecutionIssuePropertyGroup">
-                                                            <message>Test data file [output_file_name] can not upload</message>
-                                                        </actionProperties>
-                                                    </item>
-                                                    <item actionId="ExitExecution">
-                                                        <actionProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                                    </item>
-                                                </actionsWhenFalse>
-                                            </ruleProperties>
-                                        </processorInfo>
-                                    </item>
-                                </analysisRules>
-                            </postProcessing>
-                            <applicationProperties type="com.fnfr.itest.platform2.shared.documents.ntaf.NtafTransferableDocumentObject" action="Custom" subharness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harness="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" harnessName="http://spirent.com/NTAF/harness/iTest/LandslideRest/Main" requestMethod="POST" requestMethod.inherit="false" dataType="binary" dataType.inherit="false" rawResponse="true" rawResponse.inherit="false" filePath="[info(&apos;tempDir&apos;, &apos;uri&apos;)]/[output_file_name]" filePath.inherit="false" url="libraries/[user_library_id]/tdfs/[output_file_name]" url.inherit="false">
-                                <requestBody inherit="false">{
-}</requestBody>
-                            </applicationProperties>
-                        </item>
-                    </nestedSteps>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="58904f3d-0ac7-4af7-8943-09582d2456d7" action="comment" useFieldsInCommand="false">
-                    <command>
-                        <body>Delete file after use</body>
-                    </command>
-                    <nestedSteps>
-                        <item guid="5a7aa6c7-c748-4564-b3f3-30fd94e8f787" action="eval" useFieldsInCommand="false">
-                            <command>
-                                <body>import os</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                        <item guid="d1999f37-10fd-4f17-b67d-68510886b2f3" action="if" useFieldsInCommand="false">
-                            <command>
-                                <body>os.path.exists(file_path):</body>
-                            </command>
-                            <nestedSteps>
-                                <item guid="aa67de76-e142-445c-a831-a37859207781" action="eval" useFieldsInCommand="false">
-                                    <command>
-                                        <body>os.remove(file_path)</body>
-                                    </command>
-                                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                                </item>
-                            </nestedSteps>
-                            <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                        </item>
-                    </nestedSteps>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="02ab26d3-9fa3-4e3b-bce2-95d5f12de4f2" action="if" useFieldsInCommand="false">
-                    <command>
-                        <body>success:</body>
-                    </command>
-                    <nestedSteps>
-                        <item guid="44376166-198b-4786-854f-deac766add8c" action="json" useFieldsInCommand="false">
-                            <command>
-                                <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;response&apos;, pathValue=&apos;{&quot;library_id&quot;:&quot;[user_library_id]&quot;}&apos;</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup" pathValue="{&quot;library_id&quot;:&quot;[user_library_id]&quot;}" pathValue.inherit="false" pathValue.sub="true">
-                                <action inherit="false">addJsonNode</action>
-                                <documentName inherit="false">response</documentName>
-                            </applicationProperties>
-                        </item>
-                        <item guid="72237fe6-cf6c-42ec-abab-995b4d8cb86b" action="json" useFieldsInCommand="false">
-                            <command>
-                                <body>action=&apos;addJsonNode&apos;, editResponseStructure=&apos;false&apos;, documentName=&apos;response&apos;, pathValue=&apos;{&quot;new_file_name&quot;:&quot;[output_file_name]&quot;}&apos;</body>
-                            </command>
-                            <applicationProperties type="com.fnfr.svt.execution.builtin.json.JsonPropertiesGroup" pathValue="{&quot;new_file_name&quot;:&quot;[output_file_name]&quot;}" pathValue.inherit="false" pathValue.sub="true">
-                                <action inherit="false">addJsonNode</action>
-                                <documentName inherit="false">response</documentName>
-                            </applicationProperties>
-                        </item>
-                    </nestedSteps>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="c1a60300-f181-4fd5-9bb2-e4f7f4234f03" action="return">
-                    <command>
-                        <body>[response]</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-            </steps>
-            <arguments>
-                <item name="output_library_name">
-                    <defaultValue>sms</defaultValue>
-                </item>
-                <item name="library_id"/>
-            </arguments>
-        </item>
-        <item name="create_file_name_with_current_time" isPublic="true">
-            <steps>
-                <item guid="74fe67c2-7926-4f0f-98f0-8176c99b6577" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>import datetime</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="1a92e7d8-2897-4521-844f-3fc68479dcb3" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>current_time = datetime.datetime.now()</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="c81d1876-db4e-4443-a5df-346273e22857" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>output_time = current_time.strftime(&quot;%Y-%m-%d-%H-%M&quot;)</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="1514bbee-6f27-4138-8c4f-d50f95e98740" action="eval" useFieldsInCommand="false">
-                    <command>
-                        <body>output_file_name= f&quot;{prefix}-{output_time}.txt&quot;</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-                <item guid="a08ff03c-9272-4c23-9cde-c9aef8c3a40b" action="return">
-                    <command>
-                        <body>[output_file_name]</body>
-                    </command>
-                    <applicationProperties type="com.fnfr.svt.documents.EmptyPropertyGroup"/>
-                </item>
-            </steps>
-            <arguments>
-                <item name="prefix">
-                    <isMandatory>true</isMandatory>
-                </item>
-            </arguments>
         </item>
     </procedures>
 </testCase>
